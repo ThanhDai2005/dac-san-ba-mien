@@ -18,15 +18,15 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { User, Send, Smile, EllipsisVertical, Search, Loader2 } from "lucide-react";
+import {
+  User,
+  Send,
+  Smile,
+  EllipsisVertical,
+  Search,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
-
-interface Message {
-  _id: string;
-  content: string;
-  senderType: "client" | "bot" | "staff";
-  createdAt: string;
-}
 
 const ChatManagement = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -50,6 +50,7 @@ const ChatManagement = () => {
     addMessage,
     addNewConversation,
     updateConversationStatus,
+    updateConversationPreview,
     setTyping,
   } = useAdminChatStore();
 
@@ -69,12 +70,9 @@ const ChatManagement = () => {
       loadConversations();
 
       // Listen for new messages
-      on(
-        "admin:newMessage",
-        (data: { conversationId: string; message: Message }) => {
-          addMessage(data.conversationId, data.message);
-        },
-      );
+      on("admin:newMessage", (data: { conversationId: string; message }) => {
+        addMessage(data.conversationId, data.message);
+      });
 
       // Listen for new conversations
       on("admin:newConversation", (data: { conversation: any }) => {
@@ -86,6 +84,24 @@ const ChatManagement = () => {
         "admin:conversationStatusChanged",
         (data: { conversationId: string; status: string }) => {
           updateConversationStatus(data.conversationId, data.status);
+        },
+      );
+
+      // Listen for conversation updates (sidebar real-time for all admins)
+      on(
+        "admin:conversationUpdated",
+        (data: {
+          conversationId: string;
+          lastMessage: any;
+          status: "bot" | "waiting_human" | "human_active" | "closed";
+          unreadByAdmin: number;
+        }) => {
+          updateConversationPreview(
+            data.conversationId,
+            data.lastMessage,
+            data.status,
+            data.unreadByAdmin,
+          );
         },
       );
 
@@ -108,6 +124,7 @@ const ChatManagement = () => {
       off("admin:newMessage");
       off("admin:newConversation");
       off("admin:conversationStatusChanged");
+      off("admin:conversationUpdated");
       off("admin:typing");
     };
   }, [isConnected, accessToken, selectedConversationId]);
@@ -424,10 +441,13 @@ const ChatManagement = () => {
                             <div
                               className={`text-[11px] mt-2 text-right ${msg.senderType === "staff" ? "text-white/70" : "text-gray-400"}`}
                             >
-                              {new Date(msg.createdAt).toLocaleTimeString("vi-VN", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
+                              {new Date(msg.createdAt).toLocaleTimeString(
+                                "vi-VN",
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                },
+                              )}
                             </div>
                           </div>
                         </div>

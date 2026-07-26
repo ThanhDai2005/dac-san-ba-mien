@@ -1,11 +1,11 @@
 import { GoogleGenAI } from "@google/genai";
 import Product from "../models/product.model.js";
 import Category from "../models/category.model.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 const ai = new GoogleGenAI({
-  apiKey:
-    process.env.GEMINI_API_KEY ||
-    "AQ.Ab8RN6KYfRlnZccJCXcBeOc5u3qMjCLCASnlGUpGzEJAb0MjNw",
+  apiKey: process.env.GEMINI_API_KEY,
 });
 
 // System prompt - Train AI với context dự án

@@ -1,5 +1,7 @@
 import axios from "axios";
 import crypto from "crypto";
+import dotenv from "dotenv";
+dotenv.config();
 
 export const createMoMoPayment = async (order, totalAmount) => {
   const partnerCode = "MOMO";

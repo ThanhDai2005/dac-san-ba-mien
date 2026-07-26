@@ -10,6 +10,7 @@ const ChatWidget = () => {
   const [step, setStep] = useState<"form" | "chat">("form");
   const [inputValue, setInputValue] = useState("");
   const [guestInfo, setGuestInfo] = useState({ name: "", phone: "" });
+  const [isWaitingReply, setIsWaitingReply] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -26,8 +27,8 @@ const ChatWidget = () => {
     sendMessage,
     addMessage,
     setTyping,
+    setConversationStatus,
     setWidgetOpen,
-    clearMessages,
   } = useChatStore();
 
   const quickReplies = [
@@ -58,7 +59,11 @@ const ChatWidget = () => {
     if (!isConnected) {
       if (user && accessToken) {
         connect(accessToken);
-      } else if (guestInfo.name && guestInfo.phone) {
+      } else if (
+        step === "chat" &&
+        guestInfo.name.trim() &&
+        guestInfo.phone.trim()
+      ) {
         connect(undefined, guestInfo);
       }
     }
@@ -66,16 +71,20 @@ const ChatWidget = () => {
     if (isConnected) {
       on("client:newMessage", (data) => {
         addMessage(data.message);
-      });
-
-      on("client:conversationClosed", (data) => {
-        toast.info(data.message);
-        clearMessages();
-        setStep("form");
+        if (
+          data.message.senderType === "bot" ||
+          data.message.senderType === "staff"
+        ) {
+          setIsWaitingReply(false);
+        }
       });
 
       on("client:typing", (data) => {
         setTyping(data.isTyping, data.user);
+      });
+
+      on("client:conversationStatusChanged", (data) => {
+        setConversationStatus(data.status);
       });
 
       loadHistory();
@@ -83,10 +92,16 @@ const ChatWidget = () => {
 
     return () => {
       off("client:newMessage");
-      off("client:conversationClosed");
       off("client:typing");
+      off("client:conversationStatusChanged");
     };
-  }, [isConnected, user, accessToken, guestInfo]);
+  }, [isConnected, user, accessToken, step, guestInfo]);
+
+  useEffect(() => {
+    if (isOpen && effectiveStep === "chat" && isConnected) {
+      loadHistory();
+    }
+  }, [isOpen, effectiveStep, isConnected]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -122,7 +137,7 @@ const ChatWidget = () => {
   };
 
   const handleSendMessage = (text: string) => {
-    if (!text.trim()) return;
+    if (!text.trim() || isWaitingReply) return;
 
     // Hủy hẹn giờ và báo ngừng gõ ngay khi gửi tin nhắn
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
@@ -131,13 +146,27 @@ const ChatWidget = () => {
 
     sendMessage(text);
     setInputValue("");
+    setIsWaitingReply(true);
   };
 
   const handleStartChat = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!user && (!guestInfo.name.trim() || !guestInfo.phone.trim())) {
-      toast.error("Vui lòng nhập đầy đủ thông tin");
+    if (user) {
+      setStep("chat");
+      return;
+    }
+
+    const name = guestInfo.name.trim();
+    const phone = guestInfo.phone.trim();
+
+    if (!name || !phone) {
+      toast.error("Vui lòng nhập đầy đủ họ tên và số điện thoại");
+      return;
+    }
+
+    if (!/^(0[3|5|7|8|9])[0-9]{8}$/.test(phone)) {
+      toast.error("Số điện thoại không hợp lệ (10 số, đầu 03/05/07/08/09)");
       return;
     }
 
@@ -331,9 +360,10 @@ const ChatWidget = () => {
                         <button
                           key={index}
                           type="button"
+                          disabled={isWaitingReply}
                           onClick={() => handleSendMessage(reply)}
-                          className="text-[11px] bg-white text-[#b51c00] border border-[#ffb4a5] hover:bg-[#ffdad3] hover:text-[#8e1400]
-px-3 py-1.5 rounded-full transition-all flex-shrink-0 font-bold whitespace-nowrap shadow-sm"
+                          className={`text-[11px] bg-white text-[#b51c00] border border-[#ffb4a5] hover:bg-[#ffdad3] hover:text-[#8e1400]
+px-3 py-1.5 rounded-full transition-all flex-shrink-0 font-bold whitespace-nowrap shadow-sm ${isWaitingReply ? "opacity-40 cursor-not-allowed" : ""}`}
                         >
                           {reply}
                         </button>
@@ -351,12 +381,17 @@ px-3 py-1.5 rounded-full transition-all flex-shrink-0 font-bold whitespace-nowra
                     onKeyDown={(e) =>
                       e.key === "Enter" && handleSendMessage(inputValue)
                     }
-                    placeholder="Nhập tin nhắn..."
+                    placeholder={
+                      isWaitingReply
+                        ? "Đang chờ phản hồi..."
+                        : "Nhập tin nhắn..."
+                    }
                     className="flex-grow bg-white border border-[#e2e8f0] focus:border-[#b51c00] focus:ring-1 focus:ring-[#b51c00]/20 rounded-[8px] px-3 py-2.5 text-sm text-[#191c1e] placeholder-gray-400 outline-none transition-all shadow-sm"
                   />
                   <button
+                    disabled={isWaitingReply}
                     onClick={() => handleSendMessage(inputValue)}
-                    className="bg-[#b51c00] hover:bg-[#db3416] text-white p-2.5 rounded-[8px] transition-all active:scale-95 shadow-sm"
+                    className={`bg-[#b51c00] hover:bg-[#db3416] text-white p-2.5 rounded-[8px] transition-all active:scale-95 shadow-sm ${isWaitingReply ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
                     <Send size={18} />
                   </button>

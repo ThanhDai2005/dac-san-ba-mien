@@ -49,9 +49,23 @@ const PermissionManagement = () => {
 
   useEffect(() => {
     if (currentRole && currentRole._id === selectedRoleId) {
-      setSelectedPermissions(currentRole.permissions || []);
+      const rolePermissions = currentRole.permissions || [];
+
+      // Nếu là SuperAdmin, tự động thêm tất cả quyền "view"
+      if (currentRole.title === "Super Admin") {
+        const allViewPermissions = permissions
+          .filter((perm) => perm.value.includes("_view"))
+          .map((perm) => perm.value);
+
+        const mergedPermissions = Array.from(
+          new Set([...rolePermissions, ...allViewPermissions]),
+        );
+        setSelectedPermissions(mergedPermissions);
+      } else {
+        setSelectedPermissions(rolePermissions);
+      }
     }
-  }, [currentRole]);
+  }, [currentRole, permissions]);
 
   const groupPermissions = () => {
     const grouped: Record<string, Array<{ value: string; label: string }>> = {};
@@ -71,6 +85,14 @@ const PermissionManagement = () => {
   );
 
   const handleTogglePermission = (permissionId: string) => {
+    // Nếu là SuperAdmin và permission là view, không cho bỏ chọn
+    if (
+      currentRole?.title === "Super Admin" &&
+      permissionId.includes("_view")
+    ) {
+      return;
+    }
+
     setSelectedPermissions((prev) =>
       prev.includes(permissionId)
         ? prev.filter((id) => id !== permissionId)
@@ -89,9 +111,20 @@ const PermissionManagement = () => {
         return Array.from(newSet);
       });
     } else {
-      setSelectedPermissions((prev) =>
-        prev.filter((id) => !groupPermissionIds.includes(id)),
-      );
+      // Nếu là SuperAdmin, không cho bỏ chọn các quyền view
+      if (currentRole?.title === "Super Admin") {
+        const nonViewPermissions = groupPermissionIds.filter(
+          (id) => !id.includes("_view"),
+        );
+
+        setSelectedPermissions((prev) =>
+          prev.filter((id) => !nonViewPermissions.includes(id)),
+        );
+      } else {
+        setSelectedPermissions((prev) =>
+          prev.filter((id) => !groupPermissionIds.includes(id)),
+        );
+      }
     }
   };
 
@@ -260,22 +293,46 @@ const PermissionManagement = () => {
                     </label>
 
                     <div className="flex flex-col gap-3 mt-1">
-                      {groupedPermissions[groupName].map((perm) => (
-                        <label
-                          key={perm.value}
-                          className="flex items-start gap-2 cursor-pointer group/item"
-                        >
-                          <input
-                            type="checkbox"
-                            className="w-[18px] h-[18px] rounded-sm border-2 border-gray-300 cursor-pointer accent-blue-600 transition-all mt-[1px]"
-                            checked={selectedPermissions.includes(perm.value)}
-                            onChange={() => handleTogglePermission(perm.value)}
-                          />
-                          <span className="text-[14px] text-gray-600 font-medium group-hover/item:text-gray-900 transition-colors select-none leading-tight">
-                            {perm.label}
-                          </span>
-                        </label>
-                      ))}
+                      {groupedPermissions[groupName].map((perm) => {
+                        const isViewPermission = perm.value.includes("_view");
+                        const isSuperAdmin =
+                          currentRole?.title === "Super Admin";
+                        const isDisabled = isSuperAdmin && isViewPermission;
+
+                        return (
+                          <label
+                            key={perm.value}
+                            className={`flex items-start gap-2 ${
+                              isDisabled
+                                ? "cursor-not-allowed"
+                                : "cursor-pointer"
+                            } group/item`}
+                          >
+                            <input
+                              type="checkbox"
+                              className={`w-[18px] h-[18px] rounded-sm border-2 border-gray-300 transition-all mt-[1px] ${
+                                isDisabled
+                                  ? "cursor-not-allowed bg-gray-100"
+                                  : "cursor-pointer accent-blue-600"
+                              }`}
+                              checked={selectedPermissions.includes(perm.value)}
+                              onChange={() =>
+                                handleTogglePermission(perm.value)
+                              }
+                              disabled={isDisabled}
+                            />
+                            <span
+                              className={`text-[14px] font-medium transition-colors select-none leading-tight ${
+                                isDisabled
+                                  ? "text-gray-400"
+                                  : "text-gray-600 group-hover/item:text-gray-900"
+                              }`}
+                            >
+                              {perm.label}
+                            </span>
+                          </label>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}

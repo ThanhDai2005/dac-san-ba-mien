@@ -23,7 +23,9 @@ export const handleClientChat = (io, socket) => {
       const { message } = data;
 
       if (!message || !message.trim()) {
-        return socket.emit("client:sendMessageResponse", { error: "Tin nhắn không được để trống" });
+        return socket.emit("client:sendMessageResponse", {
+          error: "Tin nhắn không được để trống",
+        });
       }
 
       // 1. Tìm hoặc tạo conversation
@@ -31,30 +33,47 @@ export const handleClientChat = (io, socket) => {
         ? await Conversation.findById(conversationId)
         : null;
 
+      // Nếu bộ nhớ RAM không có conversationId, chủ động tìm trong DB trước khi tạo mới
       if (!conversation) {
-        conversation = await Conversation.create({
-          userId: isGuest ? null : user._id,
-          guestInfo: isGuest
-            ? { name: user.displayName, phone: user.phone }
-            : null,
-          status: "bot",
-          lastMessageAt: new Date(),
-        });
+        if (isGuest) {
+          conversation = await Conversation.findOne({
+            "guestInfo.phone": user.phone,
+            status: { $ne: "closed" },
+          }).sort({ lastMessageAt: -1 });
+        } else {
+          conversation = await Conversation.findOne({
+            userId: user._id,
+            status: { $ne: "closed" },
+          }).sort({ lastMessageAt: -1 });
+        }
+
+        if (!conversation) {
+          conversation = await Conversation.create({
+            userId: isGuest ? null : user._id,
+            guestInfo: isGuest
+              ? { name: user.displayName, phone: user.phone }
+              : null,
+            status: "bot",
+            lastMessageAt: new Date(),
+          });
+
+          // Bắn sự kiện cho Admin biết có luồng mới
+          io.of("/admin").emit("admin:newConversation", {
+            conversation: {
+              _id: conversation._id,
+              userName: user.displayName,
+              phone: user.phone,
+              lastMessage: null,
+              status: conversation.status,
+              unreadByAdmin: 0,
+              lastMessageAt: conversation.lastMessageAt,
+            },
+          });
+        }
+
+        // Đồng bộ lại ID vào RAM của Socket và cho user join room
         conversationId = conversation._id;
         socket.join(`conversation:${conversationId}`);
-
-        // Emit new conversation to admin namespace
-        io.of("/admin").emit("admin:newConversation", {
-          conversation: {
-            _id: conversation._id,
-            userName: user.displayName,
-            phone: user.phone,
-            lastMessage: null,
-            status: conversation.status,
-            unreadByAdmin: 0,
-            lastMessageAt: conversation.lastMessageAt,
-          },
-        });
       }
 
       // 2. Lưu tin nhắn của client
@@ -107,6 +126,14 @@ export const handleClientChat = (io, socket) => {
           },
         });
 
+      // 5.1. Emit conversation update to ALL admins (for sidebar updates)
+      io.of("/admin").emit("admin:conversationUpdated", {
+        conversationId: conversation._id,
+        lastMessage: conversation.lastMessage,
+        status: conversation.status,
+        unreadByAdmin: conversation.unreadByAdmin,
+      });
+
       // 6. Xử lý theo trạng thái conversation
       if (conversation.status === "bot") {
         // BOT TỰ ĐỘNG TRẢ LỜI
@@ -131,7 +158,10 @@ export const handleClientChat = (io, socket) => {
         // Chỉ emit tin nhắn, không bot reply
       }
 
-      socket.emit("client:sendMessageResponse", { success: true, messageId: clientMessage._id });
+      socket.emit("client:sendMessageResponse", {
+        success: true,
+        messageId: clientMessage._id,
+      });
     } catch (error) {
       console.error("Lỗi khi xử lý tin nhắn client:", error);
       socket.emit("client:sendMessageResponse", { error: "Lỗi hệ thống" });
@@ -142,7 +172,9 @@ export const handleClientChat = (io, socket) => {
   socket.on("client:requestHuman", async () => {
     try {
       if (!conversationId) {
-        return socket.emit("client:requestHumanResponse", { error: "Chưa có cuộc hội thoại" });
+        return socket.emit("client:requestHumanResponse", {
+          error: "Chưa có cuộc hội thoại",
+        });
       }
 
       const conversation = await Conversation.findById(conversationId);
@@ -208,7 +240,11 @@ export const handleClientChat = (io, socket) => {
       }
 
       if (!conversation) {
-        return socket.emit("client:loadHistoryResponse", { messages: [], conversationId: null });
+        conversationId = null;
+        return socket.emit("client:loadHistoryResponse", {
+          messages: [],
+          conversationId: null,
+        });
       }
 
       conversationId = conversation._id;
@@ -283,15 +319,16 @@ const handleBotResponse = async (
       .limit(10)
       .lean();
 
-    const conversationHistory = history
-      .reverse()
-      .map((m) => ({
-        role: m.senderType === "client" ? "user" : "bot",
-        content: m.content,
-      }));
+    const conversationHistory = history.reverse().map((m) => ({
+      role: m.senderType === "client" ? "user" : "bot",
+      content: m.content,
+    }));
 
     // Gọi Gemini AI
-    const aiResponse = await getChatbotResponse(conversationHistory, userMessage);
+    const aiResponse = await getChatbotResponse(
+      conversationHistory,
+      userMessage,
+    );
 
     // Lưu tin nhắn bot
     const botMessage = await Message.create({
@@ -317,6 +354,10 @@ const handleBotResponse = async (
         conversationId: conversation._id,
         status: "waiting_human",
         reason: aiResponse.reason,
+      });
+
+      socket.emit("client:conversationStatusChanged", {
+        status: "waiting_human",
       });
     }
 
@@ -344,6 +385,14 @@ const handleBotResponse = async (
           createdAt: botMessage.createdAt,
         },
       });
+
+    // Emit conversation update to ALL admins (for sidebar updates)
+    io.of("/admin").emit("admin:conversationUpdated", {
+      conversationId: conversation._id,
+      lastMessage: conversation.lastMessage,
+      status: conversation.status,
+      unreadByAdmin: conversation.unreadByAdmin,
+    });
   } catch (error) {
     console.error("Lỗi khi bot trả lời:", error);
     // Fallback message
@@ -388,7 +437,8 @@ export const handleAdminChat = (io, socket) => {
       socket.emit("admin:loadConversationsResponse", {
         conversations: conversations.map((c) => ({
           _id: c._id,
-          userName: c.userId?.displayName || c.guestInfo?.name || "Khách vãng lai",
+          userName:
+            c.userId?.displayName || c.guestInfo?.name || "Khách vãng lai",
           phone: c.userId?.phone || c.guestInfo?.phone || "N/A",
           lastMessage: c.lastMessage,
           status: c.status,
@@ -409,7 +459,9 @@ export const handleAdminChat = (io, socket) => {
 
       const conversation = await Conversation.findById(conversationId);
       if (!conversation) {
-        return socket.emit("admin:joinConversationResponse", { error: "Conversation không tồn tại" });
+        return socket.emit("admin:joinConversationResponse", {
+          error: "Conversation không tồn tại",
+        });
       }
 
       // Join room
@@ -456,12 +508,16 @@ export const handleAdminChat = (io, socket) => {
       const { conversationId, message } = data;
 
       if (!message || !message.trim()) {
-        return socket.emit("admin:sendMessageResponse", { error: "Tin nhắn không được để trống" });
+        return socket.emit("admin:sendMessageResponse", {
+          error: "Tin nhắn không được để trống",
+        });
       }
 
       const conversation = await Conversation.findById(conversationId);
       if (!conversation) {
-        return socket.emit("admin:sendMessageResponse", { error: "Conversation không tồn tại" });
+        return socket.emit("admin:sendMessageResponse", {
+          error: "Conversation không tồn tại",
+        });
       }
 
       // Lưu tin nhắn staff
@@ -507,7 +563,18 @@ export const handleAdminChat = (io, socket) => {
         },
       });
 
-      socket.emit("admin:sendMessageResponse", { success: true, messageId: staffMessage._id });
+      // Emit conversation update to ALL admins (for sidebar updates)
+      io.of("/admin").emit("admin:conversationUpdated", {
+        conversationId: conversation._id,
+        lastMessage: conversation.lastMessage,
+        status: conversation.status,
+        unreadByAdmin: conversation.unreadByAdmin,
+      });
+
+      socket.emit("admin:sendMessageResponse", {
+        success: true,
+        messageId: staffMessage._id,
+      });
     } catch (error) {
       console.error("Lỗi khi admin gửi tin nhắn:", error);
       socket.emit("admin:sendMessageResponse", { error: "Lỗi hệ thống" });
@@ -521,17 +588,69 @@ export const handleAdminChat = (io, socket) => {
 
       const conversation = await Conversation.findById(conversationId);
       if (!conversation) {
-        return socket.emit("admin:closeConversationResponse", { error: "Conversation không tồn tại" });
+        return socket.emit("admin:closeConversationResponse", {
+          error: "Conversation không tồn tại",
+        });
       }
 
-      conversation.status = "closed";
+      conversation.status = "bot";
+      conversation.assignedStaffId = null;
+
+      const systemMsg = await Message.create({
+        conversationId,
+        senderType: "bot",
+        content:
+          "Cuộc trò chuyện với nhân viên đã kết thúc. Bạn đang được chuyển về chat với chatbot.",
+      });
+
+      conversation.lastMessage = {
+        messageId: systemMsg._id.toString(),
+        content: systemMsg.content,
+        senderType: "bot",
+        createdAt: systemMsg.createdAt,
+      };
+      conversation.lastMessageAt = systemMsg.createdAt;
       await conversation.save();
 
-      // Thông báo client
+      // Client nhận bubble + đổi status
       io.of("/")
         .to(`conversation:${conversationId}`)
-        .emit("client:conversationClosed", {
-          message: "Cuộc hội thoại đã kết thúc. Cảm ơn anh/chị đã liên hệ!",
+        .emit("client:newMessage", {
+          message: {
+            _id: systemMsg._id,
+            content: systemMsg.content,
+            senderType: "bot",
+            createdAt: systemMsg.createdAt,
+          },
+        });
+
+      // Thông báo client → header + quick replies hiện lại
+      io.of("/")
+        .to(`conversation:${conversationId}`)
+        .emit("client:conversationStatusChanged", {
+          status: "bot",
+          message: systemMsg.content,
+        });
+
+      // Cập nhật sidebar tất cả admin
+      io.of("/admin").emit("admin:conversationUpdated", {
+        conversationId: conversation._id,
+        lastMessage: conversation.lastMessage,
+        status: "bot",
+        unreadByAdmin: conversation.unreadByAdmin,
+      });
+
+      // Admin đang xem hội thoại cũng thấy bubble
+      io.of("/admin")
+        .to(`conversation:${conversationId}`)
+        .emit("admin:newMessage", {
+          conversationId,
+          message: {
+            _id: systemMsg._id,
+            content: systemMsg.content,
+            senderType: "bot",
+            createdAt: systemMsg.createdAt,
+          },
         });
 
       socket.emit("admin:closeConversationResponse", { success: true });

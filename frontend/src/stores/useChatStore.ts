@@ -71,17 +71,31 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   addMessage: (message) => {
+    const { isWidgetOpen } = get();
+
     set((state) => ({
       messages: [...state.messages, message],
       unreadCount:
-        !get().isWidgetOpen && message.senderType !== "client"
+        !isWidgetOpen && message.senderType !== "client"
           ? state.unreadCount + 1
           : state.unreadCount,
     }));
+
+    // Play notification sound when widget is closed and message is not from client
+    if (!isWidgetOpen && message.senderType !== "client") {
+      const audio = new Audio("/tieng_ting.mp3");
+      audio.play().catch(() => {
+        // Catch browser autoplay policy error silently
+      });
+    }
   },
 
   setTyping: (isTyping, user) => {
     set({ isTyping, typingUser: user });
+  },
+
+  setConversationStatus: (status) => {
+    set({ conversationStatus: status });
   },
 
   setUnreadCount: (count) => {

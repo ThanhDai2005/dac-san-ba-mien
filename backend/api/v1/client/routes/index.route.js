@@ -8,7 +8,6 @@ import reviewRoute from "./review.route.js";
 import promotionRoute from "./promotion.route.js";
 import blogCategoryRoute from "./blogCategory.route.js";
 import blogRoute from "./blog.route.js";
-import chatRoute from "./chat.route.js";
 import { requireAuth } from "../middlewares/auth.middleware.js";
 
 export const clientV1Routes = (app) => {
@@ -33,6 +32,4 @@ export const clientV1Routes = (app) => {
   app.use(version + "/blog-category", blogCategoryRoute);
 
   app.use(version + "/blog", blogRoute);
-
-  app.use(version + "/chat", requireAuth, chatRoute);
 };

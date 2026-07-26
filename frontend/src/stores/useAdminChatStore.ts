@@ -56,7 +56,7 @@ export const useAdminChatStore = create<AdminChatState>((set, get) => ({
       // Reset unreadByAdmin for this conversation
       set((state) => ({
         conversations: state.conversations.map((c) =>
-          c._id === conversationId ? { ...c, unreadByAdmin: 0 } : c
+          c._id === conversationId ? { ...c, unreadByAdmin: 0 } : c,
         ),
       }));
 
@@ -109,18 +109,15 @@ export const useAdminChatStore = create<AdminChatState>((set, get) => ({
         return;
       }
 
-      // Update local state
+      // KHÔNG xóa khỏi list — chỉ cập nhật status, giữ nguyên hội thoại + messages đang xem
       set((state) => ({
-        conversations: state.conversations.filter(
-          (c) => c._id !== conversationId,
+        conversations: state.conversations.map((c) =>
+          c._id === conversationId
+            ? { ...c, status: "bot", assignedStaffId: null }
+            : c,
         ),
-        selectedConversationId:
-          state.selectedConversationId === conversationId
-            ? null
-            : state.selectedConversationId,
-        messages:
-          state.selectedConversationId === conversationId ? [] : state.messages,
       }));
+
       off("admin:closeConversationResponse", handleCloseConversationResponse);
     };
 
@@ -150,7 +147,10 @@ export const useAdminChatStore = create<AdminChatState>((set, get) => ({
               },
               lastMessageAt: message.createdAt,
               // Only increment unreadByAdmin if not currently viewing this conversation
-              unreadByAdmin: currentConversationId === conversationId ? 0 : c.unreadByAdmin + 1,
+              unreadByAdmin:
+                currentConversationId === conversationId
+                  ? 0
+                  : c.unreadByAdmin + 1,
             }
           : c,
       ),
@@ -167,6 +167,28 @@ export const useAdminChatStore = create<AdminChatState>((set, get) => ({
     set((state) => ({
       conversations: state.conversations.map((c) =>
         c._id === conversationId ? { ...c, status } : c,
+      ),
+    }));
+  },
+
+  updateConversationPreview: (
+    conversationId,
+    lastMessage,
+    status,
+    unreadByAdmin,
+  ) => {
+    const currentConversationId = get().selectedConversationId;
+    set((state) => ({
+      conversations: state.conversations.map((c) =>
+        c._id === conversationId
+          ? {
+              ...c,
+              lastMessage,
+              status,
+              unreadByAdmin:
+                currentConversationId === conversationId ? 0 : unreadByAdmin,
+            }
+          : c,
       ),
     }));
   },

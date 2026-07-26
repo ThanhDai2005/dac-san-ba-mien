@@ -182,6 +182,9 @@ export interface ChatState {
   requestHuman: () => void;
   addMessage: (message: Message) => void;
   setTyping: (isTyping: boolean, user: "bot" | "staff" | null) => void;
+  setConversationStatus: (
+    status: "bot" | "waiting_human" | "human_active" | "closed",
+  ) => void;
   setUnreadCount: (count: number) => void;
   setWidgetOpen: (open: boolean) => void;
   clearMessages: () => void;
@@ -570,6 +573,12 @@ export interface AdminChatState {
   updateConversationStatus: (
     conversationId: string,
     status: "bot" | "waiting_human" | "human_active" | "closed",
+  ) => void;
+  updateConversationPreview: (
+    conversationId: string,
+    lastMessage: any,
+    status: "bot" | "waiting_human" | "human_active" | "closed",
+    unreadByAdmin: number,
   ) => void;
   setTyping: (isTyping: boolean, user: "client" | "bot" | null) => void;
 }

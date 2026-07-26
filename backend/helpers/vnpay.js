@@ -1,6 +1,8 @@
 import crypto from "crypto";
 import qs from "qs";
 import moment from "moment";
+import dotenv from "dotenv";
+dotenv.config();
 
 const VNP_TMNCODE = process.env.VNP_TMNCODE;
 const VNP_HASHSECRET = process.env.VNP_HASHSECRET;
