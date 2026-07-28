@@ -160,7 +160,7 @@ export const AppSidebar = ({
                 <img
                   className="w-[80px] h-[80px] object-cover"
                   src="/logo.png"
-                  alt="Đặc Sản Ba Miền"
+                  alt="Logo Đặc Sản Ba Miền"
                 />
               </div>
             </Link>

@@ -4,28 +4,29 @@ const AboutPage = () => {
   return (
     <>
       <div className="min-h-screen bg-white pb-20">
-        {/* ================= HERO SECTION ================= */}
-        <div className="relative h-[450px] bg-gradient-to-br from-[#b51c00] to-[#8e1400] overflow-hidden">
-          {/* Background Decorative Elements */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-white rounded-full blur-[100px]"></div>
-            <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-white rounded-full blur-[120px]"></div>
-          </div>
+        {/* ================= HERO BANNER ================= */}
+        <div className="relative h-[520px] md:h-[580px] bg-[url('/banner.jpg')] bg-cover bg-center bg-no-repeat overflow-hidden flex items-center">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
 
-          <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center justify-center text-center">
-            <div className="text-white max-w-3xl">
-              <span className="inline-block px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full text-sm font-bold uppercase tracking-widest mb-6 border border-white/20">
-                Câu chuyện của chúng tôi
+          <div className="relative max-w-7xl mx-auto px-4 md:px-6 text-center z-10">
+            <div className="max-w-4xl mx-auto">
+              <span className="inline-block px-6 py-2 bg-white/10 backdrop-blur-md border border-white/30 rounded-full text-sm font-bold tracking-[2px] text-white mb-6">
+                CÂU CHUYỆN CỦA CHÚNG TÔI
               </span>
-              <h1 className="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight drop-shadow-lg">
-                Về FoodieVN
+
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white tracking-tighter leading-[1.05] drop-shadow-2xl mb-6">
+                Về <span className="text-[#ffd700]">DacSan3M</span>
               </h1>
-              <p className="text-lg md:text-2xl text-red-100 font-medium leading-relaxed">
+
+              <p className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto leading-relaxed font-light">
                 Hành trình kết nối những tâm hồn đam mê ẩm thực với hàng ngàn
-                hương vị tuyệt hảo, giao trọn niềm vui đến tận cửa nhà.
+                hương vị đặc sản ba miền, mang trọn niềm vui đến tận cửa nhà.
               </p>
             </div>
           </div>
+
+          {/* Decorative elements */}
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent" />
         </div>
 
         {/* ================= STORY SECTION ================= */}
@@ -34,8 +35,8 @@ const AboutPage = () => {
             <div className="order-2 lg:order-1 relative group">
               <div className="absolute inset-0 bg-[#b51c00] rounded-3xl translate-x-4 translate-y-4 opacity-10 group-hover:translate-x-6 group-hover:translate-y-6 transition-transform duration-500"></div>
               <img
-                src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&q=80"
-                alt="Đội ngũ FoodieVN đang chuẩn bị món ăn"
+                src="/quan_an_dac_san_ba_mien.png"
+                alt="Đội ngũ DacSan3M đang chuẩn bị món ăn"
                 className="relative rounded-3xl shadow-2xl z-10 w-full object-cover aspect-[4/3] transition-transform duration-500 group-hover:-translate-y-2"
                 loading="lazy"
               />
@@ -64,7 +65,7 @@ const AboutPage = () => {
               </h2>
               <div className="space-y-5 text-gray-600 text-lg leading-relaxed">
                 <p>
-                  FoodieVN ra đời từ một ý tưởng tưởng chừng đơn giản:{" "}
+                  Đặc Sản Ba Miền ra đời từ một ý tưởng tưởng chừng đơn giản:{" "}
                   <strong>
                     Mọi người đều xứng đáng được thưởng thức những bữa ăn nóng
                     hổi, ngon miệng, bất kể họ bận rộn đến đâu.
@@ -78,8 +79,8 @@ const AboutPage = () => {
                   thần tốc hơn trong khâu giao nhận.
                 </p>
                 <p>
-                  Và FoodieVN thành hình — không chỉ là một ứng dụng giao đồ ăn,
-                  mà là một hệ sinh thái{" "}
+                  Và Đặc Sản Ba Miền thành hình — không chỉ là một ứng dụng giao
+                  đồ ăn, mà là một hệ sinh thái{" "}
                   <strong>ưu tiên trải nghiệm vị giác</strong>, nơi mỗi đối tác
                   nhà hàng đều là một nghệ nhân, mỗi shipper là một đại sứ mang
                   niềm vui đến cho bạn.
@@ -95,7 +96,7 @@ const AboutPage = () => {
                 Giá Trị Cốt Lõi
               </h2>
               <p className="text-gray-600 text-lg">
-                Kim chỉ nam trong mọi hoạt động của hệ thống FoodieVN.
+                Kim chỉ nam trong mọi hoạt động của hệ thống Đặc Sản Ba Miền.
               </p>
             </div>
 
@@ -109,7 +110,7 @@ const AboutPage = () => {
                 {
                   icon: "rocket_launch",
                   title: "Tốc Độ Ánh Sáng",
-                  desc: "Hệ thống điều phối tài xế thông minh bằng AI giúp rút ngắn thời gian giao hàng xuống mức trung bình 30 phút.",
+                  desc: "Hệ thống điều phối tài xế thông minh bằng AI giúp rút ngắn thời gian giao hàng xuống mức trung bình 15 phút.",
                 },
                 {
                   icon: "support_agent",
@@ -148,7 +149,7 @@ const AboutPage = () => {
                 { number: "50K+", label: "Đơn Hàng / Tháng" },
                 { number: "200+", label: "Đối Tác Nhà Hàng" },
                 { number: "4.8/5", label: "Đánh Giá Trung Bình" },
-                { number: "30p", label: "Thời Gian Giao" },
+                { number: "15p", label: "Thời Gian Giao" },
               ].map((stat, idx) => (
                 <div key={idx} className="flex flex-col items-center">
                   <span className="text-4xl md:text-6xl font-black mb-3 drop-shadow-md">
@@ -177,22 +178,22 @@ const AboutPage = () => {
             <div className="grid md:grid-cols-3 gap-10">
               {[
                 {
-                  name: "Nguyễn Hùng",
-                  role: "CEO & Founder",
-                  exp: "Cựu Product Manager. 8 năm kinh nghiệm vận hành nền tảng Food-tech.",
-                  img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80",
+                  name: "Lionel Messi",
+                  role: "GOAT-10",
+                  exp: "Siêu sao vĩ đại với khả năng kiến tạo ý tưởng thiên tài. Người mang đến những món ăn giúp chinh phục mọi thực khách.",
+                  img: "/Lionel_Messi.jpg",
                 },
                 {
-                  name: "Lê Minh",
-                  role: "CTO & Co-founder",
-                  exp: "Chuyên gia MERN Stack. Đam mê tối ưu hóa hệ thống cho hàng triệu traffic.",
-                  img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80",
+                  name: "Nguyễn Đại",
+                  role: "Software Engineer",
+                  exp: "Intern Fullstack ReactJS + Node.js. Đam mê tối ưu hóa hệ thống và xây dựng trải nghiệm mượt cho hàng triệu người dùng",
+                  img: "/NguyenDai.jpg",
                 },
                 {
-                  name: "Trần Lan",
-                  role: "Head Chef",
-                  exp: "15 năm đứng bếp trưởng tại các nhà hàng 5 sao. Bậc thầy thẩm định hương vị.",
-                  img: "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&q=80",
+                  name: "Cristiano Ronaldo",
+                  role: "GOAT-7",
+                  exp: "Vua phá lưới với tinh thần chiến binh bất diệt. Người đảm bảo các món ăn đều phải có hương vị và chất lượng tốt nhất.",
+                  img: "/Cristiano_Ronaldo.jpg",
                 },
               ].map((member, idx) => (
                 <div

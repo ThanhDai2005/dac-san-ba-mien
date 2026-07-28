@@ -5,6 +5,7 @@ import { useCategoryStore } from "@/stores/useCategoryStore";
 import { useCartStore } from "@/stores/useCartStore"; // Import store giỏ hàng
 import { toast } from "sonner"; // Dùng sonner cho đồng bộ
 import type { Product } from "@/types/product";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 // Hàm Helper ánh xạ icon theo slug danh mục chuẩn UX
 const getCategoryIcon = (slug: string) => {
@@ -30,6 +31,7 @@ const getCategoryIcon = (slug: string) => {
 
 const ProductList = () => {
   const navigate = useNavigate();
+  const { accessToken } = useAuthStore();
   const { product, loading, getList } = useProductStore();
   const { category, getList: getCategoryList } = useCategoryStore();
   const { addToCart } = useCartStore();
@@ -56,6 +58,13 @@ const ProductList = () => {
   // Luồng Quick Add to Cart chuẩn Senior
   const handleQuickAdd = async (e: React.MouseEvent, item: Product) => {
     e.stopPropagation(); // Chặn sự kiện click lan ra thẻ cha (chống navigate)
+
+    if (!accessToken) {
+      toast.warning("Vui lòng đăng nhập để thêm vào giỏ hàng");
+      navigate("/signin");
+      return;
+    }
+
     if (item.stock === 0) return;
 
     try {

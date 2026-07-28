@@ -150,7 +150,7 @@ const OrderDetailPage = () => {
           <div className="flex justify-center mb-1">
             <img
               src="/logo.png"
-              alt="Đặc Sản Ba Miền"
+              alt="Logo Đặc Sản Ba Miền"
               className="w-20 h-auto object-cover"
             />
           </div>
@@ -162,7 +162,7 @@ const OrderDetailPage = () => {
             Nền tảng đặt đồ ăn trực tuyến
           </p>
           <p className="text-sm text-gray-500 mt-1">
-            Hotline: 1900 xxxx | Email: support@foodievn.com
+            Hotline: 1900 xxxx | Email: support@ds3mvn.com
           </p>
         </div>
 

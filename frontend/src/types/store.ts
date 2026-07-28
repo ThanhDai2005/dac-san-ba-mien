@@ -576,7 +576,12 @@ export interface AdminChatState {
   ) => void;
   updateConversationPreview: (
     conversationId: string,
-    lastMessage: any,
+    lastMessage: {
+      messageId?: string;
+      content: string;
+      senderType: "client" | "bot" | "staff";
+      createdAt: string;
+    } | null,
     status: "bot" | "waiting_human" | "human_active" | "closed",
     unreadByAdmin: number,
   ) => void;

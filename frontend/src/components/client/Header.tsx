@@ -42,7 +42,7 @@ const Header = () => {
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-200 shadow-sm">
-      <div className="flex justify-between items-center px-4 h-16 max-w-7xl mx-auto">
+      <div className="flex justify-between items-center px-4 h-18 max-w-7xl mx-auto">
         <div className="flex items-center gap-4">
           {/* Mobile Hamburger Menu */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -53,8 +53,12 @@ const Header = () => {
             </SheetTrigger>
             <SheetContent side="left" className="w-[280px] sm:w-[320px]">
               <SheetHeader className="mb-6">
-                <SheetTitle className="text-2xl font-bold text-[#b51c00]">
-                  FoodieVN
+                <SheetTitle className="flex items-center justify-center">
+                  <img
+                    src="/logo.png"
+                    alt="DS3M Logo"
+                    className="w-20 h-auto object-contain"
+                  />
                 </SheetTitle>
               </SheetHeader>
               <nav className="flex flex-col gap-2">
@@ -157,8 +161,12 @@ const Header = () => {
             </SheetContent>
           </Sheet>
 
-          <Link to="/" className="text-2xl font-bold text-[#b51c00]">
-            FoodieVN
+          <Link to="/" className="flex items-center">
+            <img
+              src="/logo.png"
+              alt="DS3M Logo"
+              className="w-18 h-auto object-contain"
+            />
           </Link>
         </div>
 

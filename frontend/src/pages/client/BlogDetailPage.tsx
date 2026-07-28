@@ -1,5 +1,6 @@
 import { useParams, Link, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { useBlogStore } from "@/stores/useBlogStore";
 import { useCartStore } from "@/stores/useCartStore";
 import { toast } from "sonner";
@@ -15,7 +16,7 @@ const BlogDetailPage = () => {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [addingId, setAddingId] = useState<string | null>(null);
-
+  const { accessToken } = useAuthStore();
   const { currentBlog, loading, getDetail } = useBlogStore();
   const { addToCart } = useCartStore();
 
@@ -41,6 +42,13 @@ const BlogDetailPage = () => {
     stock: number,
   ) => {
     e.stopPropagation();
+
+    if (!accessToken) {
+      toast.warning("Vui lòng đăng nhập để thêm vào giỏ hàng");
+      navigate("/signin");
+      return;
+    }
+
     if (stock === 0) return;
 
     try {
@@ -79,7 +87,7 @@ const BlogDetailPage = () => {
             Bài viết này có thể đã bị xóa hoặc không tồn tại.
           </p>
           <Link
-            to="/blog"
+            to="/blogs"
             className="inline-flex items-center gap-2 px-6 py-3 bg-[#b51c00] text-white font-bold rounded-xl hover:bg-[#8e1400] transition-colors"
           >
             Quay lại Góc Ẩm Thực
@@ -124,7 +132,7 @@ const BlogDetailPage = () => {
                 </div>
                 <div>
                   <p className="text-gray-900 font-bold">
-                    {currentBlog.authorId?.displayName || "FoodieVN Editor"}
+                    {currentBlog.authorId?.displayName}
                   </p>
                   <p className="text-xs text-gray-500">
                     {new Date(currentBlog.publishedAt).toLocaleDateString(

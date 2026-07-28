@@ -62,10 +62,11 @@ export function SignInForm({
         <CardContent className="p-6 md:p-8 flex flex-col gap-6">
           {/* Header */}
           <header className="text-center flex flex-col items-center gap-2">
-            <h1 className="font-bold text-4xl tracking-tight text-[#b51c00]">
-              FoodieVN
-            </h1>
-            <p className="text-lg text-gray-600 mt-1">Đăng nhập để tiếp tục</p>
+            <img
+              className="w-28 h-auto object-contain"
+              src="/logo.png"
+              alt="Logo Đặc Sản Ba Miền"
+            />
           </header>
 
           {/* Form */}

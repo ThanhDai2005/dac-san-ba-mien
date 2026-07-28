@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { useProductStore } from "@/stores/useProductStore";
 import { useCategoryStore } from "@/stores/useCategoryStore";
 import { useCartStore } from "@/stores/useCartStore";
@@ -12,10 +13,10 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import type { Product } from "@/types/product";
-
 const ProductListPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { accessToken } = useAuthStore();
   const { product, loading, getList } = useProductStore();
   const { category, getList: getCategoryList } = useCategoryStore();
   const { addToCart } = useCartStore();
@@ -92,6 +93,13 @@ const ProductListPage = () => {
 
   const handleQuickAdd = async (e: React.MouseEvent, item: Product) => {
     e.stopPropagation();
+
+    if (!accessToken) {
+      toast.warning("Vui lòng đăng nhập để thêm vào giỏ hàng");
+      navigate("/signin");
+      return;
+    }
+
     if (item.stock === 0) return;
 
     try {

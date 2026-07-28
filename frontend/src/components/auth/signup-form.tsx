@@ -61,10 +61,12 @@ export function SignupForm({
         <CardContent className="p-6 md:p-8 flex flex-col gap-6">
           {/* Header */}
           <header className="text-center flex flex-col items-center gap-2">
-            <h1 className="font-bold text-4xl tracking-tight text-[#b51c00]">
-              FoodieVN
-            </h1>
-            <p className="text-xl font-semibold text-gray-900 mt-2">
+            <img
+              className="w-28 h-auto object-contain"
+              src="/logo.png"
+              alt="Logo Đặc Sản Ba Miền"
+            />
+            <p className="text-xl font-semibold text-gray-900">
               Tạo tài khoản mới
             </p>
             <p className="text-gray-600 mt-1 text-sm">

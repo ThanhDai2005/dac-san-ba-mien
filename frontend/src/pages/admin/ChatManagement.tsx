@@ -92,7 +92,12 @@ const ChatManagement = () => {
         "admin:conversationUpdated",
         (data: {
           conversationId: string;
-          lastMessage: any;
+          lastMessage: {
+            messageId?: string;
+            content: string;
+            senderType: "client" | "bot" | "staff";
+            createdAt: string;
+          } | null;
           status: "bot" | "waiting_human" | "human_active" | "closed";
           unreadByAdmin: number;
         }) => {
@@ -216,15 +221,9 @@ const ChatManagement = () => {
       </header>
 
       <div className="p-6 md:p-8 max-w-[1600px] mx-auto w-full space-y-4 flex-grow flex flex-col">
-        {/* TITLE */}
-        <div>
-          <h1 className="text-[24px] font-bold text-gray-900 tracking-tight">
-            Quản lý chat khách hàng
-          </h1>
-          <p className="text-sm font-medium text-gray-500 mt-1">
-            Đặc Sản Ba Miền Admin Dashboard
-          </p>
-        </div>
+        <h1 className="text-[24px] font-bold text-gray-900 tracking-tight mb-6">
+          Quản lý chat khách hàng
+        </h1>
 
         {/* CHAT INTERFACE MAIN CONTAINER */}
         <div className="bg-white rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-gray-200 flex overflow-hidden h-[calc(100vh-220px)] min-h-[600px]">

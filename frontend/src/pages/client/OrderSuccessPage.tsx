@@ -61,7 +61,7 @@ const OrderSuccessPage = () => {
         <div className="mb-6">
           <img
             src="/logo.png"
-            alt="FoodieVN Logo"
+            alt="Logo Đặc Sản Ba Miền"
             className="w-28 h-28 object-contain mx-auto"
           />
         </div>

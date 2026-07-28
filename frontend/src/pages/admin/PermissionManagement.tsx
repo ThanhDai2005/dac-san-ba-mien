@@ -219,7 +219,7 @@ const PermissionManagement = () => {
 
       <div className="p-6 md:p-8 max-w-[1600px] mx-auto w-full space-y-6 flex-grow">
         <div className="bg-white rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-gray-200 p-6 md:p-8">
-          <h1 className="text-[22px] font-bold text-gray-900 mb-6 tracking-tight">
+          <h1 className="text-[24px] font-bold text-gray-900 mb-6 tracking-tight">
             Thêm quyền vào vai trò
           </h1>
 

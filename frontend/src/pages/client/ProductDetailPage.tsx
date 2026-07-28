@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useProductStore } from "@/stores/useProductStore";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { useCartStore } from "@/stores/useCartStore";
 import { useReviewStore } from "@/stores/useReviewStore";
 import type { Product } from "@/types/product";
@@ -25,7 +26,9 @@ const ProductDetailPage = () => {
   const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [notableProducts, setNotableProducts] = useState<Product[]>([]);
+  const [addingId, setAddingId] = useState<string | null>(null);
 
+  const { accessToken } = useAuthStore();
   const { currentProduct, loading, getDetail, getList } = useProductStore();
   const { addToCart } = useCartStore();
   const { getReviewsByProduct, resetReviews, reviews } = useReviewStore();
@@ -82,6 +85,12 @@ const ProductDetailPage = () => {
   }, [slug, getDetail, getReviewsByProduct, getList, navigate, resetReviews]);
 
   const handleAddToCart = async () => {
+    if (!accessToken) {
+      toast.warning("Vui lòng đăng nhập để thêm vào giỏ hàng");
+      navigate("/signin");
+      return;
+    }
+
     if (!currentProduct) return;
     if (quantity > currentProduct.stock) {
       toast.error("Số lượng vượt quá tồn kho");
@@ -105,6 +114,28 @@ const ProductDetailPage = () => {
     currentProduct &&
     quantity < currentProduct.stock &&
     setQuantity(quantity + 1);
+
+  const handleQuickAdd = async (e: React.MouseEvent, item: Product) => {
+    e.stopPropagation();
+
+    if (!accessToken) {
+      toast.warning("Vui lòng đăng nhập để thêm vào giỏ hàng");
+      navigate("/signin");
+      return;
+    }
+
+    if (item.stock === 0) return;
+
+    try {
+      setAddingId(item._id);
+      await addToCart(item._id, 1);
+      toast.success(`Đã thêm ${item.name} vào giỏ hàng`);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Có lỗi xảy ra");
+    } finally {
+      setAddingId(null);
+    }
+  };
 
   const SERVICES = [
     {
@@ -574,11 +605,8 @@ const ProductDetailPage = () => {
                         {(item.price ?? 0).toLocaleString("vi-VN")}đ
                       </span>
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/product/${item.slug}`);
-                        }}
-                        disabled={item.stock === 0}
+                        onClick={(e) => handleQuickAdd(e, item)}
+                        disabled={item.stock === 0 || addingId === item._id}
                         className="w-8 h-8 rounded-full bg-[#b51c00]/10 text-[#b51c00] flex items-center justify-center hover:bg-[#b51c00] hover:text-white transition-colors disabled:opacity-50"
                       >
                         <span

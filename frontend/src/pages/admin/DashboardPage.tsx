@@ -134,7 +134,7 @@ const DashboardPage = () => {
             Dashboard
           </h1>
           <p className="text-gray-500 font-medium text-sm">
-            FoodieVN Admin Dashboard
+            Đặc Sản Ba Miền Admin Dashboard
           </p>
         </div>
 

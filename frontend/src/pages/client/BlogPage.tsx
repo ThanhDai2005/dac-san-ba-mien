@@ -13,7 +13,7 @@ const BlogPage = () => {
   const { loading, getList } = useBlogStore();
   const { blogCategory, fetchBlogCategories } = useBlogCategoryStore();
 
-  const BLOGS_PER_LOAD = 5;
+  const BLOGS_PER_LOAD = 7;
 
   useEffect(() => {
     fetchBlogCategories();
@@ -236,7 +236,7 @@ const BlogPage = () => {
                               </span>
                             </div>
                             <span className="truncate max-w-[120px]">
-                              {post.authorId?.displayName || "FoodieVN"}
+                              {post.authorId?.displayName}
                             </span>
                           </div>
                           <span className="text-gray-400">

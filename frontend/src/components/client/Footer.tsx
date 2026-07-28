@@ -21,7 +21,7 @@ const Footer = () => {
             <div className="lg:w-1/4 flex justify-center lg:justify-start lg:border-r border-[#ddd] pr-4">
               <img
                 src="logo.png"
-                alt="Đặc Sản 3 Miền"
+                alt="Logo Đặc Sản 3 Miền"
                 className="w-[120px] object-contain"
               />
             </div>
@@ -65,7 +65,7 @@ const Footer = () => {
               Về chúng tôi
             </h3>
             <p className="text-[16px] text-gray-800 mb-5 leading-relaxed">
-              Đặc Sản 3 Miền là thương hiệu được thành lập vào năm 2023 với tiêu
+              Đặc Sản 3 Miền là thương hiệu được thành lập vào năm 2026 với tiêu
               chí đặt chất lượng sản phẩm lên hàng đầu.
             </p>
             <div className="flex gap-3">
@@ -180,7 +180,7 @@ const Footer = () => {
                   <Mail className="size-5" />
                 </div>
                 <div>
-                  <p>hdkn@gmail.com</p>
+                  <p>contact@dacsanbamienvn.com</p>
                   <p>gacon@domain.com</p>
                 </div>
               </div>
