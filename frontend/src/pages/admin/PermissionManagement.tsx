@@ -80,9 +80,21 @@ const PermissionManagement = () => {
 
   const groupedPermissions = groupPermissions();
 
-  const filteredGroups = Object.keys(groupedPermissions).filter((group) =>
-    group.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const normalize = (str: string) => {
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/gi, "d")
+      .toLowerCase()
+      .trim();
+  };
+
+  const filteredGroups = Object.keys(groupedPermissions).filter((group) => {
+    const keyword = normalize(searchQuery);
+    if (!keyword) return true;
+
+    return normalize(group).includes(keyword);
+  });
 
   const handleTogglePermission = (permissionId: string) => {
     // Nếu là SuperAdmin và permission là view, không cho bỏ chọn

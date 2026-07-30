@@ -30,4 +30,9 @@ export const orderService = {
     const response = await api.post(`/order/${orderId}/retry-payment`);
     return response.data;
   },
+
+  cancelOrder: async (orderId: string) => {
+    const response = await api.patch(`/order/cancel/${orderId}`);
+    return response.data;
+  },
 };

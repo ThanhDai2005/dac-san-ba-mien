@@ -110,7 +110,7 @@ const AboutPage = () => {
                 {
                   icon: "rocket_launch",
                   title: "Tốc Độ Ánh Sáng",
-                  desc: "Hệ thống điều phối tài xế thông minh bằng AI giúp rút ngắn thời gian giao hàng xuống mức trung bình 15 phút.",
+                  desc: "Hệ thống điều phối tài xế thông minh bằng AI giúp rút ngắn thời gian giao hàng xuống mức trung bình 30 phút.",
                 },
                 {
                   icon: "support_agent",
@@ -149,7 +149,7 @@ const AboutPage = () => {
                 { number: "50K+", label: "Đơn Hàng / Tháng" },
                 { number: "200+", label: "Đối Tác Nhà Hàng" },
                 { number: "4.8/5", label: "Đánh Giá Trung Bình" },
-                { number: "15p", label: "Thời Gian Giao" },
+                { number: "30p", label: "Thời Gian Giao" },
               ].map((stat, idx) => (
                 <div key={idx} className="flex flex-col items-center">
                   <span className="text-4xl md:text-6xl font-black mb-3 drop-shadow-md">

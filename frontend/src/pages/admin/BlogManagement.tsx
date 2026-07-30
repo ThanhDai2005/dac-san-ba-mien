@@ -41,6 +41,7 @@ const BlogManagement = () => {
   const currentPage = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "10");
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [localKeyword, setLocalKeyword] = useState(searchTerm);
 
   const { user } = useAdminAuthStore();
   const {
@@ -81,6 +82,21 @@ const BlogManagement = () => {
     });
     setSearchParams(mergedParams);
   };
+
+  useEffect(() => {
+    setLocalKeyword(searchTerm);
+  }, [searchTerm]);
+
+  // Debounce: dừng gõ 300ms mới đẩy lên URL → useEffect cũ tự fetch
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localKeyword !== searchTerm) {
+        updateURL({ keyword: localKeyword, page: "1" });
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [localKeyword]);
 
   useEffect(() => {
     if (canView) {
@@ -320,10 +336,8 @@ const BlogManagement = () => {
                 <input
                   type="text"
                   placeholder="Tiêu đề bài viết..."
-                  value={searchTerm}
-                  onChange={(e) =>
-                    updateURL({ keyword: e.target.value, page: "1" })
-                  }
+                  value={localKeyword}
+                  onChange={(e) => setLocalKeyword(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#b51c00] focus:border-[#b51c00] bg-white transition-shadow"
                 />
               </div>

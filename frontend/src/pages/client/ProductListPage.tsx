@@ -34,8 +34,8 @@ const ProductListPage = () => {
   const [localSearchKeyword, setLocalSearchKeyword] = useState(keyword);
 
   useEffect(() => {
-    setLocalSearchKeyword(searchParams.get("keyword") || "");
-  }, [searchParams]);
+    setLocalSearchKeyword(keyword);
+  }, [keyword]);
 
   useEffect(() => {
     getCategoryList();

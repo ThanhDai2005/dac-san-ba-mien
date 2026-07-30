@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useOrderStore } from "@/stores/useOrderStore";
 import { toast } from "sonner";
+import { confirmCancelOrder } from "@/lib/sweetalert";
 
 const statusConfig = {
   Pending: {
@@ -52,9 +53,10 @@ const paymentStatusLabels = {
 const OrderDetailPage = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
-  const { currentOrder, loading, getOrderDetail, retryPayment } =
+  const { currentOrder, loading, getOrderDetail, retryPayment, cancelOrder } =
     useOrderStore();
   const [retryingPayment, setRetryingPayment] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   const fetchOrder = async () => {
     try {
@@ -123,6 +125,27 @@ const OrderDetailPage = () => {
         error.response?.data?.message || "Lỗi khi thử thanh toán lại",
       );
       setRetryingPayment(false);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (!orderId || !currentOrder) return;
+
+    // SweetAlert2 confirmation dialog
+    const result = await confirmCancelOrder();
+
+    if (!result.isConfirmed) return;
+
+    try {
+      setCancelling(true);
+      await cancelOrder(orderId);
+      toast.success("Đơn hàng đã được hủy thành công");
+      await fetchOrder(); // Reload order details
+    } catch (err) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || "Lỗi khi hủy đơn hàng");
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -352,7 +375,7 @@ const OrderDetailPage = () => {
                 <span className="material-symbols-outlined text-[16px]">
                   tag
                 </span>
-                #{orderCode}
+                {orderCode}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -592,9 +615,26 @@ const OrderDetailPage = () => {
                       </button>
                     </div>
                   )}
+
+                {/* Cancel Button - Only for Pending & Unpaid */}
+                {order.orderStatus === "Pending" &&
+                  order.paymentStatus !== "Paid" && (
+                    <div className="mt-3">
+                      <button
+                        onClick={handleCancelOrder}
+                        disabled={cancelling}
+                        className="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-red-500 text-red-600 font-bold text-sm hover:bg-red-50 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          cancel
+                        </span>
+                        {cancelling ? "Đang hủy..." : "Hủy đơn hàng"}
+                      </button>
+                    </div>
+                  )}
               </div>
 
-              <div className="mt-6 pt-4 border-t border-gray-50 flex justify-center">
+              <div className="mt-4 pt-4 border-t border-gray-50 flex justify-center">
                 <p className="text-[11px] font-medium text-gray-400 flex items-center gap-1">
                   <span className="material-symbols-outlined text-[14px]">
                     schedule

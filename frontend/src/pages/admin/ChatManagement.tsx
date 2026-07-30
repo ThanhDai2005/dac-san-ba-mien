@@ -141,11 +141,24 @@ const ChatManagement = () => {
     };
   }, []);
 
-  const filteredConversations = conversations.filter(
-    (chat) =>
-      chat.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      chat.phone.includes(searchQuery),
-  );
+  const normalize = (str: string) => {
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/gi, "d")
+      .toLowerCase()
+      .trim();
+  };
+
+  const filteredConversations = conversations.filter((chat) => {
+    const keyword = normalize(searchQuery);
+    if (!keyword) return true;
+
+    const name = normalize(chat.userName || "");
+    const phone = (chat.phone || "").toLowerCase();
+
+    return name.includes(keyword) || phone.includes(keyword);
+  });
 
   const selectedChat = conversations.find(
     (chat) => chat._id === selectedConversationId,

@@ -14,6 +14,7 @@ export interface AuthState {
   accessToken: string | null;
   user: User | null;
   loading: boolean;
+  isAuthChecked: boolean;
   forgotPasswordLoading: boolean;
 
   setAccessToken: (accessToken: string) => void;
@@ -28,6 +29,7 @@ export interface AuthState {
   ) => Promise<void>;
   signIn: (phone: string, password: string) => Promise<void>;
   googleSignIn: (credential: string) => Promise<void>;
+  checkAuth: () => Promise<void>;
   signOut: () => Promise<void>;
   getDetail: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -133,6 +135,7 @@ export interface OrderState {
   getOrderDetail: (orderId: string) => Promise<void>;
   getOrderReviews: (orderId: string) => Promise<void>;
   retryPayment: (orderId: string) => Promise<{ paymentUrl?: string }>;
+  cancelOrder: (orderId: string) => Promise<{ message: string; data: Order }>;
   clearCurrentOrder: () => void;
 }
 

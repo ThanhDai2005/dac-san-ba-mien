@@ -313,8 +313,8 @@ export const momoCallback = async (req, res) => {
   }
 };
 
-// [GET] /api/v1/order/vnpay-callback
-export const vnpayCallback = async (req, res) => {
+// [GET] /api/v1/order/vnpay-ipn
+export const vnpayIpn = async (req, res) => {
   try {
     const { isValid, responseCode, txnRef, amount } = verifyVNPAYCallback(
       req.query,
@@ -541,6 +541,75 @@ export const getOrderReviews = async (req, res) => {
     });
   } catch (error) {
     console.log("Lỗi khi gọi getOrderReviews", error);
+    res.status(500).json({
+      message: "Lỗi hệ thống",
+    });
+  }
+};
+
+// [PATCH] /api/v1/order/cancel/:orderId
+export const cancelOrder = async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+    const userId = req.user._id;
+
+    const order = await Order.findOne({
+      _id: orderId,
+      userId: userId,
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        message: "Đơn hàng không tồn tại",
+      });
+    }
+
+    // Client chỉ được hủy đơn khi orderStatus là Pending
+    if (order.orderStatus !== "Pending") {
+      return res.status(400).json({
+        message: "Chỉ có thể hủy đơn hàng đang chờ xử lý",
+      });
+    }
+
+    // Đơn đã thanh toán online không cho phép tự hủy
+    if (order.paymentStatus === "Paid") {
+      return res.status(400).json({
+        message:
+          "Đơn hàng đã thanh toán không thể tự hủy. Vui lòng liên hệ hỗ trợ",
+      });
+    }
+
+    // Restore inventory
+    for (const item of order.items) {
+      await Product.updateOne(
+        { _id: item.productId },
+        { $inc: { stock: item.quantity } },
+      );
+    }
+
+    // Restore promotion usage
+    if (order.promotionId) {
+      await Promotion.updateOne(
+        { _id: order.promotionId },
+        {
+          $inc: { usedCount: -1 },
+          $pull: { usersUsed: userId },
+        },
+      );
+    }
+
+    const cancelledOrder = await Order.findOneAndUpdate(
+      { _id: orderId },
+      { orderStatus: "Cancelled" },
+      { new: true },
+    ).populate("items.productId", "name images price");
+
+    res.status(200).json({
+      message: "Hủy đơn hàng thành công",
+      data: cancelledOrder,
+    });
+  } catch (error) {
+    console.log("Lỗi khi gọi cancelOrder", error);
     res.status(500).json({
       message: "Lỗi hệ thống",
     });

@@ -4,6 +4,7 @@ import { useOrderStore } from "@/stores/useOrderStore";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useCartStore } from "@/stores/useCartStore";
 import { toast } from "sonner";
+import { confirmCancelOrder } from "@/lib/sweetalert";
 
 const statusConfig = {
   Pending: {
@@ -36,8 +37,14 @@ const statusConfig = {
 const OrdersPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { orders, loading, totalPages, getMyOrders, retryPayment } =
-    useOrderStore();
+  const {
+    orders,
+    loading,
+    totalPages,
+    getMyOrders,
+    retryPayment,
+    cancelOrder,
+  } = useOrderStore();
   const { user } = useAuthStore();
   const { addToCart } = useCartStore();
 
@@ -47,6 +54,7 @@ const OrdersPage = () => {
 
   const [reordering, setReordering] = useState(false);
   const [retryingPayment, setRetryingPayment] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState<string | null>(null);
 
   const updateURL = (newParams: Record<string, string>) => {
     const params = Object.fromEntries(searchParams.entries());
@@ -138,6 +146,26 @@ const OrdersPage = () => {
       );
     } finally {
       setRetryingPayment(null);
+    }
+  };
+
+  const handleCancelOrder = async (orderId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    const result = await confirmCancelOrder();
+
+    if (!result.isConfirmed) return;
+
+    try {
+      setCancelling(orderId);
+      await cancelOrder(orderId);
+      toast.success("Đơn hàng đã được hủy thành công");
+      await fetchOrders(); // Reload orders list
+    } catch (err) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || "Lỗi khi hủy đơn hàng");
+    } finally {
+      setCancelling(null);
     }
   };
 
@@ -304,6 +332,21 @@ const OrdersPage = () => {
 
                   {/* Action Buttons */}
                   <div className="flex gap-3 w-full md:w-auto">
+                    {/* Cancel Button - Only for Pending & Unpaid */}
+                    {order.orderStatus === "Pending" &&
+                      order.paymentStatus !== "Paid" && (
+                        <button
+                          onClick={(e) => handleCancelOrder(order._id, e)}
+                          disabled={cancelling === order._id}
+                          className="flex-1 md:flex-none px-6 py-2.5 rounded-xl border-2 border-red-500 text-red-600 font-bold text-sm hover:bg-red-50 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">
+                            cancel
+                          </span>
+                          {cancelling === order._id ? "Đang hủy..." : "Hủy đơn"}
+                        </button>
+                      )}
+
                     {isPendingPayment && (
                       <button
                         onClick={(e) => {

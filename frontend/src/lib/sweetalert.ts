@@ -62,3 +62,34 @@ export const confirmPermanentDelete = (title: string, text: string) => {
     },
   });
 };
+
+// Styled SweetAlert2 for order cancellation confirmation
+export const confirmCancelOrder = () => {
+  return MySwal.fire({
+    title: "Hủy đơn hàng?",
+    html: `
+      <div class="text-gray-600 text-sm leading-relaxed">
+        <p class="mb-3">Đơn hàng sẽ bị hủy và <strong>không thể khôi phục</strong>.</p>
+        <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-left">
+          <p class="text-green-800 font-medium">
+              ✓ Các quyền lợi liên quan (nếu có) sẽ được hệ thống tự động hoàn lại.
+          </p>
+        </div>
+      </div>
+    `,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#dc2626",
+    cancelButtonColor: "#6b7280",
+    confirmButtonText: "Hủy đơn hàng",
+    cancelButtonText: "Không hủy",
+    reverseButtons: true,
+    customClass: {
+      popup: "rounded-2xl",
+      title: "text-xl font-bold text-gray-900",
+      htmlContainer: "mt-2",
+      confirmButton: "rounded-xl font-bold px-6 py-3 shadow-md",
+      cancelButton: "rounded-xl font-bold px-6 py-3",
+    },
+  });
+};

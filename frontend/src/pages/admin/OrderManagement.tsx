@@ -28,6 +28,7 @@ const OrderManagement = () => {
   const currentPage = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "10");
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+  const [localKeyword, setLocalKeyword] = useState(searchTerm);
 
   const { user } = useAdminAuthStore();
   const {
@@ -65,6 +66,20 @@ const OrderManagement = () => {
     });
     setSearchParams(mergedParams);
   };
+
+  useEffect(() => {
+    setLocalKeyword(searchTerm);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localKeyword !== searchTerm) {
+        updateURL({ keyword: localKeyword, page: "1" });
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [localKeyword]);
 
   useEffect(() => {
     if (canView) {
@@ -280,10 +295,8 @@ const OrderManagement = () => {
                 <input
                   type="text"
                   placeholder="Mã đơn, SĐT hoặc Tên khách..."
-                  value={searchTerm}
-                  onChange={(e) =>
-                    updateURL({ keyword: e.target.value, page: "1" })
-                  }
+                  value={localKeyword}
+                  onChange={(e) => setLocalKeyword(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#b51c00]/20 focus:border-[#b51c00] outline-none"
                 />
               </div>

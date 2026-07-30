@@ -11,6 +11,7 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       user: null,
       loading: false,
+      isAuthChecked: false,
       forgotPasswordLoading: false,
 
       setAccessToken: (accessToken) => {
@@ -88,9 +89,38 @@ export const useAuthStore = create<AuthState>()(
           return res;
         } catch (error) {
           console.error(error);
-          toast.error(error?.response?.data?.message || "Đăng nhập Google thất bại");
+          toast.error(
+            error?.response?.data?.message || "Đăng nhập Google thất bại",
+          );
         } finally {
           set({ loading: false });
+        }
+      },
+
+      checkAuth: async () => {
+        if (get().isAuthChecked) return;
+
+        try {
+          if (!get().accessToken) {
+            try {
+              const res = await authService.refresh();
+              get().setAccessToken(res.accessToken);
+            } catch {
+              if (get().user) {
+                get().clearState();
+              }
+            }
+          }
+
+          if (get().accessToken && !get().user) {
+            try {
+              await get().getDetail();
+            } catch {
+              get().clearState();
+            }
+          }
+        } finally {
+          set({ isAuthChecked: true });
         }
       },
 

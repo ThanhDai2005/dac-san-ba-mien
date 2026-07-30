@@ -26,9 +26,10 @@ export const requireAuth = async (req, res, next) => {
       });
     }
 
-    const user = await User.findOne({ _id: decoded.userId }).select(
-      "-hashedPassword",
-    );
+    const user = await User.findOne({
+      _id: decoded.userId,
+      deleted: false,
+    }).select("-hashedPassword");
 
     if (!user) {
       return res.status(404).json({

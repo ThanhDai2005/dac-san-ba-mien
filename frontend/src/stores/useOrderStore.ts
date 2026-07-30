@@ -80,6 +80,19 @@ export const useOrderStore = create<OrderState>((set, get) => ({
     }
   },
 
+  cancelOrder: async (orderId) => {
+    try {
+      set({ loading: true });
+      const response = await orderService.cancelOrder(orderId);
+      set({ loading: false });
+      return response;
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+      set({ loading: false });
+      throw error;
+    }
+  },
+
   clearCurrentOrder: () => {
     set({ currentOrder: null });
   },

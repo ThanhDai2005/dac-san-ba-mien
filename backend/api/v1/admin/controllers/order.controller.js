@@ -1,4 +1,6 @@
 import Order from "../../../../models/order.model.js";
+import Product from "../../../../models/product.model.js";
+import Promotion from "../../../../models/promotion.model.js";
 
 // [GET] /api/v1/admin/order
 export const list = async (req, res) => {
@@ -37,6 +39,16 @@ export const list = async (req, res) => {
       const searchRegex = new RegExp(sanitizedSearch, "i");
 
       filter.$or = [
+        // 2. Tìm kiếm theo mã đơn hàng (_id): Phải convert ObjectId thành String mới dùng Regex được
+        {
+          $expr: {
+            $regexMatch: {
+              input: { $toString: "$_id" },
+              regex: sanitizedSearch,
+              options: "i",
+            },
+          },
+        },
         { "shippingAddress.recipient": searchRegex },
         { "shippingAddress.phone": searchRegex },
       ];
@@ -129,6 +141,30 @@ export const updateStatus = async (req, res) => {
         return res.status(400).json({
           message: `Không thể chuyển từ trạng thái ${existedOrder.orderStatus} sang ${orderStatus}`,
         });
+      }
+    }
+
+    if (
+      orderStatus === "Cancelled" &&
+      existedOrder.orderStatus !== "Cancelled"
+    ) {
+      if (existedOrder.orderStatus === "Pending") {
+        for (const item of existedOrder.items) {
+          await Product.updateOne(
+            { _id: item.productId },
+            { $inc: { stock: item.quantity } },
+          );
+        }
+
+        if (existedOrder.promotionId) {
+          await Promotion.updateOne(
+            { _id: existedOrder.promotionId },
+            {
+              $inc: { usedCount: -1 },
+              $pull: { usersUsed: existedOrder.userId },
+            },
+          );
+        }
       }
     }
 
