@@ -89,7 +89,7 @@ const RoleCreate = () => {
 
   if (!canCreate) {
     return (
-      <div className="bg-[#f7f9fb] min-h-screen pb-6 font-['Inter'] flex flex-col">
+      <div className="bg-[#f7f9fb] min-h-screen pb-6 flex flex-col">
         <header className="flex items-center h-16 gap-2 bg-white border-b border-gray-100 px-4 sticky top-0 z-10 shrink-0">
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-4" />
@@ -136,7 +136,7 @@ const RoleCreate = () => {
   }
 
   return (
-    <div className="bg-[#f7f9fb] min-h-screen pb-6 font-['Inter'] flex flex-col">
+    <div className="bg-[#f7f9fb] min-h-screen pb-6 flex flex-col">
       <header className="flex items-center h-16 gap-2 bg-white border-b border-gray-100 px-4 sticky top-0 z-10 shrink-0">
         <SidebarTrigger />
         <Separator orientation="vertical" className="h-4" />

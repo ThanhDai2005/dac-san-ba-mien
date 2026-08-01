@@ -653,36 +653,81 @@ const BlogManagement = () => {
               </div>
 
               <div className="flex items-center gap-1">
+                {/* Previous Button */}
                 <button
                   onClick={() =>
                     updateURL({ page: (currentPage - 1).toString() })
                   }
                   disabled={currentPage === 1}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-[#b51c00] hover:border-[#b51c00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-[#b51c00] hover:border-[#b51c00] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-600 disabled:hover:border-gray-200"
                 >
                   &lt;
                 </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (page) => (
-                    <button
-                      key={page}
-                      onClick={() => updateURL({ page: page.toString() })}
-                      className={`w-8 h-8 flex items-center justify-center rounded-lg border font-semibold text-sm transition-colors ${
-                        currentPage === page
-                          ? "border-[#b51c00] bg-[#b51c00] text-white"
-                          : "border-gray-200 text-gray-600 hover:text-[#b51c00] hover:border-[#b51c00]"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ),
-                )}
+
+                {/* Page Numbers with Ellipsis Logic */}
+                {(() => {
+                  const pages = [];
+
+                  if (totalPages <= 6) {
+                    for (let i = 1; i <= totalPages; i++) {
+                      pages.push(i);
+                    }
+                  } else {
+                    if (currentPage <= 3) {
+                      pages.push(1, 2, 3, 4, "...", totalPages);
+                    } else if (currentPage >= totalPages - 2) {
+                      pages.push(
+                        1,
+                        "...",
+                        totalPages - 3,
+                        totalPages - 2,
+                        totalPages - 1,
+                        totalPages,
+                      );
+                    } else {
+                      pages.push(
+                        1,
+                        "...",
+                        currentPage - 1,
+                        currentPage,
+                        currentPage + 1,
+                        "...",
+                        totalPages,
+                      );
+                    }
+                  }
+
+                  return pages.map((page, index) =>
+                    page === "..." ? (
+                      <span
+                        key={`ellipsis-${index}`}
+                        className="w-8 h-8 flex items-center justify-center text-gray-400 font-medium tracking-widest"
+                      >
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        key={page}
+                        onClick={() => updateURL({ page: page.toString() })}
+                        className={`w-8 h-8 flex items-center justify-center rounded-lg border font-bold text-sm transition-colors ${
+                          currentPage === page
+                            ? "border-[#b51c00] bg-[#b51c00] text-white shadow-sm"
+                            : "border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-[#b51c00] hover:border-[#b51c00]"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ),
+                  );
+                })()}
+
+                {/* Next Button */}
                 <button
                   onClick={() =>
                     updateURL({ page: (currentPage + 1).toString() })
                   }
                   disabled={currentPage === totalPages}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-[#b51c00] hover:border-[#b51c00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-[#b51c00] hover:border-[#b51c00] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-600 disabled:hover:border-gray-200"
                 >
                   &gt;
                 </button>

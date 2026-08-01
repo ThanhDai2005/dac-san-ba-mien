@@ -20,7 +20,7 @@ const checkoutSchema = z.object({
 
 type CheckoutForm = z.infer<typeof checkoutSchema>;
 
-export default function CheckoutPage() {
+const CheckoutPage = () => {
   const navigate = useNavigate();
   const { cart, getCart, clearCart } = useCartStore();
   const { createOrder } = useOrderStore();
@@ -290,9 +290,9 @@ export default function CheckoutPage() {
                           SL: x{item.quantity}
                         </p>
                         <p className="text-sm font-bold text-[#b51c00]">
-                          {(item.productId.price * item.quantity).toLocaleString(
-                            "vi-VN",
-                          )}
+                          {(
+                            item.productId.price * item.quantity
+                          ).toLocaleString("vi-VN")}
                           đ
                         </p>
                       </div>
@@ -355,4 +355,6 @@ export default function CheckoutPage() {
       </form>
     </div>
   );
-}
+};
+
+export default CheckoutPage;

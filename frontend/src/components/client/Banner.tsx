@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-const PROMO_CODE = "VIET50";
+const PROMO_CODE = "SALE30";
 
 const Banner = () => {
   const navigate = useNavigate();
@@ -51,8 +51,8 @@ const Banner = () => {
         <picture className="absolute inset-0 w-full h-full">
           <source media="(max-width: 768px)" srcSet="/banner-mobile.jpg" />
           <img
-            src="/banner.jpg"
-            alt="Khuyến mãi giảm 50% đơn đầu tiên"
+            src="/banner.png"
+            alt="Khuyến mãi giảm 30% đơn đầu tiên"
             fetchPriority="high"
             className="w-full h-full object-cover object-center md:object-right"
           />
@@ -72,7 +72,7 @@ const Banner = () => {
             </div>
 
             <h1 className="font-extrabold leading-[1.1] tracking-tight text-[#F5EDE6] mb-3 text-2xl sm:text-3xl md:text-5xl">
-              Giảm <em className="not-italic text-[#F5A623]">50%</em>
+              Giảm <em className="not-italic text-[#F5A623]">30%</em>
               <br />
               đơn hàng đầu tiên
             </h1>
@@ -100,7 +100,7 @@ const Banner = () => {
             className="bg-white/5 border border-white/10 rounded-xl px-5 py-4 min-w-[160px] text-center backdrop-blur-sm cursor-pointer transition-transform duration-200 hover:-translate-y-1 active:scale-95 select-none mx-auto sm:mx-0 w-full max-w-[280px] sm:w-auto"
           >
             <div className="text-5xl font-extrabold tracking-tight text-[#F5A623] leading-none">
-              50%
+              30%
             </div>
             <div className="text-[13px] font-semibold text-white/90 uppercase tracking-wide mt-0.5">
               OFF

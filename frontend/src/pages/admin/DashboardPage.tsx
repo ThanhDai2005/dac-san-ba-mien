@@ -79,7 +79,7 @@ const DashboardPage = () => {
     {
       name: "Đang xử lý",
       value: stats?.orderStatus?.processing || 0,
-      color: "#10B981",
+      color: "#06B6D4",
     },
     {
       name: "Đang giao",
@@ -89,7 +89,7 @@ const DashboardPage = () => {
     {
       name: "Hoàn thành",
       value: stats?.orderStatus?.delivered || 0,
-      color: "#06B6D4",
+      color: "#10B981",
     },
     {
       name: "Đã hủy",

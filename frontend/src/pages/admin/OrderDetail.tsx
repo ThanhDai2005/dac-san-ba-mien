@@ -406,10 +406,7 @@ const OrderDetail = () => {
                     className="flex gap-4 pb-4 border-b border-gray-100 last:border-b-0 last:pb-0"
                   >
                     <img
-                      src={
-                        item.productId?.images?.[0] ||
-                        "https://via.placeholder.com/150"
-                      }
+                      src={item.productId?.images?.[0]}
                       alt={item.productId?.name || "Product"}
                       className="w-20 h-20 rounded-lg object-cover border border-gray-200 bg-gray-50"
                     />

@@ -77,6 +77,13 @@ const promotionSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+promotionSchema.index({
+  deleted: 1,
+  status: 1,
+  startDate: 1,
+  endDate: 1,
+});
+
 const Promotion = mongoose.model("Promotion", promotionSchema, "promotions");
 
 export default Promotion;

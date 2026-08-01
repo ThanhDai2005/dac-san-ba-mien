@@ -30,6 +30,8 @@ const categorySchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+categorySchema.index({ deleted: 1, status: 1 });
+
 const Category = mongoose.model("Category", categorySchema, "categories");
 
 export default Category;

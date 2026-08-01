@@ -162,8 +162,8 @@ const Footer = () => {
                   <MapPin className="size-5" />
                 </div>
                 <div>
-                  <p>40/15 Tô Hiệu, P. Tân Thới Hòa</p>
-                  <p>Quận Tân Phú, TP Hồ Chí Minh</p>
+                  <p>123 Đường Trần Hưng Đạo</p>
+                  <p>Quận 1, TP. Hồ Chí Minh</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -181,7 +181,7 @@ const Footer = () => {
                 </div>
                 <div>
                   <p>contact@dacsanbamienvn.com</p>
-                  <p>gacon@domain.com</p>
+                  <p>www.dacsanbamienvn.com</p>
                 </div>
               </div>
             </div>

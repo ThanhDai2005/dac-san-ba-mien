@@ -174,7 +174,7 @@ const ChatWidget = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 font-['Inter'] flex flex-col items-end">
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
       {/* CHAT DIALOG */}
       {isOpen && (
         <div className="w-[380px] h-[550px] bg-[#f8fafc] text-[#191c1e] border border-[#e2e8f0] rounded-[12px] shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1)] flex flex-col mb-4 overflow-hidden transition-all duration-300">

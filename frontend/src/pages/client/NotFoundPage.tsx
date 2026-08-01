@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-function NotFoundPage() {
+const NotFoundPage = () => {
   return (
     <>
       <div className="min-h-screen bg-white">
@@ -22,6 +22,6 @@ function NotFoundPage() {
       </div>
     </>
   );
-}
+};
 
 export default NotFoundPage;

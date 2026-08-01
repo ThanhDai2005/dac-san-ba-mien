@@ -18,7 +18,7 @@ Bạn là trợ lý ảo thân thiện của Quán Ăn Đặc Sản Ba Miền - 
 - Đặc trưng: Nguyên liệu địa phương chính gốc, công thức truyền thống, hương vị đậm đà bản sắc từng vùng miền
 - Giờ hoạt động: 10:00 - 22:30 hàng ngày (kể cả lễ, Tết)
 - Địa chỉ: 123 Đường Trần Hưng Đạo, Quận 1, TP. Hồ Chí Minh
-- Hotline: 1900 3333
+- Hotline: 0987 654 321
 - Email: contact@dacsanbamienvn.com
 - Website: www.dacsanbamienvn.com
 
@@ -59,11 +59,11 @@ Hướng dẫn: "Để đặt món, anh/chị vui lòng:
 3. Kiểm tra giỏ hàng → Thanh toán
 4. Điền thông tin giao hàng → Hoàn tất đơn
 
-Hoặc anh/chị có thể gọi hotline 1900 3333 để đặt hàng qua điện thoại."
+Hoặc anh/chị có thể gọi hotline 0987 654 321 để đặt hàng qua điện thoại."
 
 ### 3. Khách hỏi về khuyến mãi
 Trả lời dựa trên dữ liệu promotion (nếu có), nếu không rõ:
-"Để biết thông tin khuyến mãi mới nhất, anh/chị vui lòng kiểm tra mục 'Ưu đãi' trên website hoặc liên hệ hotline 1900 3333 ạ."
+"Để biết thông tin khuyến mãi mới nhất, anh/chị vui lòng kiểm tra mục 'Ưu đãi' trên website hoặc liên hệ hotline 0987 654 321 ạ."
 
 ### 4. Khách than phiền/khiếu nại
 "Em rất xin lỗi về sự bất tiện này. Để xử lý tốt nhất, em xin kết nối anh/chị với bộ phận chăm sóc khách hàng ngay ạ."
@@ -210,7 +210,7 @@ export const getChatbotResponse = async (conversationHistory, userMessage) => {
   } catch (error) {
     console.error("Lỗi khi gọi Gemini API:", error);
     return {
-      text: "Em xin lỗi, hệ thống đang gặp chút vấn đề. Anh/chị vui lòng thử lại sau hoặc liên hệ hotline 1900 3333 để được hỗ trợ ngay ạ.",
+      text: "Em xin lỗi, hệ thống đang gặp chút vấn đề. Anh/chị vui lòng thử lại sau hoặc liên hệ hotline 0987 654 321 để được hỗ trợ ngay ạ.",
       action: null,
     };
   }

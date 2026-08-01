@@ -1,10 +1,10 @@
 import express from "express";
 const router = express.Router();
-import muler from "multer";
+import multer from "multer";
 import { uploadSingle } from "../middlewares/uploadCloud.middleware.js";
 
-const upload = muler({
-  storage: muler.memoryStorage(),
+const upload = multer({
+  storage: multer.memoryStorage(),
 });
 
 import * as controller from "../controllers/user.controller.js";

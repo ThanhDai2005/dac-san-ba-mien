@@ -5,7 +5,7 @@ const AboutPage = () => {
     <>
       <div className="min-h-screen bg-white pb-20">
         {/* ================= HERO BANNER ================= */}
-        <div className="relative h-[520px] md:h-[580px] bg-[url('/banner.jpg')] bg-cover bg-center bg-no-repeat overflow-hidden flex items-center">
+        <div className="relative h-[520px] md:h-[580px] bg-[url('/banner.png')] bg-cover bg-center bg-no-repeat overflow-hidden flex items-center">
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
 
           <div className="relative max-w-7xl mx-auto px-4 md:px-6 text-center z-10">
@@ -72,7 +72,7 @@ const AboutPage = () => {
                   </strong>
                 </p>
                 <p>
-                  Năm 2024, từ một góc quán cà phê nhỏ tại Sài Gòn, ba người bạn
+                  Năm 2026, từ một góc quán cà phê nhỏ tại Sài Gòn, ba người bạn
                   đam mê công nghệ và ẩm thực đã quyết định thay đổi cách mọi
                   người đặt đồ ăn. Chúng tôi nhận thấy thị trường cần một nền
                   tảng minh bạch hơn về nguồn gốc, ổn định hơn về chất lượng và

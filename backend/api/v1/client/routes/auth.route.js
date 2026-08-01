@@ -15,7 +15,11 @@ router.post("/signout", controller.signOut);
 
 router.post("/refresh", controller.refreshToken);
 
-router.post("/forgot-password", forgotPasswordLimiter, controller.forgotPassword);
+router.post(
+  "/forgot-password",
+  forgotPasswordLimiter,
+  controller.forgotPassword,
+);
 
 router.post("/verify-otp", forgotPasswordLimiter, controller.verifyOtp);
 

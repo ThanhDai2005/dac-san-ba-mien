@@ -155,16 +155,16 @@ export const updateStatus = async (req, res) => {
             { $inc: { stock: item.quantity } },
           );
         }
+      }
 
-        if (existedOrder.promotionId) {
-          await Promotion.updateOne(
-            { _id: existedOrder.promotionId },
-            {
-              $inc: { usedCount: -1 },
-              $pull: { usersUsed: existedOrder.userId },
-            },
-          );
-        }
+      if (existedOrder.promotionId) {
+        await Promotion.updateOne(
+          { _id: existedOrder.promotionId },
+          {
+            $inc: { usedCount: -1 },
+            $pull: { usersUsed: existedOrder.userId },
+          },
+        );
       }
     }
 
