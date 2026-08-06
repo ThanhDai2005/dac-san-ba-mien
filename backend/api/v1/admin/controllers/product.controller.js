@@ -1,6 +1,7 @@
 import Product from "../../../../models/product.model.js";
 import Category from "../../../../models/category.model.js";
 import slugify from "slugify";
+import logger from "../../../../config/logger.js";
 
 // [GET] /api/v1/admin/product
 export const list = async (req, res) => {
@@ -72,7 +73,14 @@ export const list = async (req, res) => {
       totalPages: Math.ceil(totalItems / limit),
     });
   } catch (error) {
-    console.log("Lỗi khi gọi list product", error);
+    logger.logError("Lỗi khi gọi list product", error, {
+      adminId: req.user?._id,
+      keyword: req.query.keyword,
+      categorySlug: req.query.categorySlug,
+      status: req.query.status,
+      page: req.query.page,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -100,7 +108,11 @@ export const detail = async (req, res) => {
       data: product,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi detail product", error);
+    logger.logError("Lỗi khi gọi detail product", error, {
+      adminId: req.user?._id,
+      productId: req.params.productId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -168,7 +180,12 @@ export const create = async (req, res) => {
       data: createdProduct,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi create product", error);
+    logger.logError("Lỗi khi gọi create product", error, {
+      adminId: req.user?._id,
+      productName: req.body.name,
+      category: req.body.category,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -269,7 +286,12 @@ export const update = async (req, res) => {
       data: updatedProduct,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi update product", error);
+    logger.logError("Lỗi khi gọi update product", error, {
+      adminId: req.user?._id,
+      productId: req.params.productId,
+      productName: req.body.name,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -305,7 +327,12 @@ export const changeStatus = async (req, res) => {
       message: "Cập nhật trạng thái thành công",
     });
   } catch (error) {
-    console.log("Lỗi khi gọi changeStatus product", error);
+    logger.logError("Lỗi khi gọi changeStatus product", error, {
+      adminId: req.user?._id,
+      productId: req.params.productId,
+      status: req.params.status,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -375,7 +402,12 @@ export const changeMulti = async (req, res) => {
         break;
     }
   } catch (error) {
-    console.log("Lỗi khi gọi changeMulti products", error);
+    logger.logError("Lỗi khi gọi changeMulti products", error, {
+      adminId: req.user?._id,
+      type: req.body.type,
+      idsCount: req.body.ids?.length,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -410,7 +442,11 @@ export const deleteItem = async (req, res) => {
       message: "Đã xóa thành công sản phẩm",
     });
   } catch (error) {
-    console.log("Lỗi khi gọi deleteItem product", error);
+    logger.logError("Lỗi khi gọi deleteItem product", error, {
+      adminId: req.user?._id,
+      productId: req.params.productId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });

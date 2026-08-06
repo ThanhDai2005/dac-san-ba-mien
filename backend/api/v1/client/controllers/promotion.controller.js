@@ -1,4 +1,5 @@
 import Promotion from "../../../../models/promotion.model.js";
+import logger from "../../../../config/logger.js";
 
 // [POST] /api/v1/promotion/apply
 export const apply = async (req, res) => {
@@ -94,7 +95,12 @@ export const apply = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log("Loi khi ap dung promotion", error);
+    logger.logError("Loi khi ap dung promotion", error, {
+      userId: req.user?._id,
+      code: req.body?.code,
+      orderValue: req.body?.orderValue,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({ message: "Loi he thong" });
   }
 };

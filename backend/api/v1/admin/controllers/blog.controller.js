@@ -2,6 +2,7 @@ import Blog from "../../../../models/blog.model.js";
 import BlogCategory from "../../../../models/blogCategory.model.js";
 import Product from "../../../../models/product.model.js";
 import slugify from "slugify";
+import logger from "../../../../config/logger.js";
 
 // [GET] /api/v1/admin/blog
 export const list = async (req, res) => {
@@ -75,7 +76,10 @@ export const list = async (req, res) => {
       totalPages: Math.ceil(totalItems / limit),
     });
   } catch (error) {
-    console.log("Lỗi khi gọi list blog", error);
+    logger.logError("Lỗi khi gọi list blog", error, {
+      adminId: req.user?._id,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -106,7 +110,11 @@ export const detail = async (req, res) => {
       data: blog,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi detail blog", error);
+    logger.logError("Lỗi khi gọi detail blog", error, {
+      adminId: req.user?._id,
+      blogId: req.params.blogId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -186,7 +194,10 @@ export const create = async (req, res) => {
       data: createdBlog,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi create blog", error);
+    logger.logError("Lỗi khi gọi create blog", error, {
+      adminId: req.user?._id,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -306,7 +317,11 @@ export const update = async (req, res) => {
       data: updatedBlog,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi update blog", error);
+    logger.logError("Lỗi khi gọi update blog", error, {
+      adminId: req.user?._id,
+      blogId: req.params.blogId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -351,7 +366,11 @@ export const changeStatus = async (req, res) => {
       message: "Cập nhật trạng thái thành công",
     });
   } catch (error) {
-    console.log("Lỗi khi gọi changeStatus blog", error);
+    logger.logError("Lỗi khi gọi changeStatus blog", error, {
+      adminId: req.user?._id,
+      blogId: req.params.blogId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -421,7 +440,10 @@ export const changeMulti = async (req, res) => {
         break;
     }
   } catch (error) {
-    console.log("Lỗi khi gọi changeMulti blogs", error);
+    logger.logError("Lỗi khi gọi changeMulti blogs", error, {
+      adminId: req.user?._id,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -456,7 +478,11 @@ export const deleteItem = async (req, res) => {
       message: "Đã xóa thành công bài viết",
     });
   } catch (error) {
-    console.log("Lỗi khi gọi deleteItem blog", error);
+    logger.logError("Lỗi khi gọi deleteItem blog", error, {
+      adminId: req.user?._id,
+      blogId: req.params.blogId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });

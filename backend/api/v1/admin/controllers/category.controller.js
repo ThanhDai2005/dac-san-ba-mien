@@ -1,6 +1,7 @@
 import Category from "../../../../models/category.model.js";
 import Product from "../../../../models/product.model.js";
 import slugify from "slugify";
+import logger from "../../../../config/logger.js";
 
 // [GET] /api/v1/admin/category
 export const list = async (req, res) => {
@@ -51,7 +52,10 @@ export const list = async (req, res) => {
       totalPages: Math.ceil(totalItems / limit),
     });
   } catch (error) {
-    console.log("Lỗi khi gọi list category", error);
+    logger.logError("Lỗi khi gọi list category", error, {
+      adminId: req.user?._id,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -79,7 +83,11 @@ export const detail = async (req, res) => {
       data: category,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi detail category", error);
+    logger.logError("Lỗi khi gọi detail category", error, {
+      adminId: req.user?._id,
+      categoryId: req.params.categoryId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -116,7 +124,10 @@ export const create = async (req, res) => {
       data: createdCategory,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi create category", error);
+    logger.logError("Lỗi khi gọi create category", error, {
+      adminId: req.user?._id,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -174,7 +185,11 @@ export const update = async (req, res) => {
       data: updatedCategory,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi update category", error);
+    logger.logError("Lỗi khi gọi update category", error, {
+      adminId: req.user?._id,
+      categoryId: req.params.categoryId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -210,7 +225,11 @@ export const changeStatus = async (req, res) => {
       message: "Cập nhật trạng thái thành công",
     });
   } catch (error) {
-    console.log("Lỗi khi gọi changeStatus category", error);
+    logger.logError("Lỗi khi gọi changeStatus category", error, {
+      adminId: req.user?._id,
+      categoryId: req.params.categoryId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -284,7 +303,10 @@ export const changeMulti = async (req, res) => {
         break;
     }
   } catch (error) {
-    console.log("Lỗi khi gọi changeMulti categories", error);
+    logger.logError("Lỗi khi gọi changeMulti categories", error, {
+      adminId: req.user?._id,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -324,7 +346,11 @@ export const deleteItem = async (req, res) => {
       message: "Đã xóa thành công danh mục",
     });
   } catch (error) {
-    console.log("Lỗi khi gọi deleteItem category", error);
+    logger.logError("Lỗi khi gọi deleteItem category", error, {
+      adminId: req.user?._id,
+      categoryId: req.params.categoryId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });

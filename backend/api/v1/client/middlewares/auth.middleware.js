@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../../../../models/user.model.js";
+import logger from "../../../../config/logger.js";
 
 // authorization - xác minh user là ai
 // - verify token
@@ -46,7 +47,9 @@ export const requireAuth = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    console.error("Lỗi khi xác minh client auth:", error);
+    logger.logError("Lỗi khi xác minh client auth", error, {
+      endpoint: req.originalUrl,
+    });
     return res.status(500).json({
       message: "Lỗi hệ thống",
     });

@@ -1,4 +1,5 @@
 import Role from "../../../../models/role.model.js";
+import logger from "../../../../config/logger.js";
 
 export const requirePermission = (permission) => {
   return async (req, res, next) => {
@@ -32,7 +33,11 @@ export const requirePermission = (permission) => {
 
       next();
     } catch (error) {
-      console.log("Lỗi khi kiểm tra quyền", error);
+      logger.logError("Lỗi khi kiểm tra quyền", error, {
+        userId: req.user?._id,
+        permission: permission,
+        endpoint: req.originalUrl,
+      });
       res.status(500).json({
         message: "Lỗi hệ thống",
       });

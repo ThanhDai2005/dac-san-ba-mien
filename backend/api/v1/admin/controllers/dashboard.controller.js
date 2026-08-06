@@ -2,6 +2,7 @@ import User from "../../../../models/user.model.js";
 import Product from "../../../../models/product.model.js";
 import Order from "../../../../models/order.model.js";
 import Category from "../../../../models/category.model.js";
+import logger from "../../../../config/logger.js";
 
 // [GET] /api/v1/admin/dashboard
 export const dashboard = async (req, res) => {
@@ -131,7 +132,12 @@ export const dashboard = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log("Lỗi khi gọi dashboard", error);
+    logger.logError("Lỗi khi gọi dashboard", error, {
+      adminId: req.user?._id,
+      roleId: req.user?.roleId,
+      query: req.query,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });

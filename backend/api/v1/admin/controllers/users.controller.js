@@ -1,6 +1,7 @@
 import User from "../../../../models/user.model.js";
 import Role from "../../../../models/role.model.js";
 import bcrypt from "bcrypt";
+import logger from "../../../../config/logger.js";
 
 // [GET] /api/v1/admin/users
 export const list = async (req, res) => {
@@ -49,7 +50,10 @@ export const list = async (req, res) => {
       totalPages: Math.ceil(totalItems / limit),
     });
   } catch (error) {
-    console.log("Lỗi khi gọi list user", error);
+    logger.logError("Lỗi khi gọi list user", error, {
+      adminId: req.user?._id,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -79,7 +83,11 @@ export const getDetail = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi getDetail user", error);
+    logger.logError("Lỗi khi gọi getDetail user", error, {
+      adminId: req.user?._id,
+      targetUserId: req.params.userId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -147,7 +155,10 @@ export const create = async (req, res) => {
       data: userData,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi create user", error);
+    logger.logError("Lỗi khi gọi create user", error, {
+      adminId: req.user?._id,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -247,7 +258,11 @@ export const update = async (req, res) => {
       data: updatedUser,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi update user", error);
+    logger.logError("Lỗi khi gọi update user", error, {
+      adminId: req.user?._id,
+      targetUserId: req.params.userId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -297,7 +312,11 @@ export const changeStatus = async (req, res) => {
       message: "Thay đổi trạng thái tài khoản thành công",
     });
   } catch (error) {
-    console.log("Lỗi khi gọi changeStatus user", error);
+    logger.logError("Lỗi khi gọi changeStatus user", error, {
+      adminId: req.user?._id,
+      targetUserId: req.params.userId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -373,7 +392,11 @@ export const changeMulti = async (req, res) => {
       message: "Thao tác thành công",
     });
   } catch (error) {
-    console.log("Lỗi khi gọi changeMulti user", error);
+    logger.logError("Lỗi khi gọi changeMulti user", error, {
+      adminId: req.user?._id,
+      endpoint: req.originalUrl,
+      targetUserIds: req.body?.ids,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -409,7 +432,13 @@ export const deleteItem = async (req, res) => {
       message: "Xóa vĩnh viễn tài khoản thành công",
     });
   } catch (error) {
-    console.log("Lỗi khi gọi deleteItem user", error);
+    logger.logError("Lỗi khi gọi deleteItem user", error, {
+      adminId: req.user?._id,
+      targetUserId: req.params.userId,
+      endpoint: req.originalUrl,
+      adminId: req.user?._id,
+      targetUserId: req.params.userId,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });

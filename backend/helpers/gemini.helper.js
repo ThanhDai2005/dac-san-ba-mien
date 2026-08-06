@@ -1,6 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import Product from "../models/product.model.js";
 import Category from "../models/category.model.js";
+import logger from "../config/logger.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -141,7 +142,7 @@ ${categoryProducts
 
     return menuContext;
   } catch (error) {
-    console.error("Lỗi khi lấy context thực đơn:", error);
+    logger.logError("Lỗi khi lấy context thực đơn:", error);
     return "## THỰC ĐƠN HIỆN TẠI\n(Đang tải dữ liệu...)";
   }
 };
@@ -208,7 +209,9 @@ export const getChatbotResponse = async (conversationHistory, userMessage) => {
       action: null,
     };
   } catch (error) {
-    console.error("Lỗi khi gọi Gemini API:", error);
+    logger.logError("Lỗi khi gọi Gemini API", error, {
+      model: "gemini-3.6-flash",
+    });
     return {
       text: "Em xin lỗi, hệ thống đang gặp chút vấn đề. Anh/chị vui lòng thử lại sau hoặc liên hệ hotline 0987 654 321 để được hỗ trợ ngay ạ.",
       action: null,

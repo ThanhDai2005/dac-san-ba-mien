@@ -1,6 +1,7 @@
 import User from "../../../../models/user.model.js";
 import Session from "../../../../models/session.model.js";
 import bcrypt from "bcrypt";
+import logger from "../../../../config/logger.js";
 
 // [GET] /api/v1/user/detail
 export const getDetail = async (req, res) => {
@@ -10,7 +11,10 @@ export const getDetail = async (req, res) => {
       user: req.user,
     });
   } catch (error) {
-    console.log("Lỗi hệ thống", error);
+    logger.logError("Lỗi hệ thống", error, {
+      userId: req.user?._id,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -39,7 +43,10 @@ export const uploadAvatar = async (req, res) => {
       avatarUrl: user.avatarUrl,
     });
   } catch (error) {
-    console.log("Lỗi xảy ra khi upload Avatar", error);
+    logger.logError("Lỗi xảy ra khi upload Avatar", error, {
+      userId: req.user?._id,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -85,7 +92,10 @@ export const updateInfo = async (req, res) => {
       user: user,
     });
   } catch (error) {
-    console.log("Lỗi xảy ra khi updateInfo", error);
+    logger.logError("Lỗi xảy ra khi updateInfo", error, {
+      userId: req.user?._id,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -146,7 +156,10 @@ export const changePassword = async (req, res) => {
       message: "Đổi mật khẩu thành công. Vui lòng đăng nhập lại.",
     });
   } catch (error) {
-    console.log("Lỗi xảy ra khi changePassword", error);
+    logger.logError("Lỗi xảy ra khi changePassword", error, {
+      userId: req.user?._id,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });

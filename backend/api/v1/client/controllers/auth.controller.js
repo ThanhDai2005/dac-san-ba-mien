@@ -7,6 +7,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
+import logger from "../../../../config/logger.js";
 
 const ACCESS_TOKEN_TIME = "15m";
 const REFRESH_TOKEN_TIME = 14 * 24 * 60 * 60 * 1000; // 14 ngày
@@ -63,7 +64,11 @@ export const signUp = async (req, res) => {
       message: "Đăng ký thành công",
     });
   } catch (error) {
-    console.log("Lỗi khi gọi signUp", error);
+    logger.logError("Lỗi khi gọi signUp", error, {
+      endpoint: req.originalUrl,
+      phone: req.body.phone,
+      email: req.body.email,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -123,8 +128,8 @@ export const signIn = async (req, res) => {
     // trả refresh token về trong cookie
     res.cookie("clientRefreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV == "production",
-      sameSite: process.env.NODE_ENV == "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV == "production", // Chỉ truyền qua HTTPS an toàn
+      sameSite: process.env.NODE_ENV == "production" ? "none" : "lax", // Cho phép Frontend từ Vercel thoải mái nhận và gửi cookie sang Render mà không bị chặn
       maxAge: REFRESH_TOKEN_TIME,
     });
 
@@ -135,7 +140,10 @@ export const signIn = async (req, res) => {
       accessToken: accessToken,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi signIn", error);
+    logger.logError("Lỗi khi gọi signIn", error, {
+      endpoint: req.originalUrl,
+      phone: req.body.phone,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -157,7 +165,10 @@ export const signOut = async (req, res) => {
       message: "Đăng xuất thành công",
     });
   } catch (error) {
-    console.log("Lỗi khi gọi signOut", error);
+    logger.logError("Lỗi khi gọi signOut", error, {
+      endpoint: req.originalUrl,
+      userId: req.userId,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -199,7 +210,10 @@ export const refreshToken = async (req, res) => {
       accessToken: accessToken,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi refreshToken", error);
+    logger.logError("Lỗi khi gọi refreshToken", error, {
+      endpoint: req.originalUrl,
+      hasRefreshToken: !!req.cookies.clientRefreshToken,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -248,7 +262,10 @@ export const forgotPassword = async (req, res) => {
       email: forgotPassword.email,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi forgotPassword", error);
+    logger.logError("Lỗi khi gọi forgotPassword", error, {
+      endpoint: req.originalUrl,
+      email: req.body.email,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -298,7 +315,10 @@ export const verifyOtp = async (req, res) => {
       resetToken: resetToken,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi verifyOtp", error);
+    logger.logError("Lỗi khi gọi verifyOtp", error, {
+      endpoint: req.originalUrl,
+      email: req.body.email,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -347,7 +367,10 @@ export const resetPassword = async (req, res) => {
       message: "Đổi mật khẩu thành công",
     });
   } catch (error) {
-    console.log("Lỗi khi gọi resetPassword", error);
+    logger.logError("Lỗi khi gọi resetPassword", error, {
+      endpoint: req.originalUrl,
+      email: req.body.email,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -429,7 +452,10 @@ export const googleAuth = async (req, res) => {
       accessToken: accessToken,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi googleAuth", error);
+    logger.logError("Lỗi khi gọi googleAuth", error, {
+      endpoint: req.originalUrl,
+      hasCredential: !!req.body.credential,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });

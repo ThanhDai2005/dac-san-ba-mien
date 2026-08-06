@@ -1,6 +1,7 @@
 import Order from "../../../../models/order.model.js";
 import Product from "../../../../models/product.model.js";
 import Promotion from "../../../../models/promotion.model.js";
+import logger from "../../../../config/logger.js";
 
 // [GET] /api/v1/admin/order
 export const list = async (req, res) => {
@@ -66,7 +67,10 @@ export const list = async (req, res) => {
       totalPages: Math.ceil(totalItems / limit),
     });
   } catch (error) {
-    console.log("Lỗi khi gọi list order admin", error);
+    logger.logError("Lỗi khi lấy danh sách đơn hàng (admin)", error, {
+      adminId: req.user?._id,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -93,7 +97,11 @@ export const detail = async (req, res) => {
       data: order,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi detail order admin", error);
+    logger.logError("Lỗi khi lấy chi tiết đơn hàng (admin)", error, {
+      adminId: req.user?._id,
+      orderId: req.params?.orderId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -186,7 +194,13 @@ export const updateStatus = async (req, res) => {
       data: updatedOrder,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi update status order admin", error);
+    logger.logError("Lỗi khi cập nhật trạng thái đơn hàng (admin)", error, {
+      adminId: req.user?._id,
+      orderId: req.params?.orderId,
+      orderStatus: req.body?.orderStatus,
+      paymentStatus: req.body?.paymentStatus,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });

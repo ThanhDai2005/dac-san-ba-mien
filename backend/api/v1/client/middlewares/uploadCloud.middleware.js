@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
+import logger from "../../../../config/logger.js";
 
 let streamUpload = (buffer, options) => {
   return new Promise((resolve, reject) => {
@@ -51,7 +52,10 @@ export const uploadSingle = async (req, res, next) => {
 
     req.body[req.file.fieldname] = result.secure_url;
   } catch (error) {
-    console.error("Upload error:", error);
+    logger.logError("Lỗi khi upload file", error, {
+      fieldname: req.file?.fieldname,
+      endpoint: req.originalUrl,
+    });
     return res.status(500).json({ message: "Lỗi khi upload file" });
   }
 
@@ -77,7 +81,11 @@ export const uploadMulti = async (req, res, next) => {
 
     req.body[fieldName] = results.map((item, index) => item.secure_url);
   } catch (error) {
-    console.error("Upload multi error:", error);
+    logger.logError("Lỗi khi upload nhiều files", error, {
+      filesCount: req.files?.length,
+      fieldname: req.files?.[0]?.fieldname,
+      endpoint: req.originalUrl,
+    });
     return res.status(500).json({ message: "Lỗi khi upload files" });
   }
 

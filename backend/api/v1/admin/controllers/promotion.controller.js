@@ -1,4 +1,5 @@
 import Promotion from "../../../../models/promotion.model.js";
+import logger from "../../../../config/logger.js";
 
 // [GET] /api/v1/admin/promotion
 export const list = async (req, res) => {
@@ -36,7 +37,10 @@ export const list = async (req, res) => {
       totalPages: Math.ceil(totalItems / limit),
     });
   } catch (error) {
-    console.log("Lỗi khi gọi list promotion", error);
+    logger.logError("Lỗi khi gọi list promotion", error, {
+      adminId: req.user?._id,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -114,7 +118,11 @@ export const create = async (req, res) => {
       data: createdPromotion,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi create promotion", error);
+    logger.logError("Lỗi khi gọi create promotion", error, {
+      adminId: req.user?._id,
+      code: req.body?.code,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -227,7 +235,11 @@ export const update = async (req, res) => {
       data: updatedPromotion,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi update promotion", error);
+    logger.logError("Lỗi khi gọi update promotion", error, {
+      adminId: req.user?._id,
+      promotionId: req.params?.promotionId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -255,7 +267,11 @@ export const getDetail = async (req, res) => {
       data: promotion,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi getDetail promotion", error);
+    logger.logError("Lỗi khi gọi getDetail promotion", error, {
+      adminId: req.user?._id,
+      promotionId: req.params?.promotionId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -291,7 +307,12 @@ export const changeStatus = async (req, res) => {
       message: "Thay đổi trạng thái khuyến mãi thành công",
     });
   } catch (error) {
-    console.log("Lỗi khi gọi changeStatus promotion", error);
+    logger.logError("Lỗi khi gọi changeStatus promotion", error, {
+      adminId: req.user?._id,
+      promotionId: req.params?.promotionId,
+      status: req.body?.status,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -354,7 +375,12 @@ export const changeMulti = async (req, res) => {
         break;
     }
   } catch (error) {
-    console.log("Lỗi khi gọi changeMulti promotion", error);
+    logger.logError("Lỗi khi gọi changeMulti promotion", error, {
+      adminId: req.user?._id,
+      type: req.body?.type,
+      idsCount: req.body?.ids?.length,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -389,7 +415,11 @@ export const deleteItem = async (req, res) => {
       message: "Xóa khuyến mãi thành công",
     });
   } catch (error) {
-    console.log("Lỗi khi gọi delete promotion", error);
+    logger.logError("Lỗi khi gọi delete promotion", error, {
+      adminId: req.user?._id,
+      promotionId: req.params?.promotionId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });

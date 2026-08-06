@@ -1,5 +1,6 @@
 import axios from "axios";
 import crypto from "crypto";
+import logger from "../config/logger.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -73,6 +74,10 @@ export const createMoMoPayment = async (order, totalAmount) => {
 
     return momoResponse.data;
   } catch (error) {
-    console.error("Lỗi kết nối cổng MoMo:", error);
+    logger.logError("Lỗi kết nối cổng MoMo", error, {
+      orderId: order?._id,
+      amount: totalAmount,
+    });
+    return null;
   }
 };

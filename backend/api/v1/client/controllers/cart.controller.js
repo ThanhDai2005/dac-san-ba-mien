@@ -1,5 +1,6 @@
 import Cart from "../../../../models/cart.model.js";
 import Product from "../../../../models/product.model.js";
+import logger from "../../../../config/logger.js";
 
 // [GET] /api/v1/cart
 export const getCart = async (req, res) => {
@@ -23,7 +24,10 @@ export const getCart = async (req, res) => {
       cart: cart,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi cart", error);
+    logger.logError("Lỗi khi gọi cart", error, {
+      userId: req.user?._id,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -102,7 +106,12 @@ export const addToCart = async (req, res) => {
       cart: cart,
     });
   } catch (error) {
-    console.log("Lỗi khi thêm vào giỏ hàng", error);
+    logger.logError("Lỗi khi thêm vào giỏ hàng", error, {
+      userId: req.user?._id,
+      productId: req.body?.productId,
+      quantity: req.body?.quantity,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -172,7 +181,12 @@ export const updateQuantity = async (req, res) => {
       cart: cart,
     });
   } catch (error) {
-    console.log("Lỗi khi cập nhật số lượng", error);
+    logger.logError("Lỗi khi cập nhật số lượng", error, {
+      userId: req.user?._id,
+      productId: req.params?.productId,
+      quantity: req.body?.quantity,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -210,7 +224,11 @@ export const removeFromCart = async (req, res) => {
       cart: cart,
     });
   } catch (error) {
-    console.log("Lỗi khi xóa sản phẩm khỏi giỏ hàng", error);
+    logger.logError("Lỗi khi xóa sản phẩm khỏi giỏ hàng", error, {
+      userId: req.user?._id,
+      productId: req.params?.productId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -239,7 +257,10 @@ export const clearCart = async (req, res) => {
       cart: cart,
     });
   } catch (error) {
-    console.log("Lỗi khi xóa giỏ hàng", error);
+    logger.logError("Lỗi khi xóa giỏ hàng", error, {
+      userId: req.user?._id,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });

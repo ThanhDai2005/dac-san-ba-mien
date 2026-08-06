@@ -1,6 +1,7 @@
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
 import { getChatbotResponse } from "../helpers/gemini.helper.js";
+import logger from "../config/logger.js";
 
 /**
  * Socket handler cho Client namespace (/)
@@ -10,8 +11,13 @@ export const handleClientChat = (io, socket) => {
   const user = socket.user;
   const isGuest = socket.isGuest;
 
-  console.log(
+  logger.logInfo(
     `[CLIENT CHAT] ${user.displayName} ${isGuest ? "(Guest)" : "(User)"} connected`,
+    {
+      displayName: user.displayName,
+      isGuest: isGuest,
+      socketId: socket.id,
+    },
   );
 
   // Join room riêng cho conversation
@@ -163,7 +169,11 @@ export const handleClientChat = (io, socket) => {
         messageId: clientMessage._id,
       });
     } catch (error) {
-      console.error("Lỗi khi xử lý tin nhắn client:", error);
+      logger.logError("Lỗi khi xử lý tin nhắn client", error, {
+        userId: user._id,
+        isGuest: isGuest,
+        conversationId: conversationId,
+      });
       socket.emit("client:sendMessageResponse", { error: "Lỗi hệ thống" });
     }
   });
@@ -217,7 +227,10 @@ export const handleClientChat = (io, socket) => {
         socket.emit("client:requestHumanResponse", { success: true });
       }
     } catch (error) {
-      console.error("Lỗi khi yêu cầu nhân viên:", error);
+      logger.logError("Lỗi khi yêu cầu nhân viên", error, {
+        userId: user._id,
+        conversationId: conversationId,
+      });
       socket.emit("client:requestHumanResponse", { error: "Lỗi hệ thống" });
     }
   });
@@ -273,7 +286,10 @@ export const handleClientChat = (io, socket) => {
         unreadByClient: 0,
       });
     } catch (error) {
-      console.error("Lỗi khi load lịch sử:", error);
+      logger.logError("Lỗi khi load lịch sử chat", error, {
+        userId: user._id,
+        isGuest: isGuest,
+      });
       socket.emit("client:loadHistoryResponse", { error: "Lỗi hệ thống" });
     }
   });
@@ -295,7 +311,10 @@ export const handleClientChat = (io, socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log(`[CLIENT CHAT] ${user.displayName} disconnected`);
+    logger.logInfo(`[CLIENT CHAT] ${user.displayName} disconnected`, {
+      displayName: user.displayName,
+      socketId: socket.id,
+    });
   });
 };
 
@@ -394,7 +413,9 @@ const handleBotResponse = async (
       unreadByAdmin: conversation.unreadByAdmin,
     });
   } catch (error) {
-    console.error("Lỗi khi bot trả lời:", error);
+    logger.logError("Lỗi khi bot trả lời", error, {
+      conversationId: conversation._id,
+    });
     // Fallback message
     const fallbackMsg = await Message.create({
       conversationId: conversation._id,
@@ -421,7 +442,11 @@ const handleBotResponse = async (
 export const handleAdminChat = (io, socket) => {
   const staff = socket.user;
 
-  console.log(`[ADMIN CHAT] Staff ${staff.displayName} connected`);
+  logger.logInfo(`[ADMIN CHAT] Staff ${staff.displayName} connected`, {
+    displayName: staff.displayName,
+    staffId: staff._id,
+    socketId: socket.id,
+  });
 
   // Event: Admin load danh sách conversations
   socket.on("admin:loadConversations", async () => {
@@ -447,7 +472,9 @@ export const handleAdminChat = (io, socket) => {
         })),
       });
     } catch (error) {
-      console.error("Lỗi khi load conversations:", error);
+      logger.logError("Lỗi khi load danh sách conversations (admin)", error, {
+        staffId: staff._id,
+      });
       socket.emit("admin:loadConversationsResponse", { error: "Lỗi hệ thống" });
     }
   });
@@ -497,7 +524,10 @@ export const handleAdminChat = (io, socket) => {
         },
       });
     } catch (error) {
-      console.error("Lỗi khi join conversation:", error);
+      logger.logError("Lỗi khi admin join conversation", error, {
+        staffId: staff._id,
+        conversationId: data?.conversationId,
+      });
       socket.emit("admin:joinConversationResponse", { error: "Lỗi hệ thống" });
     }
   });
@@ -576,7 +606,10 @@ export const handleAdminChat = (io, socket) => {
         messageId: staffMessage._id,
       });
     } catch (error) {
-      console.error("Lỗi khi admin gửi tin nhắn:", error);
+      logger.logError("Lỗi khi admin gửi tin nhắn", error, {
+        staffId: staff._id,
+        conversationId: data?.conversationId,
+      });
       socket.emit("admin:sendMessageResponse", { error: "Lỗi hệ thống" });
     }
   });
@@ -655,7 +688,10 @@ export const handleAdminChat = (io, socket) => {
 
       socket.emit("admin:closeConversationResponse", { success: true });
     } catch (error) {
-      console.error("Lỗi khi đóng conversation:", error);
+      logger.logError("Lỗi khi đóng conversation", error, {
+        staffId: staff._id,
+        conversationId: data?.conversationId,
+      });
       socket.emit("admin:closeConversationResponse", { error: "Lỗi hệ thống" });
     }
   });
@@ -674,6 +710,10 @@ export const handleAdminChat = (io, socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log(`[ADMIN CHAT] Staff ${staff.displayName} disconnected`);
+    logger.logInfo(`[ADMIN CHAT] Staff ${staff.displayName} disconnected`, {
+      displayName: staff.displayName,
+      staffId: staff._id,
+      socketId: socket.id,
+    });
   });
 };

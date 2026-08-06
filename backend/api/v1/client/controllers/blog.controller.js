@@ -1,5 +1,6 @@
 import Blog from "../../../../models/blog.model.js";
 import BlogCategory from "../../../../models/blogCategory.model.js";
+import logger from "../../../../config/logger.js";
 
 // [GET] /api/v1/blog
 export const list = async (req, res) => {
@@ -54,7 +55,11 @@ export const list = async (req, res) => {
       totalPages: Math.ceil(totalItems / limit),
     });
   } catch (error) {
-    console.log("Lỗi khi gọi list blog", error);
+    logger.logError("Lỗi khi lấy danh sách blog", error, {
+      keyword: req.query?.keyword,
+      blogCategorySlug: req.query?.blogCategorySlug,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -86,7 +91,10 @@ export const detail = async (req, res) => {
       data: blog,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi detail blog", error);
+    logger.logError("Lỗi khi lấy chi tiết blog", error, {
+      slug: req.params?.slug,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });

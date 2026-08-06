@@ -4,6 +4,7 @@ import Role from "../../../../models/role.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import logger from "../../../../config/logger.js";
 
 const ACCESS_TOKEN_TIME = "15m";
 const REFRESH_TOKEN_TIME = 14 * 24 * 60 * 60 * 1000;
@@ -87,8 +88,8 @@ export const login = async (req, res) => {
 
     res.cookie("adminRefreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV == "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV == "production", // Chỉ truyền qua HTTPS an toàn
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Cho phép Frontend từ Vercel thoải mái nhận và gửi cookie sang Render mà không bị chặn
       maxAge: REFRESH_TOKEN_TIME,
     });
 
@@ -97,7 +98,10 @@ export const login = async (req, res) => {
       accessToken: accessToken,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi login", error);
+    logger.logError("Lỗi khi gọi login", error, {
+      endpoint: req.originalUrl,
+      phone: req.body.phone,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -118,7 +122,10 @@ export const logout = async (req, res) => {
       message: "đăng xuất thành công",
     });
   } catch (error) {
-    console.log("Lỗi khi gọi logout", error);
+    logger.logError("Lỗi khi gọi logout", error, {
+      endpoint: req.originalUrl,
+      adminId: req.userId,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -160,7 +167,10 @@ export const refreshToken = async (req, res) => {
       accessToken: accessToken,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi refreshToken", error);
+    logger.logError("Lỗi khi gọi refreshToken", error, {
+      endpoint: req.originalUrl,
+      hasRefreshToken: !!req.cookies.adminRefreshToken,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });

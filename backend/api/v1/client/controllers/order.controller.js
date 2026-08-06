@@ -9,6 +9,9 @@ import {
   createVNPAYPayment,
   verifyVNPAYCallback,
 } from "../../../../helpers/vnpay.js";
+import { sendEmail } from "../../../../helpers/mailer.js";
+import { orderConfirmationTemplate } from "../../../../helpers/orderConfirmation.template.js";
+import logger from "../../../../config/logger.js";
 
 // [POST] /api/v1/order
 export const create = async (req, res) => {
@@ -205,6 +208,23 @@ export const create = async (req, res) => {
       .populate("userId", "displayName email")
       .populate("items.productId", "name images price");
 
+    // Send order confirmation email
+    try {
+      if (req.user.email) {
+        await sendEmail(
+          req.user.email,
+          "Xác nhận đơn hàng - Đặc Sản Ba Miền",
+          orderConfirmationTemplate(populatedOrder),
+        );
+      }
+    } catch (error) {
+      logger.logWarning("Lỗi gửi email xác nhận đơn hàng", error, {
+        orderId: createdOrder._id,
+        email: req.user.email,
+        endpoint: req.originalUrl,
+      });
+    }
+
     if (paymentMethod === "MOMO") {
       const momoResponse = await createMoMoPayment(createdOrder, totalAmount);
 
@@ -232,7 +252,11 @@ export const create = async (req, res) => {
       data: populatedOrder,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi create order", error);
+    logger.logError("Lỗi khi tạo đơn hàng", error, {
+      userId: req.user?._id,
+      items: req.body?.items?.length,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -293,9 +317,12 @@ export const momoCallback = async (req, res) => {
           orderStatus: "Processing",
         },
       );
-      console.log(
-        `MoMo IPN: Đơn hàng ${realOrderId} đã thanh toán THÀNH CÔNG.`,
-      );
+      logger.logInfo("MoMo IPN: Thanh toán thành công", {
+        orderId: realOrderId,
+        transId: transId,
+        amount: amount,
+        endpoint: req.originalUrl,
+      });
     } else {
       await Order.updateOne(
         { _id: realOrderId },
@@ -303,12 +330,19 @@ export const momoCallback = async (req, res) => {
           paymentStatus: "Failed",
         },
       );
-      console.log(`MoMo IPN: Đơn hàng ${realOrderId} thanh toán THẤT BẠI`);
+      logger.logWarning("MoMo IPN: Thanh toán thất bại", {
+        orderId: realOrderId,
+        resultCode: resultCode,
+        endpoint: req.originalUrl,
+      });
     }
 
     return res.status(200).json({ message: "Đã xác nhận IPN" });
   } catch (error) {
-    console.error("Lỗi khi xử lý MoMo IPN Callback:", error);
+    logger.logError("Lỗi khi xử lý MoMo IPN Callback", error, {
+      orderId: req.body?.orderId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({ message: "Lỗi hệ thống khi xử lý IPN" });
   }
 };
@@ -337,10 +371,13 @@ export const vnpayIpn = async (req, res) => {
 
     // So sánh amount với Math.round để tránh floating point
     if (Math.round(order.totalAmount) !== amount) {
-      console.error(
-        `Amount mismatch: order=${order.totalAmount}, vnpay=${amount}`,
-      );
-      return res.status(200).json({ RspCode: "04", Message: "Invalid amount" });
+      logger.logWarning("VNPAY: Amount mismatch", {
+        orderId: realOrderId,
+        expectedAmount: order.totalAmount,
+        actualAmount: amount,
+        endpoint: req.originalUrl,
+      });
+      return res.status(200).json({ RspCode: "04", Message: "Amount invalid" });
     }
 
     if (order.paymentStatus !== "Pending") {
@@ -354,15 +391,27 @@ export const vnpayIpn = async (req, res) => {
         { _id: realOrderId },
         { paymentStatus: "Paid", orderStatus: "Processing" },
       );
-      console.log(`VNPAY: Đơn hàng ${realOrderId} đã thanh toán THÀNH CÔNG`);
+      logger.logInfo("VNPAY IPN: Thanh toán thành công", {
+        orderId: realOrderId,
+        responseCode: responseCode,
+        amount: amount,
+        endpoint: req.originalUrl,
+      });
     } else {
       await Order.updateOne({ _id: realOrderId }, { paymentStatus: "Failed" });
-      console.log(`VNPAY: Đơn hàng ${realOrderId} thanh toán THẤT BẠI`);
+      logger.logWarning("VNPAY IPN: Thanh toán thất bại", {
+        orderId: realOrderId,
+        responseCode: responseCode,
+        endpoint: req.originalUrl,
+      });
     }
 
     return res.status(200).json({ RspCode: "00", Message: "Confirm success" });
   } catch (error) {
-    console.error("Lỗi khi xử lý VNPAY callback:", error);
+    logger.logError("Lỗi khi xử lý VNPAY IPN Callback", error, {
+      orderId: req.query?.vnp_TxnRef,
+      endpoint: req.originalUrl,
+    });
     return res.status(200).json({ RspCode: "99", Message: "Input error" });
   }
 };
@@ -434,7 +483,11 @@ export const retryPayment = async (req, res) => {
       }
     }
   } catch (error) {
-    console.log("Lỗi khi gọi retryPayment", error);
+    logger.logError("Lỗi khi thanh toán lại đơn hàng", error, {
+      userId: req.user?._id,
+      orderId: req.params?.orderId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -470,7 +523,10 @@ export const myOrders = async (req, res) => {
       totalPages: Math.ceil(totalItems / limit),
     });
   } catch (error) {
-    console.log("Lỗi khi gọi myOrders", error);
+    logger.logError("Lỗi khi lấy danh sách đơn hàng", error, {
+      userId: req.user?._id,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -498,7 +554,11 @@ export const detail = async (req, res) => {
       data: order,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi detail order", error);
+    logger.logError("Lỗi khi lấy chi tiết đơn hàng", error, {
+      userId: req.user?._id,
+      orderId: req.params?.orderId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -540,7 +600,11 @@ export const getOrderReviews = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log("Lỗi khi gọi getOrderReviews", error);
+    logger.logError("Lỗi khi lấy danh sách đánh giá đơn hàng", error, {
+      userId: req.user?._id,
+      orderId: req.params?.orderId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -609,7 +673,11 @@ export const cancelOrder = async (req, res) => {
       data: cancelledOrder,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi cancelOrder", error);
+    logger.logError("Lỗi khi hủy đơn hàng", error, {
+      userId: req.user?._id,
+      orderId: req.params?.orderId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });

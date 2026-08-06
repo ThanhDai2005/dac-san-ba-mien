@@ -1,4 +1,5 @@
 import Role from "../../../../models/role.model.js";
+import logger from "../../../../config/logger.js";
 
 // [GET] /api/v1/admin/role
 export const list = async (req, res) => {
@@ -31,7 +32,13 @@ export const list = async (req, res) => {
       totalPages: Math.ceil(totalItems / limit),
     });
   } catch (error) {
-    console.log("Lỗi khi gọi list role", error);
+    logger.logError("Lỗi khi gọi list role", error, {
+      adminId: req.user?._id,
+      roleId: req.user?.roleId,
+      keyword: req.query.keyword,
+      page: req.query.page,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -59,7 +66,12 @@ export const getDetail = async (req, res) => {
       data: role,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi getDetail role", error);
+    logger.logError("Lỗi khi gọi getDetail role", error, {
+      adminId: req.user?._id,
+      roleId: req.user?.roleId,
+      targetRoleId: req.params.roleId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -94,7 +106,12 @@ export const create = async (req, res) => {
       data: createdRole,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi create role", error);
+    logger.logError("Lỗi khi gọi create role", error, {
+      adminId: req.user?._id,
+      roleId: req.user?.roleId,
+      title: req.body?.title,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -150,7 +167,13 @@ export const update = async (req, res) => {
       data: updatedRole,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi update role", error);
+    logger.logError("Lỗi khi gọi update role", error, {
+      adminId: req.user?._id,
+      roleId: req.user?.roleId,
+      targetRoleId: req.params.roleId,
+      title: req.body?.title,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -185,7 +208,12 @@ export const deleteItem = async (req, res) => {
       message: "Xóa vai trò thành công",
     });
   } catch (error) {
-    console.log("Lỗi khi gọi delete role", error);
+    logger.logError("Lỗi khi gọi delete role", error, {
+      adminId: req.user?._id,
+      roleId: req.user?.roleId,
+      targetRoleId: req.params.roleId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -268,7 +296,11 @@ export const getPermissions = async (req, res) => {
       data: permissions,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi getPermissions", error);
+    logger.logError("Lỗi khi gọi getPermissions", error, {
+      adminId: req.user?._id,
+      roleId: req.user?.roleId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -311,7 +343,13 @@ export const updatePermissions = async (req, res) => {
       data: updatedRole,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi updatePermissions", error);
+    logger.logError("Lỗi khi gọi updatePermissions", error, {
+      adminId: req.user?._id,
+      roleId: req.user?.roleId,
+      targetRoleId: req.params.roleId,
+      permissionsCount: req.body?.permissions?.length,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });

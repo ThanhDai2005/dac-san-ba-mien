@@ -6,13 +6,18 @@ import {
   orderCreationLimiter,
   paymentCallbackLimiter,
   cancelOrderLimiter,
+  retryPaymentLimiter,
 } from "../../../../middlewares/rateLimiter.middleware.js";
 
 router.post("/", orderCreationLimiter, controller.create);
 router.post("/momo-callback", paymentCallbackLimiter, controller.momoCallback);
 router.get("/vnpay-ipn", paymentCallbackLimiter, controller.vnpayIpn);
 
-router.post("/:orderId/retry-payment", controller.retryPayment);
+router.post(
+  "/:orderId/retry-payment",
+  retryPaymentLimiter,
+  controller.retryPayment,
+);
 
 router.get("/my", controller.myOrders);
 router.get("/detail/:orderId", controller.detail);

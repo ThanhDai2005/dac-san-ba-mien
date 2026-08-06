@@ -55,3 +55,15 @@ export const paymentCallbackLimiter = rateLimit({
   legacyHeaders: false,
   message: { message: "Too many payment callbacks" },
 });
+
+export const retryPaymentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 3,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.user?._id?.toString() || ipKeyGenerator(req.ip),
+  message: {
+    message:
+      "Bạn đã thử thanh toán lại quá nhiều lần, vui lòng thử lại sau 15 phút",
+  },
+});

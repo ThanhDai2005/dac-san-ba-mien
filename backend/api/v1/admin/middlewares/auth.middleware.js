@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../../../../models/user.model.js";
+import logger from "../../../../config/logger.js";
 
 export const requireAuth = async (req, res, next) => {
   try {
@@ -49,7 +50,9 @@ export const requireAuth = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    console.log("Lỗi khi xác minh admin auth:", error);
+    logger.logError("Lỗi khi xác minh admin auth", error, {
+      endpoint: req.originalUrl,
+    });
     return res.status(500).json({
       message: "Lỗi hệ thống",
     });

@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import logger from "../config/logger.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -20,10 +21,17 @@ export const sendEmail = async (to, subject, htmlContent) => {
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log("Email sent: " + info.response);
+    logger.logInfo("Email sent successfully", {
+      to: to,
+      subject: subject,
+      messageId: info.messageId,
+    });
     return info;
   } catch (error) {
-    console.error("Lỗi gửi mail: ", error);
+    logger.logError("Lỗi gửi email", error, {
+      to: to,
+      subject: subject,
+    });
     throw error;
   }
 };

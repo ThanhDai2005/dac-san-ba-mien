@@ -1,4 +1,5 @@
 import Category from "../../../../models/category.model.js";
+import logger from "../../../../config/logger.js";
 
 // [GET] /api/v1/category
 export const list = async (req, res) => {
@@ -13,7 +14,9 @@ export const list = async (req, res) => {
       data: data,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi list category", error);
+    logger.logError("Lỗi khi lấy danh sách category", error, {
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });

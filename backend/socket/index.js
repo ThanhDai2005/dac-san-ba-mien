@@ -4,6 +4,7 @@ import {
   clientSocketAuth,
 } from "../middlewares/socket.middleware.js";
 import { handleClientChat, handleAdminChat } from "./chat.handler.js";
+import logger from "../config/logger.js";
 
 let io;
 
@@ -20,13 +21,19 @@ export const initSocket = (server) => {
   adminNamespace.use(adminSocketAuth);
   adminNamespace.on("connection", (socket) => {
     const user = socket.user;
-    console.log(`[ADMIN] ${user.displayName} online: ${socket.id}`);
+    logger.logInfo(`[ADMIN] ${user.displayName} online: ${socket.id}`, {
+      adminId: user._id?.toString(),
+      socketId: socket.id,
+    });
 
     // Xử lý chat admin
     handleAdminChat(io, socket);
 
     socket.on("disconnect", () => {
-      console.log("[ADMIN] disconnected:", socket.id);
+      logger.logInfo(`[ADMIN] ${user.displayName} disconnected`, {
+        adminId: user._id?.toString(),
+        socketId: socket.id,
+      });
     });
   });
 
@@ -36,13 +43,23 @@ export const initSocket = (server) => {
   clientNamespace.on("connection", (socket) => {
     const user = socket.user;
     const isGuest = socket.isGuest ? "(Khách vãng lai)" : "(Thành viên)";
-    console.log(`[CLIENT] ${user.displayName} ${isGuest} online: ${socket.id}`);
+    logger.logInfo(
+      `[CLIENT] ${user.displayName} ${isGuest} online: ${socket.id}`,
+      {
+        userId: user._id?.toString(),
+        socketId: socket.id,
+        role: isGuest,
+      },
+    );
 
     // Xử lý chat client
     handleClientChat(io, socket);
 
     socket.on("disconnect", () => {
-      console.log("[CLIENT] disconnected:", socket.id);
+      logger.logInfo(`[CLIENT] ${user.displayName} disconnected`, {
+        userId: user._id?.toString(),
+        socketId: socket.id,
+      });
     });
   });
 

@@ -1,5 +1,6 @@
 import Product from "../../../../models/product.model.js";
 import Category from "../../../../models/category.model.js";
+import logger from "../../../../config/logger.js";
 
 // [GET] /api/v1/product
 export const list = async (req, res) => {
@@ -73,7 +74,13 @@ export const list = async (req, res) => {
       totalPages: Math.ceil(totalItems / limit),
     });
   } catch (error) {
-    console.log("Lỗi khi gọi list product", error);
+    logger.logError("Lỗi khi gọi list product", error, {
+      keyword: req.query.keyword,
+      categorySlug: req.query.categorySlug,
+      page: req.query.page,
+      limit: req.query.limit,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });
@@ -101,7 +108,10 @@ export const detail = async (req, res) => {
       data: data,
     });
   } catch (error) {
-    console.log("Lỗi khi gọi detail product", error);
+    logger.logError("Lỗi khi gọi detail product", error, {
+      slug: req.params.slug,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({
       message: "Lỗi hệ thống",
     });

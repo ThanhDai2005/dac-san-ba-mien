@@ -1,6 +1,7 @@
 import Review from "../../../../models/review.model.js";
 import Product from "../../../../models/product.model.js";
 import Order from "../../../../models/order.model.js";
+import logger from "../../../../config/logger.js";
 
 // [POST] /api/v1/review
 export const create = async (req, res) => {
@@ -107,7 +108,12 @@ export const create = async (req, res) => {
       data: populatedReview,
     });
   } catch (error) {
-    console.log("Lỗi khi tạo review", error);
+    logger.logError("Lỗi khi tạo review", error, {
+      userId: req.user?._id,
+      productId: req.body?.productId,
+      orderId: req.body?.orderId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({ message: "Lỗi hệ thống" });
   }
 };
@@ -146,7 +152,10 @@ export const listByProduct = async (req, res) => {
       totalPages: Math.ceil(totalItems / limit),
     });
   } catch (error) {
-    console.log("Lỗi khi lấy danh sách review", error);
+    logger.logError("Lỗi khi lấy danh sách review", error, {
+      productId: req.params?.productId,
+      endpoint: req.originalUrl,
+    });
     res.status(500).json({ message: "Lỗi hệ thống" });
   }
 };
