@@ -4,14 +4,13 @@ const router = express.Router();
 import * as controller from "../controllers/order.controller.js";
 import {
   orderCreationLimiter,
-  paymentCallbackLimiter,
   cancelOrderLimiter,
   retryPaymentLimiter,
 } from "../../../../middlewares/rateLimiter.middleware.js";
 
 router.post("/", orderCreationLimiter, controller.create);
-router.post("/momo-callback", paymentCallbackLimiter, controller.momoCallback);
-router.get("/vnpay-ipn", paymentCallbackLimiter, controller.vnpayIpn);
+router.post("/momo-callback", controller.momoCallback);
+router.get("/vnpay-ipn", controller.vnpayIpn);
 
 router.post(
   "/:orderId/retry-payment",

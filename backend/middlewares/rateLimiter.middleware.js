@@ -31,7 +31,7 @@ export const orderCreationLimiter = rateLimit({
   max: 8,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.user?._id?.toString() || ipKeyGenerator(req.ip),
+  keyGenerator: (req) => req.user?._id?.toString() || ipKeyGenerator(req.ip), //nếu một người trong quán cafe đặt hàng liên tục, hệ thống sẽ khóa tính năng đặt hàng của tất cả mọi người đang ngồi trong quán đó vì họ chung một IP. Giới hạn theo ID người dùng (req.user?._id) giúp phạt đúng người đúng tội
   message: {
     message: "Bạn đã tạo quá nhiều đơn hàng, vui lòng thử lại sau 10 phút",
   },
@@ -46,14 +46,6 @@ export const cancelOrderLimiter = rateLimit({
   keyGenerator: (req) => req.user?._id?.toString() || ipKeyGenerator(req.ip),
   standardHeaders: true,
   legacyHeaders: false,
-});
-
-export const paymentCallbackLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000,
-  max: 60,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { message: "Too many payment callbacks" },
 });
 
 export const retryPaymentLimiter = rateLimit({

@@ -44,7 +44,8 @@ export const list = async (req, res) => {
         .populate("relatedProducts", "name slug price images")
         .sort({ publishedAt: -1, createdAt: -1 })
         .skip(skip)
-        .limit(limit),
+        .limit(limit)
+        .lean(),
       Blog.countDocuments(filter),
     ]);
 
@@ -78,7 +79,8 @@ export const detail = async (req, res) => {
     })
       .populate("authorId", "displayName avatarUrl")
       .populate("blogCategoryId", "name slug")
-      .populate("relatedProducts");
+      .populate("relatedProducts")
+      .lean();
 
     if (!blog) {
       return res.status(404).json({

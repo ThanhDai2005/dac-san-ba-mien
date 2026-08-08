@@ -51,8 +51,10 @@ const Banner = () => {
         <picture className="absolute inset-0 w-full h-full">
           <source media="(max-width: 768px)" srcSet="/banner-mobile.jpg" />
           <img
-            src="/banner.png"
+            src="/banner.webp"
             alt="Khuyến mãi giảm 30% đơn đầu tiên"
+            width="1200"
+            height="400"
             fetchPriority="high"
             className="w-full h-full object-cover object-center md:object-right"
           />

@@ -159,7 +159,7 @@ export const AppSidebar = ({
               <div className="flex justify-center items-center">
                 <img
                   className="w-[80px] h-[80px] object-cover"
-                  src="/logo.png"
+                  src="/logo.webp"
                   alt="Logo Đặc Sản Ba Miền"
                 />
               </div>

@@ -60,7 +60,7 @@ const OrderSuccessPage = () => {
         {/* Logo */}
         <div className="mb-6">
           <img
-            src="/logo.png"
+            src="/logo.webp"
             alt="Logo Đặc Sản Ba Miền"
             className="w-28 h-28 object-contain mx-auto"
           />

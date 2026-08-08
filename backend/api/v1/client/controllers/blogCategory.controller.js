@@ -7,7 +7,9 @@ export const list = async (req, res) => {
     const data = await BlogCategory.find({
       status: "active",
       deleted: false,
-    }).sort({ createdAt: -1 });
+    })
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.status(200).json({
       message: "Lấy danh sách blog category thành công",

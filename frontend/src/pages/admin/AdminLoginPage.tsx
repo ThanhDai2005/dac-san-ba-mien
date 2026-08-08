@@ -14,7 +14,7 @@ const AdminLoginPage = () => {
   }, [user, navigate]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[url('/banner.png')] bg-cover bg-center bg-no-repeat">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[url('/banner.webp')] bg-cover bg-center bg-no-repeat">
       <div className="w-full max-w-[420px] relative z-10 rounded-3xl border-2 border-white bg-black/10 backdrop-blur-sm shadow-2xl py-10 px-6 sm:py-16 sm:px-12 mx-4">
         <LoginForm />
       </div>

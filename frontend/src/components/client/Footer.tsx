@@ -20,7 +20,7 @@ const Footer = () => {
             {/* Logo */}
             <div className="lg:w-1/4 flex justify-center lg:justify-start lg:border-r border-[#ddd] pr-4">
               <img
-                src="logo.png"
+                src="logo.webp"
                 alt="Logo Đặc Sản 3 Miền"
                 className="w-[120px] object-contain"
               />

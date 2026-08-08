@@ -62,7 +62,8 @@ export const list = async (req, res) => {
         .populate("categoryId", "name slug")
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(limit),
+        .limit(limit)
+        .lean(),
       Product.countDocuments(filter),
     ]);
 

@@ -44,7 +44,7 @@ export function LoginForm({
     <div className={cn("flex flex-col w-full", className)} {...props}>
       <div className="flex items-center justify-center">
         <img
-          src="/logo.png"
+          src="/logo.webp"
           alt="Logo"
           className="h-[120px] w-[120px] object-cover"
         />

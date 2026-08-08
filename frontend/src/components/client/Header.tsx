@@ -55,8 +55,10 @@ const Header = () => {
               <SheetHeader className="mb-6">
                 <SheetTitle className="flex items-center justify-center">
                   <img
-                    src="/logo.png"
+                    src="/logo.webp"
                     alt="DS3M Logo"
+                    width={80}
+                    height={80}
                     className="w-20 h-auto object-contain"
                   />
                 </SheetTitle>
@@ -163,8 +165,10 @@ const Header = () => {
 
           <Link to="/" className="flex items-center">
             <img
-              src="/logo.png"
+              src="/logo.webp"
               alt="DS3M Logo"
+              width={72}
+              height={72}
               className="w-18 h-auto object-contain"
             />
           </Link>

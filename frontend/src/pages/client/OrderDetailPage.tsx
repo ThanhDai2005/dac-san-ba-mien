@@ -172,7 +172,7 @@ const OrderDetailPage = () => {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-1">
             <img
-              src="/logo.png"
+              src="/logo.webp"
               alt="Logo Đặc Sản Ba Miền"
               className="w-20 h-auto object-cover"
             />

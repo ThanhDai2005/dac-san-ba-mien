@@ -218,7 +218,7 @@ export const create = async (req, res) => {
         );
       }
     } catch (error) {
-      logger.logWarning("Lỗi gửi email xác nhận đơn hàng", error, {
+      logger.logWarning("Lỗi gửi email xác nhận đơn hàng", {
         orderId: createdOrder._id,
         email: req.user.email,
         endpoint: req.originalUrl,

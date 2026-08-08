@@ -5,7 +5,7 @@ const AboutPage = () => {
     <>
       <div className="min-h-screen bg-white pb-20">
         {/* ================= HERO BANNER ================= */}
-        <div className="relative h-[520px] md:h-[580px] bg-[url('/banner.png')] bg-cover bg-center bg-no-repeat overflow-hidden flex items-center">
+        <div className="relative h-[520px] md:h-[580px] bg-[url('/banner.webp')] bg-cover bg-center bg-no-repeat overflow-hidden flex items-center">
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
 
           <div className="relative max-w-7xl mx-auto px-4 md:px-6 text-center z-10">

@@ -63,7 +63,8 @@ export const list = async (req, res) => {
         .populate("categoryId", "name slug")
         .sort(sort)
         .skip(skip)
-        .limit(limit),
+        .limit(limit)
+        .lean(),
       Product.countDocuments(filter),
     ]);
 
@@ -95,7 +96,9 @@ export const detail = async (req, res) => {
       slug: slug,
       status: "active",
       deleted: false,
-    }).populate("categoryId", "name slug");
+    })
+      .populate("categoryId", "name slug")
+      .lean();
 
     if (!data) {
       return res.status(404).json({

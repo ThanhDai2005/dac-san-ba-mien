@@ -63,7 +63,7 @@ export function SignupForm({
           <header className="text-center flex flex-col items-center gap-2">
             <img
               className="w-28 h-auto object-contain"
-              src="/logo.png"
+              src="/logo.webp"
               alt="Logo Đặc Sản Ba Miền"
             />
             <p className="text-xl font-semibold text-gray-900">
