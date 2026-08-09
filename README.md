@@ -10,6 +10,7 @@
 - **Shopping Cart Management:** Add/update/remove items with stock validation and automatic total calculation
 - **Order Processing:** Place orders with delivery info, apply promotion codes, track status (Pending → Processing → Shipped → Delivered)
 - **Payment Integration:** COD, VNPAY, and MOMO with secure transaction handling
+- **Order Confirmation Email:** Automatic confirmation email sent to customer upon successful order placement
 - **Product Reviews:** Rate (1-5 stars) and review products after delivery
 - **Blog & Articles:** Food-related articles organized by category
 
@@ -45,8 +46,9 @@
 - **Authentication**: JWT + HTTP-only Cookies + Google OAuth
 - **AI Chatbot**: Google Gemini AI
 - **Payment Gateway**: VNPAY + MOMO
-- **Email Service**: Nodemailer (OTP Verification)
+- **Email Service**: Nodemailer (OTP Verification + Order Confirmation)
 - **Media Storage**: Cloudinary
+- **Logging**: Winston + Daily Rotate File (structured JSON logs with 14-day retention)
 - **Additional Tools**: React Hook Form + Zod, Recharts, TinyMCE, Axios, Framer Motion, Sonner, SweetAlert2, Swiper
 
 ## 🌐 Getting Started
@@ -73,6 +75,10 @@ Create `.env` in backend:
 ```env
 # Server
 PORT=3000
+NODE_ENV=development
+
+# Logging Level (debug | info | warn | error)
+LOG_LEVEL=debug
 
 # Database
 MONGO_URL=mongodb://localhost:27017/dac_san_ba_mien
