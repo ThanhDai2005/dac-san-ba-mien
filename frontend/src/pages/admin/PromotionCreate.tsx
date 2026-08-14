@@ -1,18 +1,11 @@
 import { useState } from "react";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-  BreadcrumbLink,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Save, ArrowLeft, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAdminPromotionStore } from "@/stores/useAdminPromotionStore";
 import { toast } from "sonner";
+import AdminHeader from "@/components/admin/AdminHeader";
+import AdminPageHeading from "@/components/admin/AdminPageHeading";
+import AdminFormActions from "@/components/admin/AdminFormActions";
 
 const PromotionCreate = () => {
   const navigate = useNavigate();
@@ -102,59 +95,19 @@ const PromotionCreate = () => {
 
   return (
     <div className="bg-[#f7f9fb] min-h-screen pb-12">
-      {/* HEADER BREADCRUMB */}
-      <header className="flex items-center h-16 gap-2 bg-white border-b border-gray-100 px-4 sticky top-0 z-10">
-        <SidebarTrigger />
-        <Separator orientation="vertical" className="h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                href="/admin/dashboard"
-                className="font-medium text-gray-500"
-              >
-                Admin
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                href="/admin/promotions"
-                className="font-medium text-gray-500"
-              >
-                Quản lý khuyến mãi
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="font-bold text-[#b51c00]">
-                Thêm khuyến mãi
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </header>
+      <AdminHeader
+        items={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Quản lý khuyến mãi", href: "/admin/promotions" },
+          { label: "Thêm khuyến mãi", isCurrentPage: true },
+        ]}
+      />
 
-      <div className="p-6 md:p-8 max-w-[1200px] mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-[24px] font-bold text-gray-900 tracking-tight">
-              Thêm khuyến mãi mới
-            </h1>
-            <p className="text-sm font-medium text-gray-500 mt-1">
-              Tạo mã giảm giá cho khách hàng
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-700 rounded-[20px] font-semibold text-sm hover:bg-gray-200 transition-colors active:scale-95"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Quay lại
-          </button>
-        </div>
+      <div className="p-6 md:p-8 max-w-[1200px] mx-auto space-y-6">
+        <AdminPageHeading
+          title="Thêm khuyến mãi mới"
+          subtitle="Tạo mã giảm giá cho khách hàng"
+        />
 
         <form
           onSubmit={handleSubmit}
@@ -374,34 +327,10 @@ const PromotionCreate = () => {
             </div>
           </div>
 
-          {/* Footer Actions */}
-          <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-[20px] font-semibold text-sm hover:bg-gray-100 transition-colors active:scale-95"
-              disabled={loading}
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex items-center gap-2 px-6 py-2.5 bg-[#b51c00] text-white rounded-[20px] font-semibold text-sm hover:bg-[#8e1400] shadow-sm shadow-red-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Đang lưu...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4" />
-                  Lưu khuyến mãi
-                </>
-              )}
-            </button>
-          </div>
+          <AdminFormActions
+            loading={loading}
+            submitLabel="Lưu khuyến mãi"
+          />
         </form>
       </div>
     </div>

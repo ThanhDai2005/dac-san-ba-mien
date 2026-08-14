@@ -1,15 +1,5 @@
 import { useState, useEffect } from "react";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-  BreadcrumbLink,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import {
   Package,
   User,
   MapPin,
@@ -25,6 +15,7 @@ import {
 import { useAdminOrderStore } from "@/stores/useAdminOrderStore";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import AdminHeader from "@/components/admin/AdminHeader";
 
 const OrderDetail = () => {
   const navigate = useNavigate();
@@ -251,38 +242,13 @@ const OrderDetail = () => {
 
   return (
     <div className="bg-[#f7f9fb] min-h-screen pb-12">
-      {/* HEADER BREADCRUMB */}
-      <header className="flex items-center h-16 gap-2 bg-white border-b border-gray-100 px-4 sticky top-0 z-10">
-        <SidebarTrigger />
-        <Separator orientation="vertical" className="h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                href="/admin/dashboard"
-                className="font-medium text-gray-500"
-              >
-                Admin
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                href="/admin/orders"
-                className="font-medium text-gray-500"
-              >
-                Quản lý đơn hàng
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="font-bold text-[#b51c00]">
-                Chi tiết đơn hàng
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </header>
+      <AdminHeader
+        items={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Quản lý đơn hàng", href: "/admin/orders" },
+          { label: "Chi tiết đơn hàng", isCurrentPage: true },
+        ]}
+      />
 
       <div className="p-6 md:p-8 max-w-[1400px] mx-auto space-y-6">
         {/* HEADER WITH BACK BUTTON */}

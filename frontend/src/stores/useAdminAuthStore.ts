@@ -18,7 +18,6 @@ export const useAdminAuthStore = create<AdminAuthState>()(
       clearState: () => {
         set({ accessToken: null, user: null, loading: false });
         localStorage.removeItem("adminStorage");
-        sessionStorage.removeItem("adminStorage");
       },
 
       login: async (phone, password) => {

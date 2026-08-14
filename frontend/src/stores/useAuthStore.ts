@@ -26,7 +26,6 @@ export const useAuthStore = create<AuthState>()(
         set({ accessToken: null, user: null, loading: false });
         useCartStore.getState().clearCart();
         localStorage.removeItem("authStorage");
-        sessionStorage.removeItem("authStorage");
         localStorage.removeItem("cart-storage");
       },
 

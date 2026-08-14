@@ -3,16 +3,6 @@ import { useAdminSocketStore } from "@/stores/useAdminSocketStore";
 import { useAdminChatStore } from "@/stores/useAdminChatStore";
 import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
 import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
-  BreadcrumbPage,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -27,13 +17,16 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { hasPermission } from "@/lib/permissions";
+import AdminHeader from "@/components/admin/AdminHeader";
+import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 
 const ChatManagement = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [messageInput, setMessageInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { accessToken } = useAdminAuthStore();
+  const { accessToken, user } = useAdminAuthStore();
   const { connect, disconnect, on, off, isConnected } = useAdminSocketStore();
   const {
     conversations,
@@ -53,6 +46,8 @@ const ChatManagement = () => {
     updateConversationPreview,
     setTyping,
   } = useAdminChatStore();
+
+  const canView = hasPermission(user, "chats_view");
 
   // Auto scroll to bottom
   useEffect(() => {
@@ -207,31 +202,35 @@ const ChatManagement = () => {
     toast.success("Đã kết thúc cuộc hội thoại");
   };
 
+  if (!canView) {
+    return (
+      <NoPermissionScreen
+        breadcrumbItems={[
+          {
+            label: "Admin",
+            href: "/admin/dashboard",
+          },
+          {
+            label: "Tư vấn với khách hàng",
+            isCurrentPage: true,
+          },
+        ]}
+      />
+    );
+  }
+
   return (
     <div className="bg-[#f7f9fb] min-h-screen pb-6 flex flex-col">
       {/* HEADER BREADCRUMB */}
-      <header className="flex items-center h-16 gap-2 bg-white border-b border-gray-100 px-4 sticky top-0 z-10 shrink-0">
-        <SidebarTrigger />
-        <Separator orientation="vertical" className="h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                href="/admin/dashboard"
-                className="font-medium text-gray-500"
-              >
-                Admin
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="font-bold text-[#b51c00]">
-                Tư vấn với khách hàng
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </header>
+      <AdminHeader
+        items={[
+          { label: "Admin", href: "/admin/dashboard" },
+          {
+            label: "Tư vấn với khách hàng",
+            isCurrentPage: true,
+          },
+        ]}
+      />
 
       <div className="p-6 md:p-8 max-w-[1600px] mx-auto w-full space-y-4 flex-grow flex flex-col">
         <h1 className="text-[24px] font-bold text-gray-900 tracking-tight mb-6">

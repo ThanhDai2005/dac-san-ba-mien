@@ -1,20 +1,13 @@
 import { useState } from "react";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-  BreadcrumbLink,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { ArrowLeft, Save } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAdminRoleStore } from "@/stores/useAdminRoleStore";
 import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
 import { hasPermission } from "@/lib/permissions";
 import { toast } from "sonner";
+import AdminHeader from "@/components/admin/AdminHeader";
+import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
+import AdminPageHeading from "@/components/admin/AdminPageHeading";
+import AdminFormActions from "@/components/admin/AdminFormActions";
 
 const RoleCreate = () => {
   const navigate = useNavigate();
@@ -89,104 +82,32 @@ const RoleCreate = () => {
 
   if (!canCreate) {
     return (
-      <div className="bg-[#f7f9fb] min-h-screen pb-6 flex flex-col">
-        <header className="flex items-center h-16 gap-2 bg-white border-b border-gray-100 px-4 sticky top-0 z-10 shrink-0">
-          <SidebarTrigger />
-          <Separator orientation="vertical" className="h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink
-                  href="/admin/dashboard"
-                  className="font-medium text-gray-500"
-                >
-                  Admin
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink
-                  href="/admin/roles"
-                  className="font-medium text-gray-500"
-                >
-                  Quản lý vai trò
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage className="font-bold text-[#b51c00]">
-                  Thêm vai trò
-                </BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </header>
-        <div className="p-6 md:p-8 max-w-[1600px] mx-auto w-full flex-grow flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Không có quyền truy cập
-            </h2>
-            <p className="text-gray-600">
-              Bạn không có quyền tạo vai trò. Vui lòng liên hệ quản trị viên.
-            </p>
-          </div>
-        </div>
-      </div>
+      <NoPermissionScreen
+        breadcrumbItems={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Quản lý vai trò", href: "/admin/roles" },
+          { label: "Thêm vai trò", isCurrentPage: true },
+        ]}
+      />
     );
   }
 
   return (
     <div className="bg-[#f7f9fb] min-h-screen pb-6 flex flex-col">
-      <header className="flex items-center h-16 gap-2 bg-white border-b border-gray-100 px-4 sticky top-0 z-10 shrink-0">
-        <SidebarTrigger />
-        <Separator orientation="vertical" className="h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                href="/admin/dashboard"
-                className="font-medium text-gray-500"
-              >
-                Admin
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                href="/admin/roles"
-                className="font-medium text-gray-500"
-              >
-                Quản lý vai trò
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="font-bold text-[#b51c00]">
-                Thêm vai trò
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </header>
+      <AdminHeader
+        items={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Quản lý vai trò", href: "/admin/roles" },
+          { label: "Thêm vai trò", isCurrentPage: true },
+        ]}
+      />
 
       <div className="p-6 md:p-8 max-w-[1200px] mx-auto w-full space-y-6 flex-grow">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate("/admin/roles")}
-            className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div>
-            <h1 className="text-[24px] font-bold text-gray-900 tracking-tight">
-              Thêm vai trò mới
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Tạo vai trò mới cho hệ thống. Bạn có thể gán quyền sau khi tạo
-              xong.
-            </p>
-          </div>
-        </div>
+        <AdminPageHeading
+          title="Thêm vai trò mới"
+          subtitle="Tạo vai trò mới cho hệ thống. Bạn có thể gán quyền sau khi tạo xong."
+          onBack={() => navigate("/admin/roles")}
+        />
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="bg-white rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-gray-200 p-6 md:p-8">
@@ -274,24 +195,8 @@ const RoleCreate = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 justify-end pt-4 border-t border-gray-100">
-            <button
-              type="button"
-              onClick={() => navigate("/admin/roles")}
-              className="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg font-semibold text-sm hover:bg-gray-50 transition-colors"
-              disabled={loading}
-            >
-              Hủy bỏ
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex items-center gap-2 px-6 py-2.5 bg-[#b51c00] text-white rounded-lg font-semibold text-sm hover:bg-[#8e1400] shadow-sm shadow-red-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Save className="w-4 h-4" />
-              {loading ? "Đang tạo..." : "Tạo vai trò"}
-            </button>
-          </div>
+          {/* Action Buttons */}
+          <AdminFormActions loading={loading} submitLabel="Tạo vai trò" />
         </form>
       </div>
     </div>

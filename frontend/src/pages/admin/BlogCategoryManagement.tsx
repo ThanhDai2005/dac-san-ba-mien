@@ -1,16 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-  BreadcrumbLink,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import {
   Search,
   Plus,
   Trash2,
@@ -29,6 +19,9 @@ import {
 } from "@/lib/sweetalert";
 import { hasPermission } from "@/lib/permissions";
 import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
+import AdminHeader from "@/components/admin/AdminHeader";
+import AdminPagination from "@/components/admin/AdminPagination";
+import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 
 const BlogCategoryManagement = () => {
   const navigate = useNavigate();
@@ -239,68 +232,24 @@ const BlogCategoryManagement = () => {
 
   if (!canView) {
     return (
-      <div className="bg-[#f7f9fb] min-h-screen pb-6 flex flex-col">
-        <header className="flex items-center h-16 gap-2 bg-white border-b border-gray-100 px-4 sticky top-0 z-10 shrink-0">
-          <SidebarTrigger />
-          <Separator orientation="vertical" className="h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink
-                  href="/admin/dashboard"
-                  className="font-medium text-gray-500"
-                >
-                  Admin
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage className="font-bold text-[#b51c00]">
-                  Quản lý danh mục blog
-                </BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </header>
-        <div className="p-6 md:p-8 max-w-[1600px] mx-auto w-full flex-grow flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Không có quyền truy cập
-            </h2>
-            <p className="text-gray-600">
-              Bạn không có quyền xem trang này. Vui lòng liên hệ quản trị viên.
-            </p>
-          </div>
-        </div>
-      </div>
+      <NoPermissionScreen
+        breadcrumbItems={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Quản lý danh mục blog", isCurrentPage: true },
+        ]}
+      />
     );
   }
 
   return (
     <div className="bg-[#f7f9fb] min-h-screen pb-12">
       {/* HEADER BREADCRUMB */}
-      <header className="flex items-center h-16 gap-2 bg-white border-b border-gray-100 px-4 sticky top-0 z-10">
-        <SidebarTrigger />
-        <Separator orientation="vertical" className="h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                href="/admin/dashboard"
-                className="font-medium text-gray-500"
-              >
-                Admin
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="font-bold text-[#b51c00]">
-                Quản lý danh mục bài viết
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </header>
+      <AdminHeader
+        items={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Quản lý danh mục bài viết", isCurrentPage: true },
+        ]}
+      />
 
       <div className="p-6 md:p-8 max-w-[1600px] mx-auto space-y-6">
         {/* TITLE & FILTERS */}
@@ -587,103 +536,15 @@ const BlogCategoryManagement = () => {
 
           {/* PAGINATION */}
           {blogCategories.length > 0 && (
-            <div className="flex flex-col md:flex-row items-center justify-between px-6 py-4 border-t border-gray-100 bg-white">
-              <div className="flex items-center gap-2 mb-4 md:mb-0">
-                <span className="text-sm text-gray-500">Số lượng mục</span>
-                <select
-                  value={limit}
-                  onChange={(e) => {
-                    updateURL({ limit: e.target.value, page: "1" });
-                  }}
-                  className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-[#b51c00] focus:border-[#b51c00] px-3 py-1.5 outline-none cursor-pointer"
-                >
-                  <option value="10">10</option>
-                  <option value="20">20</option>
-                  <option value="50">50</option>
-                </select>
-              </div>
-
-              <div className="flex items-center gap-1">
-                {/* Previous Button */}
-                <button
-                  onClick={() =>
-                    updateURL({ page: (currentPage - 1).toString() })
-                  }
-                  disabled={currentPage === 1}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-[#b51c00] hover:border-[#b51c00] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-600 disabled:hover:border-gray-200"
-                >
-                  &lt;
-                </button>
-
-                {/* Page Numbers with Ellipsis Logic */}
-                {(() => {
-                  const pages = [];
-
-                  if (totalPages <= 6) {
-                    for (let i = 1; i <= totalPages; i++) {
-                      pages.push(i);
-                    }
-                  } else {
-                    if (currentPage <= 3) {
-                      pages.push(1, 2, 3, 4, "...", totalPages);
-                    } else if (currentPage >= totalPages - 2) {
-                      pages.push(
-                        1,
-                        "...",
-                        totalPages - 3,
-                        totalPages - 2,
-                        totalPages - 1,
-                        totalPages,
-                      );
-                    } else {
-                      pages.push(
-                        1,
-                        "...",
-                        currentPage - 1,
-                        currentPage,
-                        currentPage + 1,
-                        "...",
-                        totalPages,
-                      );
-                    }
-                  }
-
-                  return pages.map((page, index) =>
-                    page === "..." ? (
-                      <span
-                        key={`ellipsis-${index}`}
-                        className="w-8 h-8 flex items-center justify-center text-gray-400 font-medium tracking-widest"
-                      >
-                        ...
-                      </span>
-                    ) : (
-                      <button
-                        key={page}
-                        onClick={() => updateURL({ page: page.toString() })}
-                        className={`w-8 h-8 flex items-center justify-center rounded-lg border font-bold text-sm transition-colors ${
-                          currentPage === page
-                            ? "border-[#b51c00] bg-[#b51c00] text-white shadow-sm"
-                            : "border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-[#b51c00] hover:border-[#b51c00]"
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    ),
-                  );
-                })()}
-
-                {/* Next Button */}
-                <button
-                  onClick={() =>
-                    updateURL({ page: (currentPage + 1).toString() })
-                  }
-                  disabled={currentPage === totalPages}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-[#b51c00] hover:border-[#b51c00] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-600 disabled:hover:border-gray-200"
-                >
-                  &gt;
-                </button>
-              </div>
-            </div>
+            <AdminPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              limit={limit}
+              onPageChange={(page) => updateURL({ page: page.toString() })}
+              onLimitChange={(newLimit) =>
+                updateURL({ limit: newLimit.toString(), page: "1" })
+              }
+            />
           )}
         </div>
       </div>

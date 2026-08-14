@@ -1,15 +1,5 @@
 import { useState, useEffect } from "react";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-  BreadcrumbLink,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import {
   Users,
   Utensils,
   LayoutList,
@@ -18,6 +8,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useAdminDashboardStore } from "@/stores/useAdminDashboardStore";
+import AdminHeader from "@/components/admin/AdminHeader";
 
 import {
   PieChart,
@@ -103,29 +94,12 @@ const DashboardPage = () => {
 
   return (
     <div className="bg-[#f7f9fb] min-h-screen pb-12">
-      {/* HEADER BREADCRUMB */}
-      <header className="flex items-center h-16 gap-2 bg-white border-b border-gray-100 px-4 sticky top-0 z-10">
-        <SidebarTrigger />
-        <Separator orientation="vertical" className="h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                href="/admin/dashboard"
-                className="font-medium text-gray-500"
-              >
-                Admin
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="font-bold text-[#b51c00]">
-                Dashboard
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </header>
+      <AdminHeader
+        items={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Dashboard", isCurrentPage: true },
+        ]}
+      />
 
       <div className="flex flex-col gap-8 p-6 md:p-8 max-w-[1600px] mx-auto">
         {/* TITLE */}

@@ -1,18 +1,11 @@
 import { useState, useEffect } from "react";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-  BreadcrumbLink,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAdminBlogCategoryStore } from "@/stores/useAdminBlogCategoryStore";
 import { toast } from "sonner";
+import AdminHeader from "@/components/admin/AdminHeader";
+import AdminPageHeading from "@/components/admin/AdminPageHeading";
+import AdminFormActions from "@/components/admin/AdminFormActions";
 
 const BlogCategoryEdit = () => {
   const navigate = useNavigate();
@@ -73,57 +66,22 @@ const BlogCategoryEdit = () => {
 
   return (
     <div className="bg-[#f7f9fb] min-h-screen pb-12">
-      {/* HEADER BREADCRUMB */}
-      <header className="flex items-center h-16 gap-2 bg-white border-b border-gray-100 px-4 sticky top-0 z-10">
-        <SidebarTrigger />
-        <Separator orientation="vertical" className="h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                href="/admin/dashboard"
-                className="font-medium text-gray-500"
-              >
-                Admin
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                href="/admin/blog-categories"
-                className="font-medium text-gray-500"
-              >
-                Quản lý danh mục bài viết
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="font-bold text-[#b51c00]">
-                Chỉnh sửa danh mục
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </header>
+      <AdminHeader
+        items={[
+          { label: "Admin", href: "/admin/dashboard" },
+          {
+            label: "Quản lý danh mục bài viết",
+            href: "/admin/blog-categories",
+          },
+          { label: "Chỉnh sửa danh mục", isCurrentPage: true },
+        ]}
+      />
 
       <div className="p-6 md:p-8 max-w-[1000px] mx-auto space-y-6">
-        {/* TITLE */}
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div>
-            <h1 className="text-[24px] font-bold text-gray-900 tracking-tight">
-              Chỉnh sửa danh mục bài viết
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Cập nhật thông tin danh mục bài viết
-            </p>
-          </div>
-        </div>
+        <AdminPageHeading
+          title="Chỉnh sửa danh mục bài viết"
+          subtitle="Cập nhật thông tin danh mục bài viết"
+        />
 
         {/* FORM CARD */}
         <form onSubmit={handleSubmit}>
@@ -192,33 +150,11 @@ const BlogCategoryEdit = () => {
               </div>
             </div>
 
-            {/* ACTION BUTTONS */}
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => navigate(-1)}
-                className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-semibold text-sm hover:bg-gray-100 transition-colors"
-              >
-                Hủy
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-6 py-2.5 bg-[#b51c00] text-white rounded-lg font-semibold text-sm hover:bg-[#8e1400] shadow-sm shadow-red-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Đang lưu...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4" />
-                    Cập nhật danh mục
-                  </>
-                )}
-              </button>
-            </div>
+            {/* Action Buttons */}
+            <AdminFormActions
+              loading={loading}
+              submitLabel="Cập nhật danh mục"
+            />
           </div>
         </form>
       </div>

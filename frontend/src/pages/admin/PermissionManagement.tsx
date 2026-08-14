@@ -1,18 +1,10 @@
 import { useState, useEffect } from "react";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-  BreadcrumbLink,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAdminRoleStore } from "@/stores/useAdminRoleStore";
 import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
 import { toast } from "sonner";
 import { hasPermission } from "@/lib/permissions";
+import AdminHeader from "@/components/admin/AdminHeader";
+import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 
 const PermissionManagement = () => {
   const { user } = useAdminAuthStore();
@@ -167,67 +159,23 @@ const PermissionManagement = () => {
 
   if (!canView) {
     return (
-      <div className="bg-[#f7f9fb] min-h-screen pb-6 flex flex-col">
-        <header className="flex items-center h-16 gap-2 bg-white border-b border-gray-100 px-4 sticky top-0 z-10 shrink-0">
-          <SidebarTrigger />
-          <Separator orientation="vertical" className="h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink
-                  href="/admin/dashboard"
-                  className="font-medium text-gray-500"
-                >
-                  Admin
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage className="font-bold text-[#b51c00]">
-                  Phân quyền
-                </BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </header>
-        <div className="p-6 md:p-8 max-w-[1600px] mx-auto w-full flex-grow flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Không có quyền truy cập
-            </h2>
-            <p className="text-gray-600">
-              Bạn không có quyền xem trang này. Vui lòng liên hệ quản trị viên.
-            </p>
-          </div>
-        </div>
-      </div>
+      <NoPermissionScreen
+        breadcrumbItems={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Phân quyền", isCurrentPage: true },
+        ]}
+      />
     );
   }
 
   return (
     <div className="bg-[#f7f9fb] min-h-screen pb-6 flex flex-col">
-      <header className="flex items-center h-16 gap-2 bg-white border-b border-gray-100 px-4 sticky top-0 z-10 shrink-0">
-        <SidebarTrigger />
-        <Separator orientation="vertical" className="h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                href="/admin/dashboard"
-                className="font-medium text-gray-500"
-              >
-                Admin
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="font-bold text-[#b51c00]">
-                Phân quyền
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </header>
+      <AdminHeader
+        items={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Phân quyền", isCurrentPage: true },
+        ]}
+      />
 
       <div className="p-6 md:p-8 max-w-[1600px] mx-auto w-full space-y-6 flex-grow">
         <div className="bg-white rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-gray-200 p-6 md:p-8">
