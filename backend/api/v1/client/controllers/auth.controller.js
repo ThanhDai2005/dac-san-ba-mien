@@ -333,7 +333,7 @@ export const resetPassword = async (req, res) => {
     let decoded;
     try {
       decoded = jwt.verify(resetToken, process.env.RESET_TOKEN_SECRET);
-    } catch (err) {
+    } catch (error) {
       return res.status(400).json({
         message: "Phiên làm việc đã hết hạn. Vui lòng thực hiện lại từ đầu.",
       });

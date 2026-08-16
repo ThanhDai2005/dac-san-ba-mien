@@ -120,6 +120,15 @@ export const updateStatus = async (req, res) => {
       });
     }
 
+    if (
+      paymentStatus &&
+      !["Pending", "Paid", "Failed", "Refunded"].includes(paymentStatus)
+    ) {
+      return res.status(400).json({
+        message: "Trạng thái thanh toán không hợp lệ",
+      });
+    }
+
     const existedOrder = await Order.findOne({ _id: orderId });
     if (!existedOrder) {
       return res.status(404).json({
@@ -143,7 +152,7 @@ export const updateStatus = async (req, res) => {
       Shipped: ["Delivered"],
     };
 
-    if (orderStatus != existedOrder.orderStatus) {
+    if (orderStatus && orderStatus != existedOrder.orderStatus) {
       const allowedStatuses = validTransitions[existedOrder.orderStatus];
       if (!allowedStatuses || !allowedStatuses.includes(orderStatus)) {
         return res.status(400).json({
@@ -176,15 +185,30 @@ export const updateStatus = async (req, res) => {
       }
     }
 
+    const updatePayload = {};
+
+    if (orderStatus) {
+      updatePayload.orderStatus = orderStatus;
+    }
+
+    if (paymentStatus) {
+      updatePayload.paymentStatus = paymentStatus;
+    }
+
+    // Quy tắc tự động: Nếu đơn là COD + Đang chờ tiền + Shipper báo Giao thành công (Delivered)
+    // -> Hệ thống tự động chuyển sang Đã thanh toán (Paid)
+    if (
+      orderStatus === "Delivered" &&
+      existedOrder.paymentMethod === "COD" &&
+      existedOrder.paymentStatus === "Pending"
+    ) {
+      updatePayload.paymentStatus = "Paid";
+    }
+
     const updatedOrder = await Order.findOneAndUpdate(
       { _id: orderId },
-      {
-        orderStatus: orderStatus,
-        paymentStatus: paymentStatus,
-      },
-      {
-        new: true,
-      },
+      updatePayload,
+      { new: true },
     )
       .populate("userId", "displayName email")
       .populate("items.productId", "name images price");

@@ -119,7 +119,7 @@ export const create = async (req, res) => {
       // Check minimum order value
       if (subtotal < promotion.minOrderValue) {
         return res.status(400).json({
-          message: `Đơn hàng tối thiểu ${promotion.minOrderValue.toLocaleString()} VND để áp dụng mã này`,
+          message: `Đơn hàng tối thiểu ${promotion.minOrderValue.toLocaleString("vi-VN")} VND để áp dụng mã này`,
         });
       }
 
