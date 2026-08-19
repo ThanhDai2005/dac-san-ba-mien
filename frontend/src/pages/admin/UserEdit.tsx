@@ -6,10 +6,13 @@ import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { useAdminUserStore } from "@/stores/useAdminUserStore";
 import { useAdminRoleStore } from "@/stores/useAdminRoleStore";
+import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
+import { hasPermission } from "@/lib/permissions";
 import { toast } from "sonner";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminPageHeading from "@/components/admin/AdminPageHeading";
 import AdminFormActions from "@/components/admin/AdminFormActions";
+import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 
 const userEditSchema = z
   .object({
@@ -39,11 +42,14 @@ type UserEditFormData = z.infer<typeof userEditSchema>;
 
 const UserEdit = () => {
   const navigate = useNavigate();
-  const { userId } = useParams<{ userId: string }>();
+  const { userId } = useParams();
+  const { user } = useAdminAuthStore();
   const { getUserDetail, updateUser, loading } = useAdminUserStore();
   const { roles, fetchRoles } = useAdminRoleStore();
   const [submitting, setSubmitting] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(true);
+
+  const canEdit = hasPermission(user, "users_edit");
 
   const {
     register,
@@ -130,6 +136,18 @@ const UserEdit = () => {
       <div className="bg-[#f7f9fb] min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-[#b51c00]" />
       </div>
+    );
+  }
+
+  if (!canEdit) {
+    return (
+      <NoPermissionScreen
+        breadcrumbItems={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Quản lý tài khoản", href: "/admin/users" },
+          { label: "Chỉnh sửa tài khoản", isCurrentPage: true },
+        ]}
+      />
     );
   }
 

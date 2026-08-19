@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router";
 import { useOrderStore } from "@/stores/useOrderStore";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useCartStore } from "@/stores/useCartStore";
+import Pagination from "@/components/client/Pagination";
 import { toast } from "sonner";
 import { confirmCancelOrder } from "@/lib/sweetalert";
 
@@ -139,8 +140,7 @@ const OrdersPage = () => {
       } else {
         toast.error("Không thể tạo liên kết thanh toán");
       }
-    } catch (err) {
-      const error = err as { response?: { data?: { message?: string } } };
+    } catch (error) {
       toast.error(
         error.response?.data?.message || "Lỗi khi thử thanh toán lại",
       );
@@ -161,8 +161,7 @@ const OrdersPage = () => {
       await cancelOrder(orderId);
       toast.success("Đơn hàng đã được hủy thành công");
       await fetchOrders(); // Reload orders list
-    } catch (err) {
-      const error = err as { response?: { data?: { message?: string } } };
+    } catch (error) {
       toast.error(error.response?.data?.message || "Lỗi khi hủy đơn hàng");
     } finally {
       setCancelling(null);
@@ -447,90 +446,13 @@ const OrdersPage = () => {
         </div>
       )}
 
-      {/* Traditional Pagination */}
+      {/* Pagination */}
       {!loading && totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-10">
-          {/* Previous Button */}
-          <button
-            onClick={() => updateURL({ page: (currentPage - 1).toString() })}
-            disabled={currentPage === 1}
-            className="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:border-[#b51c00] hover:text-[#b51c00] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-300 disabled:hover:text-gray-600"
-            aria-label="Trang trước"
-          >
-            <span className="material-symbols-outlined text-[20px]">
-              chevron_left
-            </span>
-          </button>
-
-          {/* Page Numbers with Ellipsis Logic */}
-          {(() => {
-            const pages = [];
-
-            if (totalPages <= 6) {
-              for (let i = 1; i <= totalPages; i++) {
-                pages.push(i);
-              }
-            } else {
-              if (currentPage <= 3) {
-                pages.push(1, 2, 3, 4, "...", totalPages);
-              } else if (currentPage >= totalPages - 2) {
-                pages.push(
-                  1,
-                  "...",
-                  totalPages - 3,
-                  totalPages - 2,
-                  totalPages - 1,
-                  totalPages,
-                );
-              } else {
-                pages.push(
-                  1,
-                  "...",
-                  currentPage - 1,
-                  currentPage,
-                  currentPage + 1,
-                  "...",
-                  totalPages,
-                );
-              }
-            }
-
-            return pages.map((page, index) =>
-              page === "..." ? (
-                <span
-                  key={`ellipsis-${index}`}
-                  className="w-10 h-10 flex items-center justify-center text-gray-400 font-medium tracking-widest"
-                >
-                  ...
-                </span>
-              ) : (
-                <button
-                  key={page}
-                  onClick={() => updateURL({ page: page.toString() })}
-                  className={`w-10 h-10 rounded-lg font-semibold transition-all ${
-                    currentPage === page
-                      ? "bg-[#b51c00] text-white shadow-md shadow-red-100"
-                      : "border border-gray-300 text-gray-700 hover:border-[#b51c00] hover:text-[#b51c00]"
-                  }`}
-                >
-                  {page}
-                </button>
-              ),
-            );
-          })()}
-
-          {/* Next Button */}
-          <button
-            onClick={() => updateURL({ page: (currentPage + 1).toString() })}
-            disabled={currentPage === totalPages}
-            className="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:border-[#b51c00] hover:text-[#b51c00] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-300 disabled:hover:text-gray-600"
-            aria-label="Trang sau"
-          >
-            <span className="material-symbols-outlined text-[20px]">
-              chevron_right
-            </span>
-          </button>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(page) => updateURL({ page: page.toString() })}
+        />
       )}
     </div>
   );

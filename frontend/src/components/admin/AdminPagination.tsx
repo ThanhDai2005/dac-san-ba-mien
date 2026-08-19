@@ -89,7 +89,7 @@ const AdminPagination = ({
           ) : (
             <button
               key={page}
-              onClick={() => onPageChange(page as number)}
+              onClick={() => onPageChange(page)}
               className={`w-8 h-8 flex items-center justify-center rounded-lg border font-bold text-sm transition-colors ${
                 currentPage === page
                   ? "border-[#b51c00] bg-[#b51c00] text-white shadow-sm"

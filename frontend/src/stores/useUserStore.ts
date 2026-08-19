@@ -2,7 +2,6 @@ import { userService } from "@/services/userService";
 import type { UserState } from "@/types/store";
 import { create } from "zustand";
 import { useAuthStore } from "./useAuthStore";
-import { toast } from "sonner";
 
 export const useUserStore = create<UserState>()((set) => ({
   loading: false,
@@ -15,10 +14,9 @@ export const useUserStore = create<UserState>()((set) => ({
       if (user) {
         setUser({ ...user, avatarUrl: res.avatarUrl });
       }
-    } catch (err) {
-      const error = err as { response?: { data?: { message?: string } } };
-      toast.error(error?.response?.data?.message || "Upload Avatar that bai!");
-      throw err;
+    } catch (error) {
+      console.log("Error uploadAvatar", error);
+      throw error;
     } finally {
       set({ loading: false });
     }
@@ -43,10 +41,9 @@ export const useUserStore = create<UserState>()((set) => ({
           address: res.user.address,
         });
       }
-    } catch (err) {
-      const error = err as { response?: { data?: { message?: string } } };
+    } catch (error) {
       console.log("Error updateInfo", error);
-      throw err;
+      throw error;
     } finally {
       set({ loading: false });
     }
@@ -61,10 +58,9 @@ export const useUserStore = create<UserState>()((set) => ({
         confirmNewPassword,
       );
       return res;
-    } catch (err) {
-      const error = err as { response?: { data?: { message?: string } } };
+    } catch (error) {
       console.log("Error changePassword", error);
-      throw err;
+      throw error;
     } finally {
       set({ loading: false });
     }

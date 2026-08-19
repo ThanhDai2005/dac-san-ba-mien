@@ -45,7 +45,6 @@ export const useAdminOrderStore = create<AdminOrderStore>((set, get) => ({
       set({ loading: true });
       const response = await adminOrderService.updateStatus(orderId, data);
       set({ currentOrder: response.data, loading: false });
-      toast.success("Cập nhật trạng thái đơn hàng thành công");
       return response.data;
     } catch (error) {
       console.error("Lỗi khi cập nhật trạng thái:", error);

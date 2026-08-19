@@ -7,7 +7,7 @@ import "viewerjs/dist/viewer.css";
 
 const OrderReviewsViewPage = () => {
   const navigate = useNavigate();
-  const { orderId } = useParams<{ orderId: string }>();
+  const { orderId } = useParams();
   const { orderReviews, loading, getOrderReviews } = useOrderStore();
 
   const imageGalleryRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});

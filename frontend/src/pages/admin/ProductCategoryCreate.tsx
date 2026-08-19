@@ -1,18 +1,23 @@
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAdminCategoryStore } from "@/stores/useAdminCategoryStore";
+import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
+import { hasPermission } from "@/lib/permissions";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminPageHeading from "@/components/admin/AdminPageHeading";
 import AdminFormActions from "@/components/admin/AdminFormActions";
+import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 
 const ProductCategoryCreate = () => {
   const navigate = useNavigate();
+  const { user } = useAdminAuthStore();
   const { loading, createCategory } = useAdminCategoryStore();
   const [formData, setFormData] = useState({
     name: "",
     status: "active",
   });
+
+  const canCreate = hasPermission(user, "product_categories_create");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +33,18 @@ const ProductCategoryCreate = () => {
       // Error already handled in store
     }
   };
+
+  if (!canCreate) {
+    return (
+      <NoPermissionScreen
+        breadcrumbItems={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Quản lý danh mục", href: "/admin/product-categories" },
+          { label: "Thêm danh mục", isCurrentPage: true },
+        ]}
+      />
+    );
+  }
 
   return (
     <div className="bg-[#f7f9fb] min-h-screen pb-12">

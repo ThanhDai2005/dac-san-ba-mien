@@ -4,18 +4,13 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { useBlogStore } from "@/stores/useBlogStore";
 import { useCartStore } from "@/stores/useCartStore";
 import { toast } from "sonner";
-
-const stripHtml = (html: string) => {
-  const tmp = document.createElement("DIV");
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || "";
-};
+import ProductCard from "@/components/client/ProductCard";
+import type { Product } from "@/types/product";
 
 const BlogDetailPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
-  const [addingId, setAddingId] = useState<string | null>(null);
   const { accessToken } = useAuthStore();
   const { currentBlog, loading, getDetail } = useBlogStore();
   const { addToCart } = useCartStore();
@@ -35,30 +30,18 @@ const BlogDetailPage = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleQuickAdd = async (
-    e: React.MouseEvent,
-    productId: string,
-    productName: string,
-    stock: number,
-  ) => {
-    e.stopPropagation();
-
+  const handleQuickAdd = async (item: Product) => {
     if (!accessToken) {
       toast.warning("Vui lòng đăng nhập để thêm vào giỏ hàng");
       navigate("/signin");
       return;
     }
 
-    if (stock === 0) return;
-
     try {
-      setAddingId(productId);
-      await addToCart(productId, 1);
-      toast.success(`Đã thêm ${productName} vào giỏ hàng`);
+      await addToCart(item._id, 1);
+      toast.success(`Đã thêm ${item.name} vào giỏ hàng`);
     } catch (error) {
       toast.error(error.response?.data?.message);
-    } finally {
-      setAddingId(null);
     }
   };
 
@@ -96,9 +79,6 @@ const BlogDetailPage = () => {
       </div>
     );
   }
-
-  const safeDescription =
-    stripHtml(currentBlog.content).substring(0, 160) + "...";
 
   return (
     <>
@@ -179,89 +159,13 @@ const BlogDetailPage = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                  {currentBlog.relatedProducts.map((product) => {
-                    const hasImages =
-                      product.images && product.images.length > 0;
-                    const imageUrl = hasImages
-                      ? product.images[0]
-                      : "/placeholder.png";
-                    const stock = product.stock ?? 0;
-                    const price = product.price ?? 0;
-                    const averageRating = product.averageRating ?? 0;
-
-                    return (
-                      <div
-                        key={product._id}
-                        onClick={() => navigate(`/product/${product.slug}`)}
-                        className="group bg-gray-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer border border-gray-200 hover:border-[#b51c00]/30 flex flex-col"
-                      >
-                        <div className="relative aspect-[4/3] overflow-hidden">
-                          <img
-                            src={imageUrl}
-                            alt={product.name}
-                            loading="lazy"
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                          {stock === 0 && (
-                            <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] flex items-center justify-center">
-                              <span className="bg-white text-gray-900 px-3 py-1 rounded-md text-xs font-black uppercase tracking-widest">
-                                Hết hàng
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="p-5 flex flex-col grow">
-                          <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-[#b51c00] transition-colors leading-snug">
-                            {product.name}
-                          </h3>
-                          <div className="mt-auto pt-4 border-t border-gray-200/60">
-                            <div className="flex items-center justify-between mb-4">
-                              <span className="text-[#b51c00] font-black text-lg">
-                                {price.toLocaleString("vi-VN")}đ
-                              </span>
-                              <div className="flex items-center gap-1 bg-white px-2 py-1 rounded-md border border-gray-200">
-                                <span
-                                  className="material-symbols-outlined text-yellow-500 text-[14px]"
-                                  style={{ fontVariationSettings: "'FILL' 1" }}
-                                >
-                                  star
-                                </span>
-                                <span className="text-xs font-bold">
-                                  {averageRating.toFixed(1)}
-                                </span>
-                              </div>
-                            </div>
-
-                            <button
-                              onClick={(e) =>
-                                handleQuickAdd(
-                                  e,
-                                  product._id,
-                                  product.name,
-                                  stock,
-                                )
-                              }
-                              disabled={stock === 0 || addingId === product._id}
-                              className="w-full py-3 bg-[#b51c00] text-white rounded-xl font-bold hover:bg-[#8e1400] transition-all active:scale-95 disabled:opacity-50 disabled:bg-gray-300 flex items-center justify-center gap-2 shadow-md shadow-red-900/20"
-                            >
-                              {addingId === product._id ? (
-                                <span className="material-symbols-outlined animate-spin text-[20px]">
-                                  progress_activity
-                                </span>
-                              ) : (
-                                <>
-                                  <span className="material-symbols-outlined text-[20px]">
-                                    add_shopping_cart
-                                  </span>
-                                  Thêm Vào Giỏ
-                                </>
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {currentBlog.relatedProducts.map((product) => (
+                    <ProductCard
+                      key={product._id}
+                      product={product}
+                      onQuickAdd={handleQuickAdd}
+                    />
+                  ))}
                 </div>
               </div>
             )}

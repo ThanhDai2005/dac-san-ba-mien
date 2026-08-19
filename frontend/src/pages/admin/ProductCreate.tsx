@@ -1,15 +1,19 @@
 import { useState, useEffect, useRef } from "react";
-import { Loader2, Upload, X } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAdminProductStore } from "@/stores/useAdminProductStore";
 import { useAdminCategoryStore } from "@/stores/useAdminCategoryStore";
+import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
+import { hasPermission } from "@/lib/permissions";
 import { Editor } from "@tinymce/tinymce-react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminPageHeading from "@/components/admin/AdminPageHeading";
 import AdminFormActions from "@/components/admin/AdminFormActions";
+import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 
 const ProductCreate = () => {
   const navigate = useNavigate();
+  const { user } = useAdminAuthStore();
   const { loading, createProduct } = useAdminProductStore();
   const { categories, fetchCategories } = useAdminCategoryStore();
   const editorRef = useRef<any>(null);
@@ -24,6 +28,8 @@ const ProductCreate = () => {
   });
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
+  const canCreate = hasPermission(user, "products_create");
 
   useEffect(() => {
     fetchCategories("", "active", 1, 100);
@@ -84,6 +90,18 @@ const ProductCreate = () => {
       // Error already handled in store
     }
   };
+
+  if (!canCreate) {
+    return (
+      <NoPermissionScreen
+        breadcrumbItems={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Quản lý sản phẩm", href: "/admin/products" },
+          { label: "Thêm sản phẩm", isCurrentPage: true },
+        ]}
+      />
+    );
+  }
 
   return (
     <div className="bg-[#f7f9fb] min-h-screen pb-12">

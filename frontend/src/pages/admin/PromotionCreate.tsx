@@ -1,15 +1,20 @@
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAdminPromotionStore } from "@/stores/useAdminPromotionStore";
+import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
+import { hasPermission } from "@/lib/permissions";
 import { toast } from "sonner";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminPageHeading from "@/components/admin/AdminPageHeading";
 import AdminFormActions from "@/components/admin/AdminFormActions";
+import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 
 const PromotionCreate = () => {
   const navigate = useNavigate();
+  const { user } = useAdminAuthStore();
   const { createPromotion, loading } = useAdminPromotionStore();
+
+  const canCreate = hasPermission(user, "promotions_create");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -92,6 +97,18 @@ const PromotionCreate = () => {
       // Error handled in store
     }
   };
+
+  if (!canCreate) {
+    return (
+      <NoPermissionScreen
+        breadcrumbItems={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Quản lý khuyến mãi", href: "/admin/promotions" },
+          { label: "Thêm khuyến mãi", isCurrentPage: true },
+        ]}
+      />
+    );
+  }
 
   return (
     <div className="bg-[#f7f9fb] min-h-screen pb-12">

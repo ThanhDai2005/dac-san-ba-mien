@@ -13,7 +13,7 @@ interface ReviewData {
 
 const OrderReviewPage = () => {
   const navigate = useNavigate();
-  const { orderId } = useParams<{ orderId: string }>();
+  const { orderId } = useParams();
   const { orders, getMyOrders } = useOrderStore();
   const { createReview } = useReviewStore();
 

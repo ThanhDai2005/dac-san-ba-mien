@@ -51,7 +51,8 @@ const VerifyOtp = () => {
     toast.promise(forgotPassword(email), {
       loading: "Đang gửi lại mã OTP...",
       success: "Đã gửi lại mã OTP thành công!",
-      error: (err) => err?.response?.data?.message || "Gửi lại OTP thất bại!",
+      error: (error) =>
+        error?.response?.data?.message || "Gửi lại OTP thất bại!",
     });
 
     setCooldown(30);

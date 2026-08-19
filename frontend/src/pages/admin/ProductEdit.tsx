@@ -3,16 +3,20 @@ import { Loader2, Upload, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAdminProductStore } from "@/stores/useAdminProductStore";
 import { useAdminCategoryStore } from "@/stores/useAdminCategoryStore";
+import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
+import { hasPermission } from "@/lib/permissions";
 import { toast } from "sonner";
 import { Editor } from "@tinymce/tinymce-react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminPageHeading from "@/components/admin/AdminPageHeading";
 import AdminFormActions from "@/components/admin/AdminFormActions";
+import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 
 const ProductEdit = () => {
   const navigate = useNavigate();
-  const { productId } = useParams<{ productId: string }>();
+  const { productId } = useParams();
   const [fetching, setFetching] = useState(true);
+  const { user } = useAdminAuthStore();
   const { loading, getProductDetail, updateProduct } = useAdminProductStore();
   const { categories, fetchCategories } = useAdminCategoryStore();
   const editorRef = useRef<any>(null);
@@ -28,6 +32,8 @@ const ProductEdit = () => {
   });
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
+
+  const canEdit = hasPermission(user, "products_edit");
 
   useEffect(() => {
     loadData();
@@ -133,6 +139,18 @@ const ProductEdit = () => {
       <div className="bg-[#f7f9fb] min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-[#b51c00]" />
       </div>
+    );
+  }
+
+  if (!canEdit) {
+    return (
+      <NoPermissionScreen
+        breadcrumbItems={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Quản lý sản phẩm", href: "/admin/products" },
+          { label: "Chỉnh sửa sản phẩm", isCurrentPage: true },
+        ]}
+      />
     );
   }
 

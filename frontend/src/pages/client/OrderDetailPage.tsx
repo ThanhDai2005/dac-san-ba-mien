@@ -51,7 +51,7 @@ const paymentStatusLabels = {
 };
 
 const OrderDetailPage = () => {
-  const { orderId } = useParams<{ orderId: string }>();
+  const { orderId } = useParams();
   const navigate = useNavigate();
   const { currentOrder, loading, getOrderDetail, retryPayment, cancelOrder } =
     useOrderStore();
@@ -119,8 +119,7 @@ const OrderDetailPage = () => {
       } else {
         toast.error("Không thể tạo liên kết thanh toán");
       }
-    } catch (err) {
-      const error = err as { response?: { data?: { message?: string } } };
+    } catch (error) {
       toast.error(
         error.response?.data?.message || "Lỗi khi thử thanh toán lại",
       );
@@ -141,8 +140,7 @@ const OrderDetailPage = () => {
       await cancelOrder(orderId);
       toast.success("Đơn hàng đã được hủy thành công");
       await fetchOrder(); // Reload order details
-    } catch (err) {
-      const error = err as { response?: { data?: { message?: string } } };
+    } catch (error) {
       toast.error(error.response?.data?.message || "Lỗi khi hủy đơn hàng");
     } finally {
       setCancelling(false);

@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 const OrderSuccessPage = () => {
   const navigate = useNavigate();
-  const { orderId } = useParams<{ orderId: string }>();
+  const { orderId } = useParams();
   const [searchParams] = useSearchParams();
   const { getOrderDetail, currentOrder } = useOrderStore();
   const [loading, setLoading] = useState(true);

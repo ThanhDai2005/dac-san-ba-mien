@@ -12,6 +12,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import ProductCard from "@/components/client/ProductCard";
+import Pagination from "@/components/client/Pagination";
 import type { Product } from "@/types/product";
 const ProductListPage = () => {
   const navigate = useNavigate();
@@ -28,7 +30,6 @@ const ProductListPage = () => {
   const sortValue = searchParams.get("sortValue") || "-1";
 
   const [totalPages, setTotalPages] = useState(1);
-  const [addingId, setAddingId] = useState<string | null>(null);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   const [localSearchKeyword, setLocalSearchKeyword] = useState(keyword);
@@ -91,9 +92,7 @@ const ProductListPage = () => {
     setIsMobileFilterOpen(false);
   };
 
-  const handleQuickAdd = async (e: React.MouseEvent, item: Product) => {
-    e.stopPropagation();
-
+  const handleQuickAdd = async (item: Product) => {
     if (!accessToken) {
       toast.warning("Vui lòng đăng nhập để thêm vào giỏ hàng");
       navigate("/signin");
@@ -103,13 +102,10 @@ const ProductListPage = () => {
     if (item.stock === 0) return;
 
     try {
-      setAddingId(item._id);
       await addToCart(item._id, 1);
       toast.success(`Đã thêm ${item.name} vào giỏ hàng`);
     } catch (error) {
       toast.error(error.response?.data?.message);
-    } finally {
-      setAddingId(null);
     }
   };
 
@@ -363,157 +359,22 @@ const ProductListPage = () => {
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
             {product.map((item: Product) => (
-              <article
+              <ProductCard
                 key={item._id}
-                onClick={() => navigate(`/product/${item.slug}`)}
-                className="bg-white rounded-2xl overflow-hidden shadow-sm flex flex-col group border border-transparent hover:border-[#b51c00]/30 hover:shadow-md transition-all duration-300 cursor-pointer relative"
-              >
-                <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
-                  <img
-                    alt={item.name}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    src={item.images[0] || "/placeholder.png"}
-                  />
-                  <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-md px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
-                    <span
-                      className="material-symbols-outlined text-yellow-500 text-[14px]"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                    >
-                      star
-                    </span>
-                    <span className="text-xs font-bold text-gray-900">
-                      {item.averageRating.toFixed(1)}
-                    </span>
-                  </div>
-                  {item.stock === 0 && (
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center">
-                      <span className="bg-white text-gray-900 px-4 py-1.5 rounded-md text-xs font-black uppercase tracking-widest shadow-lg">
-                        Hết hàng
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="p-4 flex flex-col flex-grow">
-                  <h3 className="text-sm md:text-base font-bold text-gray-900 line-clamp-2 leading-snug group-hover:text-[#b51c00] transition-colors mb-2">
-                    {item.name}
-                  </h3>
-                  <div className="mt-auto flex items-end justify-between">
-                    <span className="text-base md:text-lg font-black text-[#b51c00]">
-                      {item.price.toLocaleString("vi-VN")}đ
-                    </span>
-                    <button
-                      onClick={(e) => handleQuickAdd(e, item)}
-                      disabled={item.stock === 0 || addingId === item._id}
-                      className="w-9 h-9 rounded-full bg-red-50 text-[#b51c00] flex items-center justify-center hover:bg-[#b51c00] hover:text-white transition-all duration-300 disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400 active:scale-90"
-                    >
-                      {addingId === item._id ? (
-                        <span className="material-symbols-outlined text-[20px] animate-spin">
-                          progress_activity
-                        </span>
-                      ) : (
-                        <span className="material-symbols-outlined text-[22px]">
-                          add_shopping_cart
-                        </span>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </article>
+                product={item}
+                onQuickAdd={handleQuickAdd}
+              />
             ))}
           </div>
         )}
 
-        {/* Traditional Pagination - For Product List (Shop/Menu Page) */}
+        {/* Pagination */}
         {!loading && totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-10">
-            {/* Previous Button */}
-            <button
-              onClick={() => updateURL({ page: (currentPage - 1).toString() })}
-              disabled={currentPage === 1}
-              className="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:border-[#b51c00] hover:text-[#b51c00] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-300 disabled:hover:text-gray-600"
-              aria-label="Trang trước"
-            >
-              <span className="material-symbols-outlined text-[20px]">
-                chevron_left
-              </span>
-            </button>
-
-            {/* Page Numbers with Standard Ellipsis Logic */}
-            {(() => {
-              const pages = [];
-
-              // 1. Nếu tổng số trang ít (từ 6 trở xuống), hiển thị tất cả, không cần dấu ...
-              if (totalPages <= 6) {
-                for (let i = 1; i <= totalPages; i++) {
-                  pages.push(i);
-                }
-              } else {
-                // 2. Nếu nhiều trang thì bắt đầu tính toán hiển thị dấu ...
-                if (currentPage <= 3) {
-                  // Đang ở đoạn đầu: Hiện 1 2 3 4 ... Trang cuối
-                  pages.push(1, 2, 3, 4, "...", totalPages);
-                } else if (currentPage >= totalPages - 2) {
-                  // Đang ở đoạn cuối: Hiện 1 ... (Cuối-3) (Cuối-2) (Cuối-1) Cuối
-                  pages.push(
-                    1,
-                    "...",
-                    totalPages - 3,
-                    totalPages - 2,
-                    totalPages - 1,
-                    totalPages,
-                  );
-                } else {
-                  // Đang ở giữa: Hiện 1 ... (Trước) (Hiện tại) (Sau) ... Cuối
-                  pages.push(
-                    1,
-                    "...",
-                    currentPage - 1,
-                    currentPage,
-                    currentPage + 1,
-                    "...",
-                    totalPages,
-                  );
-                }
-              }
-
-              return pages.map((page, index) =>
-                page === "..." ? (
-                  <span
-                    key={`ellipsis-${index}`}
-                    className="w-10 h-10 flex items-center justify-center text-gray-400 font-medium tracking-widest"
-                  >
-                    ...
-                  </span>
-                ) : (
-                  <button
-                    key={page}
-                    onClick={() => updateURL({ page: page.toString() })}
-                    className={`w-10 h-10 rounded-lg font-semibold transition-all ${
-                      currentPage === page
-                        ? "bg-[#b51c00] text-white shadow-md shadow-red-100"
-                        : "border border-gray-300 text-gray-700 hover:border-[#b51c00] hover:text-[#b51c00]"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ),
-              );
-            })()}
-
-            {/* Next Button */}
-            <button
-              onClick={() => updateURL({ page: (currentPage + 1).toString() })}
-              disabled={currentPage === totalPages}
-              className="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:border-[#b51c00] hover:text-[#b51c00] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-300 disabled:hover:text-gray-600"
-              aria-label="Trang sau"
-            >
-              <span className="material-symbols-outlined text-[20px]">
-                chevron_right
-              </span>
-            </button>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => updateURL({ page: page.toString() })}
+          />
         )}
       </section>
     </div>

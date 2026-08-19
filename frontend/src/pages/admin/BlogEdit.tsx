@@ -3,20 +3,22 @@ import { Loader2, Upload, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAdminBlogStore } from "@/stores/useAdminBlogStore";
 import { useAdminBlogCategoryStore } from "@/stores/useAdminBlogCategoryStore";
+import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
+import { hasPermission } from "@/lib/permissions";
 import { toast } from "sonner";
 import { Editor } from "@tinymce/tinymce-react";
 import axios from "axios";
-import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminPageHeading from "@/components/admin/AdminPageHeading";
 import AdminFormActions from "@/components/admin/AdminFormActions";
+import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 
 const BlogEdit = () => {
   const navigate = useNavigate();
-  const { blogId } = useParams<{ blogId: string }>();
+  const { blogId } = useParams();
+  const { user, accessToken } = useAdminAuthStore();
   const { loading, getBlogDetail, updateBlog } = useAdminBlogStore();
   const { blogCategories, fetchBlogCategories } = useAdminBlogCategoryStore();
-  const { accessToken } = useAdminAuthStore();
   console.log(accessToken);
   const editorRef = useRef<any>(null);
   const [fetching, setFetching] = useState(true);
@@ -28,6 +30,8 @@ const BlogEdit = () => {
     blogCategory: "",
     status: "active",
   });
+
+  const canEdit = hasPermission(user, "blogs_edit");
 
   useEffect(() => {
     fetchBlogCategories("", "active", 1, 100);
@@ -109,6 +113,18 @@ const BlogEdit = () => {
       <div className="bg-[#f7f9fb] min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-[#b51c00]" />
       </div>
+    );
+  }
+
+  if (!canEdit) {
+    return (
+      <NoPermissionScreen
+        breadcrumbItems={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Quản lý bài viết", href: "/admin/blogs" },
+          { label: "Chỉnh sửa bài viết", isCurrentPage: true },
+        ]}
+      />
     );
   }
 

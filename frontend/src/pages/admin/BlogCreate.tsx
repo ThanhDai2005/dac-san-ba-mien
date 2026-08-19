@@ -1,21 +1,23 @@
 import { useState, useEffect, useRef } from "react";
-import { Loader2, Upload, X } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAdminBlogStore } from "@/stores/useAdminBlogStore";
 import { useAdminBlogCategoryStore } from "@/stores/useAdminBlogCategoryStore";
+import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
+import { hasPermission } from "@/lib/permissions";
 import { toast } from "sonner";
 import { Editor } from "@tinymce/tinymce-react";
 import axios from "axios";
-import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminPageHeading from "@/components/admin/AdminPageHeading";
 import AdminFormActions from "@/components/admin/AdminFormActions";
+import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 
 const BlogCreate = () => {
   const navigate = useNavigate();
+  const { user, accessToken } = useAdminAuthStore();
   const { loading, createBlog } = useAdminBlogStore();
   const { blogCategories, fetchBlogCategories } = useAdminBlogCategoryStore();
-  const { accessToken } = useAdminAuthStore();
   const editorRef = useRef<any>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
@@ -25,6 +27,8 @@ const BlogCreate = () => {
     blogCategory: "",
     status: "active",
   });
+
+  const canCreate = hasPermission(user, "blogs_create");
 
   useEffect(() => {
     fetchBlogCategories("", "active", 1, 100);
@@ -76,6 +80,18 @@ const BlogCreate = () => {
       // Error already handled in store
     }
   };
+
+  if (!canCreate) {
+    return (
+      <NoPermissionScreen
+        breadcrumbItems={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Quản lý bài viết", href: "/admin/blogs" },
+          { label: "Thêm bài viết", isCurrentPage: true },
+        ]}
+      />
+    );
+  }
 
   return (
     <div className="bg-[#f7f9fb] min-h-screen pb-12">

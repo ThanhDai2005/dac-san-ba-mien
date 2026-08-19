@@ -2,14 +2,18 @@ import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAdminBlogCategoryStore } from "@/stores/useAdminBlogCategoryStore";
+import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
+import { hasPermission } from "@/lib/permissions";
 import { toast } from "sonner";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminPageHeading from "@/components/admin/AdminPageHeading";
 import AdminFormActions from "@/components/admin/AdminFormActions";
+import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 
 const BlogCategoryEdit = () => {
   const navigate = useNavigate();
-  const { blogCategoryId } = useParams<{ blogCategoryId: string }>();
+  const { blogCategoryId } = useParams();
+  const { user } = useAdminAuthStore();
   const { loading, getBlogCategoryDetail, updateBlogCategory } =
     useAdminBlogCategoryStore();
   const [fetching, setFetching] = useState(true);
@@ -17,6 +21,8 @@ const BlogCategoryEdit = () => {
     name: "",
     status: "active",
   });
+
+  const canEdit = hasPermission(user, "blog_categories_edit");
 
   useEffect(() => {
     loadBlogCategory();
@@ -61,6 +67,21 @@ const BlogCategoryEdit = () => {
       <div className="bg-[#f7f9fb] min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-[#b51c00]" />
       </div>
+    );
+  }
+
+  if (!canEdit) {
+    return (
+      <NoPermissionScreen
+        breadcrumbItems={[
+          { label: "Admin", href: "/admin/dashboard" },
+          {
+            label: "Quản lý danh mục bài viết",
+            href: "/admin/blog-categories",
+          },
+          { label: "Chỉnh sửa danh mục", isCurrentPage: true },
+        ]}
+      />
     );
   }
 

@@ -15,9 +15,10 @@ import "swiper/css/free-mode";
 import "swiper/css/navigation";
 import "swiper/css/thumbs";
 import ReviewSection from "@/components/client/ReviewSection";
+import ProductCard from "@/components/client/ProductCard";
 
 const ProductDetailPage = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug } = useParams();
   const navigate = useNavigate();
 
   const [quantity, setQuantity] = useState(1);
@@ -26,7 +27,6 @@ const ProductDetailPage = () => {
   const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [notableProducts, setNotableProducts] = useState<Product[]>([]);
-  const [addingId, setAddingId] = useState<string | null>(null);
 
   const { accessToken } = useAuthStore();
   const { currentProduct, loading, getDetail, getList } = useProductStore();
@@ -115,9 +115,7 @@ const ProductDetailPage = () => {
     quantity < currentProduct.stock &&
     setQuantity(quantity + 1);
 
-  const handleQuickAdd = async (e: React.MouseEvent, item: Product) => {
-    e.stopPropagation();
-
+  const handleQuickAdd = async (item: Product) => {
     if (!accessToken) {
       toast.warning("Vui lòng đăng nhập để thêm vào giỏ hàng");
       navigate("/signin");
@@ -127,13 +125,10 @@ const ProductDetailPage = () => {
     if (item.stock === 0) return;
 
     try {
-      setAddingId(item._id);
       await addToCart(item._id, 1);
       toast.success(`Đã thêm ${item.name} vào giỏ hàng`);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Có lỗi xảy ra");
-    } finally {
-      setAddingId(null);
     }
   };
 
@@ -560,65 +555,11 @@ const ProductDetailPage = () => {
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {relatedProducts.map((item) => (
-                <div
+                <ProductCard
                   key={item._id}
-                  onClick={() => navigate(`/product/${item.slug}`)}
-                  className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col group cursor-pointer border border-gray-100 hover:border-gray-300 transition-all duration-300"
-                >
-                  <div className="relative h-[140px] md:h-[160px] overflow-hidden bg-gray-50">
-                    <img
-                      src={item.images[0] || "/placeholder.png"}
-                      alt={item.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded flex items-center gap-1 shadow-sm">
-                      <span
-                        className="material-symbols-outlined text-yellow-500"
-                        style={{
-                          fontSize: "14px",
-                          fontVariationSettings: "'FILL' 1",
-                        }}
-                      >
-                        star
-                      </span>
-                      <span className="text-xs font-semibold text-gray-800">
-                        {(item.averageRating ?? 0).toFixed(1)}
-                      </span>
-                    </div>
-                    {item.stock === 0 && (
-                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <span className="bg-white text-gray-900 px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">
-                          Hết hàng
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-3 flex flex-col grow">
-                    <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-1 leading-snug">
-                      {item.name}
-                    </h3>
-                    <p className="text-xs text-gray-500 line-clamp-1 mb-3">
-                      {item.categoryId?.name || "Danh mục chung"}
-                    </p>
-                    <div className="mt-auto flex items-center justify-between">
-                      <span className="text-base font-bold text-[#b51c00]">
-                        {(item.price ?? 0).toLocaleString("vi-VN")}đ
-                      </span>
-                      <button
-                        onClick={(e) => handleQuickAdd(e, item)}
-                        disabled={item.stock === 0 || addingId === item._id}
-                        className="w-8 h-8 rounded-full bg-[#b51c00]/10 text-[#b51c00] flex items-center justify-center hover:bg-[#b51c00] hover:text-white transition-colors disabled:opacity-50"
-                      >
-                        <span
-                          className="material-symbols-outlined"
-                          style={{ fontSize: "20px" }}
-                        >
-                          add
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                  product={item}
+                  onQuickAdd={handleQuickAdd}
+                />
               ))}
             </div>
           </div>

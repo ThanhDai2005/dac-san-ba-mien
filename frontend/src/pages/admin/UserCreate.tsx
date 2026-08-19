@@ -5,10 +5,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAdminUserStore } from "@/stores/useAdminUserStore";
 import { useAdminRoleStore } from "@/stores/useAdminRoleStore";
+import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
+import { hasPermission } from "@/lib/permissions";
 import { toast } from "sonner";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminPageHeading from "@/components/admin/AdminPageHeading";
 import AdminFormActions from "@/components/admin/AdminFormActions";
+import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 
 const userSchema = z
   .object({
@@ -30,9 +33,12 @@ type UserFormData = z.infer<typeof userSchema>;
 
 const UserCreate = () => {
   const navigate = useNavigate();
+  const { user } = useAdminAuthStore();
   const { createUser, loading } = useAdminUserStore();
   const { roles, fetchRoles } = useAdminRoleStore();
   const [submitting, setSubmitting] = useState(false);
+
+  const canCreate = hasPermission(user, "users_create");
 
   const {
     register,
@@ -89,6 +95,18 @@ const UserCreate = () => {
       setSubmitting(false);
     }
   };
+
+  if (!canCreate) {
+    return (
+      <NoPermissionScreen
+        breadcrumbItems={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Quản lý tài khoản", href: "/admin/users" },
+          { label: "Thêm tài khoản", isCurrentPage: true },
+        ]}
+      />
+    );
+  }
 
   return (
     <div className="bg-[#f7f9fb] min-h-screen pb-12">

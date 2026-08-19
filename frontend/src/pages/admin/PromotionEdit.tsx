@@ -2,16 +2,22 @@ import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAdminPromotionStore } from "@/stores/useAdminPromotionStore";
+import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
+import { hasPermission } from "@/lib/permissions";
 import { toast } from "sonner";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminPageHeading from "@/components/admin/AdminPageHeading";
 import AdminFormActions from "@/components/admin/AdminFormActions";
+import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 
 const PromotionEdit = () => {
   const navigate = useNavigate();
-  const { promotionId } = useParams<{ promotionId: string }>();
+  const { promotionId } = useParams();
+  const { user } = useAdminAuthStore();
   const { currentPromotion, getDetail, updatePromotion, loading } =
     useAdminPromotionStore();
+
+  const canEdit = hasPermission(user, "promotions_edit");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -132,6 +138,18 @@ const PromotionEdit = () => {
       <div className="bg-[#f7f9fb] min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-[#b51c00]" />
       </div>
+    );
+  }
+
+  if (!canEdit) {
+    return (
+      <NoPermissionScreen
+        breadcrumbItems={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Quản lý khuyến mãi", href: "/admin/promotions" },
+          { label: "Chỉnh sửa khuyến mãi", isCurrentPage: true },
+        ]}
+      />
     );
   }
 

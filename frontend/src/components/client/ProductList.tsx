@@ -6,6 +6,7 @@ import { useCartStore } from "@/stores/useCartStore"; // Import store giỏ hàn
 import { toast } from "sonner"; // Dùng sonner cho đồng bộ
 import type { Product } from "@/types/product";
 import { useAuthStore } from "@/stores/useAuthStore";
+import ProductCard from "./ProductCard";
 
 // Hàm Helper ánh xạ icon theo slug danh mục chuẩn UX
 const getCategoryIcon = (slug: string) => {
@@ -36,7 +37,6 @@ const ProductList = () => {
   const { category, getList: getCategoryList } = useCategoryStore();
   const { addToCart } = useCartStore();
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [addingId, setAddingId] = useState<string | null>(null);
 
   // Tối ưu: Chỉ gọi API danh mục 1 lần khi mount trang
   useEffect(() => {
@@ -56,9 +56,7 @@ const ProductList = () => {
   }, [selectedCategory]);
 
   // Luồng Quick Add to Cart chuẩn Senior
-  const handleQuickAdd = async (e: React.MouseEvent, item: Product) => {
-    e.stopPropagation(); // Chặn sự kiện click lan ra thẻ cha (chống navigate)
-
+  const handleQuickAdd = async (item: Product) => {
     if (!accessToken) {
       toast.warning("Vui lòng đăng nhập để thêm vào giỏ hàng");
       navigate("/signin");
@@ -68,14 +66,11 @@ const ProductList = () => {
     if (item.stock === 0) return;
 
     try {
-      setAddingId(item._id);
       await addToCart(item._id, 1);
       toast.success(`Đã thêm ${item.name} vào giỏ hàng`);
     } catch (error) {
       toast.error(error.response?.data?.message);
       console.log(error);
-    } finally {
-      setAddingId(null);
     }
   };
 
@@ -198,74 +193,11 @@ const ProductList = () => {
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {product.map((item: Product) => (
-              <div
+              <ProductCard
                 key={item._id}
-                onClick={() => navigate(`/product/${item.slug}`)}
-                className="bg-white rounded-2xl shadow-sm overflow-hidden flex flex-col group cursor-pointer border border-gray-100 hover:shadow-md hover:border-[#b51c00]/30 transition-all duration-300 relative"
-              >
-                <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
-                  <img
-                    src={item.images[0] || "/placeholder.png"}
-                    alt={item.name}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-
-                  {/* Badge Đánh giá */}
-                  <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-md px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
-                    <span
-                      className="material-symbols-outlined text-yellow-500 text-[14px]"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                    >
-                      star
-                    </span>
-                    <span className="text-xs font-bold text-gray-900">
-                      {item.averageRating.toFixed(1)}
-                    </span>
-                  </div>
-
-                  {item.stock === 0 && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-[2px]">
-                      <span className="bg-white text-gray-900 px-4 py-1.5 rounded-md text-xs font-black uppercase tracking-widest shadow-lg">
-                        Hết hàng
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-4 flex flex-col grow">
-                  <h3 className="text-base font-bold text-gray-900 line-clamp-2 mb-1.5 leading-snug group-hover:text-[#b51c00] transition-colors">
-                    {item.name}
-                  </h3>
-                  <p className="text-xs text-gray-500 line-clamp-1 mb-4 font-medium">
-                    {item.categoryId?.name || "Món ngon mỗi ngày"}
-                  </p>
-
-                  <div className="mt-auto flex items-center justify-between">
-                    <span className="text-lg font-black text-[#b51c00]">
-                      {item.price.toLocaleString("vi-VN")}đ
-                    </span>
-
-                    {/* Nút Quick Add */}
-                    <button
-                      onClick={(e) => handleQuickAdd(e, item)}
-                      disabled={item.stock === 0 || addingId === item._id}
-                      className="w-9 h-9 rounded-full bg-red-50 text-[#b51c00] flex items-center justify-center hover:bg-[#b51c00] hover:text-white transition-all duration-300 disabled:opacity-50 disabled:bg-gray-100 disabled:text-gray-400 active:scale-90"
-                    >
-                      {addingId === item._id ? (
-                        <span className="material-symbols-outlined text-[20px] animate-spin">
-                          progress_activity
-                        </span>
-                      ) : (
-                        <span className="material-symbols-outlined text-[22px]">
-                          add_shopping_cart
-                        </span>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
+                product={item}
+                onQuickAdd={handleQuickAdd}
+              />
             ))}
           </div>
         )}

@@ -2,14 +2,18 @@ import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAdminCategoryStore } from "@/stores/useAdminCategoryStore";
+import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
+import { hasPermission } from "@/lib/permissions";
 import { toast } from "sonner";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminPageHeading from "@/components/admin/AdminPageHeading";
 import AdminFormActions from "@/components/admin/AdminFormActions";
+import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 
 const ProductCategoryEdit = () => {
   const navigate = useNavigate();
-  const { categoryId } = useParams<{ categoryId: string }>();
+  const { categoryId } = useParams();
+  const { user } = useAdminAuthStore();
   const { loading, getCategoryDetail, updateCategory } =
     useAdminCategoryStore();
   const [fetching, setFetching] = useState(true);
@@ -17,6 +21,8 @@ const ProductCategoryEdit = () => {
     name: "",
     status: "active",
   });
+
+  const canEdit = hasPermission(user, "product_categories_edit");
 
   useEffect(() => {
     loadCategory();
@@ -61,6 +67,18 @@ const ProductCategoryEdit = () => {
       <div className="bg-[#f7f9fb] min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-[#b51c00]" />
       </div>
+    );
+  }
+
+  if (!canEdit) {
+    return (
+      <NoPermissionScreen
+        breadcrumbItems={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Quản lý danh mục", href: "/admin/product-categories" },
+          { label: "Chỉnh sửa danh mục", isCurrentPage: true },
+        ]}
+      />
     );
   }
 
