@@ -117,6 +117,47 @@ export const dashboard = async (req, res) => {
       });
     }
 
+    // 5. Đơn hàng mới nhất (Recent Orders) - Lấy 4 đơn gần nhất
+    const recentOrders = await Order.find({})
+      .sort({ createdAt: -1 })
+      .limit(4)
+      .populate("userId", "displayName")
+      .select("_id totalAmount orderStatus createdAt userId")
+      .lean();
+
+    // 6. Top 3 sản phẩm bán chạy nhất (Top Products) - Query thông thường
+    const topProductsAggregation = await Order.aggregate([
+      { $match: { orderStatus: { $in: ["Delivered"] } } },
+      { $unwind: "$items" },
+      {
+        $group: {
+          _id: "$items.productId",
+          totalSold: { $sum: "$items.quantity" },
+          totalRevenue: {
+            $sum: { $multiply: ["$items.quantity", "$items.price"] },
+          },
+        },
+      },
+      { $sort: { totalSold: -1 } },
+      { $limit: 3 },
+    ]);
+
+    const topProductIds = topProductsAggregation.map((item) => item._id);
+    const productsDetails = await Product.find({ _id: { $in: topProductIds } })
+      .select("name")
+      .lean();
+
+    const productMap = {};
+    productsDetails.forEach((product) => {
+      productMap[product._id.toString()] = product.name;
+    });
+
+    const topProducts = topProductsAggregation.map((item) => ({
+      name: productMap[item._id.toString()] || "Sản phẩm không xác định",
+      sold: item.totalSold,
+      revenue: item.totalRevenue,
+    }));
+
     res.status(200).json({
       message: "Lấy thống kê dashboard thành công",
       data: {
@@ -129,6 +170,8 @@ export const dashboard = async (req, res) => {
         orderStatus: orderStatusData,
         revenueByDateRange: revenueStats,
         monthlyRevenue: monthlyRevenue,
+        recentOrders: recentOrders,
+        topProducts: topProducts,
       },
     });
   } catch (error) {

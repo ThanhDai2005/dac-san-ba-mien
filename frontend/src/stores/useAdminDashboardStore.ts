@@ -22,6 +22,8 @@ export const useAdminDashboardStore = create<AdminDashboardState>((set) => ({
       totalOrders: 0,
     },
     monthlyRevenue: [],
+    recentOrders: [],
+    topProducts: [],
   },
   loading: false,
 

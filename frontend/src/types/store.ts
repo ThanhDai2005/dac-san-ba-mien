@@ -242,6 +242,20 @@ export interface AdminDashboardState {
       month: string;
       revenue: number;
     }>;
+    recentOrders: Array<{
+      _id: string;
+      userId?: {
+        displayName: string;
+      };
+      totalAmount: number;
+      orderStatus: string;
+      createdAt: string;
+    }>;
+    topProducts: Array<{
+      name: string;
+      sold: number;
+      revenue: number;
+    }>;
   };
   loading: boolean;
 

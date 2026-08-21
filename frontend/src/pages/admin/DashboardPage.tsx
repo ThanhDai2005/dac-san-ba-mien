@@ -3,12 +3,15 @@ import {
   Users,
   Utensils,
   LayoutList,
-  DollarSign,
   ShoppingCart,
   Loader2,
+  TrendingUp,
+  Clock,
+  ArrowRight,
 } from "lucide-react";
 import { useAdminDashboardStore } from "@/stores/useAdminDashboardStore";
 import AdminHeader from "@/components/admin/AdminHeader";
+import { Link } from "react-router-dom";
 
 import {
   PieChart,
@@ -21,8 +24,23 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Legend,
 } from "recharts";
+
+// Tính thời gian "X phút trước", "X giờ trước", "X ngày trước"
+const getTimeAgo = (createdAt: string): string => {
+  const now = new Date();
+  const created = new Date(createdAt);
+  const diffMs = now.getTime() - created.getTime();
+
+  const minutes = Math.floor(diffMs / 60000);
+  const hours = Math.floor(diffMs / 3600000);
+  const days = Math.floor(diffMs / 86400000);
+
+  if (minutes < 1) return "Vừa xong";
+  if (minutes < 60) return `${minutes} phút trước`;
+  if (hours < 24) return `${hours} giờ trước`;
+  return `${days} ngày trước`;
+};
 
 const DashboardPage = () => {
   const [startDate, setStartDate] = useState("");
@@ -78,7 +96,7 @@ const DashboardPage = () => {
       color: "#3B82F6",
     },
     {
-      name: "Hoàn thành",
+      name: "Đã giao",
       value: stats?.orderStatus?.delivered || 0,
       color: "#10B981",
     },
@@ -121,13 +139,13 @@ const DashboardPage = () => {
           <>
             {/* 1. SECTION: 4 STAT CARDS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-[12px] p-5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] border border-gray-100 flex items-center gap-4 hover:border-[#b51c00]/30 transition-colors">
-                <div className="w-16 h-16 rounded-[12px] bg-[#3B82F6] text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/20">
-                  <Users size={28} strokeWidth={2.5} />
+              <div className="bg-white rounded-[12px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-gray-100 flex items-center gap-4 hover:border-[#b51c00]/30 transition-colors">
+                <div className="w-14 h-14 rounded-[12px] bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                  <Users size={24} strokeWidth={2.5} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-500 mb-1">
-                    Số lượng tài khoản
+                  <p className="text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">
+                    Tài khoản
                   </p>
                   <h3 className="text-2xl font-black text-gray-900">
                     {stats?.overview?.totalUsers || 0}
@@ -135,12 +153,12 @@ const DashboardPage = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-[12px] p-5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] border border-gray-100 flex items-center gap-4 hover:border-[#b51c00]/30 transition-colors">
-                <div className="w-16 h-16 rounded-[12px] bg-[#22C55E] text-white flex items-center justify-center shrink-0 shadow-lg shadow-green-500/20">
-                  <ShoppingCart size={28} strokeWidth={2.5} />
+              <div className="bg-white rounded-[12px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-gray-100 flex items-center gap-4 hover:border-[#b51c00]/30 transition-colors">
+                <div className="w-14 h-14 rounded-[12px] bg-green-50 text-green-600 flex items-center justify-center shrink-0">
+                  <ShoppingCart size={24} strokeWidth={2.5} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-500 mb-1">
+                  <p className="text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">
                     Tổng đơn hàng
                   </p>
                   <h3 className="text-2xl font-black text-gray-900">
@@ -149,13 +167,13 @@ const DashboardPage = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-[12px] p-5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] border border-gray-100 flex items-center gap-4 hover:border-[#b51c00]/30 transition-colors">
-                <div className="w-16 h-16 rounded-[12px] bg-[#06B6D4] text-white flex items-center justify-center shrink-0 shadow-lg shadow-cyan-500/20">
-                  <Utensils size={28} strokeWidth={2.5} />
+              <div className="bg-white rounded-[12px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-gray-100 flex items-center gap-4 hover:border-[#b51c00]/30 transition-colors">
+                <div className="w-14 h-14 rounded-[12px] bg-cyan-50 text-cyan-600 flex items-center justify-center shrink-0">
+                  <Utensils size={24} strokeWidth={2.5} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-500 mb-1">
-                    Số lượng món ăn
+                  <p className="text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">
+                    Món ăn
                   </p>
                   <h3 className="text-2xl font-black text-gray-900">
                     {stats?.overview?.totalProducts || 0}
@@ -163,13 +181,13 @@ const DashboardPage = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-[12px] p-5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] border border-gray-100 flex items-center gap-4 hover:border-[#b51c00]/30 transition-colors">
-                <div className="w-16 h-16 rounded-[12px] bg-[#F97316] text-white flex items-center justify-center shrink-0 shadow-lg shadow-orange-500/20">
-                  <LayoutList size={28} strokeWidth={2.5} />
+              <div className="bg-white rounded-[12px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-gray-100 flex items-center gap-4 hover:border-[#b51c00]/30 transition-colors">
+                <div className="w-14 h-14 rounded-[12px] bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
+                  <LayoutList size={24} strokeWidth={2.5} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-500 mb-1">
-                    Số lượng danh mục
+                  <p className="text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">
+                    Danh mục
                   </p>
                   <h3 className="text-2xl font-black text-gray-900">
                     {stats?.overview?.totalCategories || 0}
@@ -178,145 +196,24 @@ const DashboardPage = () => {
               </div>
             </div>
 
-            {/* 2. SECTION: THỐNG KÊ HÓA ĐƠN (PIE CHART) */}
-            <div className="bg-white rounded-[12px] shadow-[0_2px_10px_rgba(0,0,0,0.04)] border border-gray-100 p-6 md:p-8">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                <h2 className="text-xl font-bold text-gray-900">
-                  Thống Kê Hóa Đơn
-                </h2>
-                <select
-                  value={pieFilter}
-                  onChange={(e) => handlePieFilterChange(e.target.value)}
-                  disabled={isPieLoading}
-                  className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-[#b51c00] focus:border-[#b51c00] block px-4 py-2.5 outline-none cursor-pointer font-semibold min-w-[150px] shadow-sm disabled:opacity-50"
-                >
-                  <option value="Cả năm">Cả năm</option>
-                  {Array.from({ length: 12 }, (_, i) => (
-                    <option key={i + 1} value={`Tháng ${i + 1}`}>
-                      Tháng {i + 1}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Box chứa biểu đồ có thuộc tính relative để overlay màn mờ khi load */}
-              <div className="relative grid grid-cols-1 lg:grid-cols-3 gap-8 items-center h-[350px]">
-                {/* Lớp mờ (Overlay) chỉ xuất hiện mỏng trên biểu đồ khi chuyển tháng */}
-                {isPieLoading && (
-                  <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[1px] flex items-center justify-center rounded-xl transition-all">
-                    <Loader2 className="w-8 h-8 animate-spin text-[#b51c00]" />
-                  </div>
-                )}
-
-                {/* Custom Legend (Bên trái) */}
-                <div className="col-span-1 flex flex-col gap-3">
-                  {orderPieData.map((entry, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-4 h-4 rounded-md shrink-0 shadow-sm"
-                          style={{ backgroundColor: entry.color }}
-                        />
-                        <span className="text-sm font-medium text-gray-600">
-                          {entry.name}
-                        </span>
-                      </div>
-                      <span className="text-sm font-bold text-gray-900">
-                        {entry.value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Pie Chart (Bên phải) */}
-                <div className="col-span-1 lg:col-span-2 h-full relative">
-                  {/* Nếu không có dữ liệu -> Hiển thị Empty State */}
-                  {!hasPieData && !isPieLoading ? (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                      <div className="w-24 h-24 rounded-full border-4 border-dashed border-gray-200 flex items-center justify-center mb-3">
-                        <span className="material-symbols-outlined text-4xl text-gray-300">
-                          pie_chart
-                        </span>
-                      </div>
-                      <p className="font-semibold text-gray-500">
-                        Chưa có đơn hàng nào
-                      </p>
-                    </div>
-                  ) : (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={orderPieData}
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={120}
-                          innerRadius={0}
-                          dataKey="value"
-                          animationDuration={800} // Cải thiện độ mượt của chuyển động
-                          animationEasing="ease-out"
-                          label={({ cx, cy, midAngle, outerRadius, value }) => {
-                            if (value === 0) return null;
-                            const RADIAN = Math.PI / 180;
-                            const radius = outerRadius * 1.15;
-                            const x =
-                              cx + radius * Math.cos(-midAngle * RADIAN);
-                            const y =
-                              cy + radius * Math.sin(-midAngle * RADIAN);
-                            return (
-                              <text
-                                x={x}
-                                y={y}
-                                fill="#374151"
-                                textAnchor={x > cx ? "start" : "end"}
-                                dominantBaseline="central"
-                                fontSize="13"
-                                fontWeight="700"
-                              >
-                                {value}
-                              </text>
-                            );
-                          }}
-                        >
-                          {orderPieData.map((entry, index) => (
-                            <Cell
-                              key={`cell-${index}`}
-                              fill={entry.color}
-                              stroke="white"
-                              strokeWidth={3}
-                            />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          contentStyle={{
-                            borderRadius: "12px",
-                            border: "none",
-                            boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                          }}
-                          itemStyle={{ fontWeight: "bold", color: "#111827" }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  )}
+            {/* 2. SECTION: DOANH THU TỔNG QUAN (LINE CHART) */}
+            <div className="bg-white rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-gray-100 p-6 md:p-8">
+              <div className="flex justify-between items-center mb-8">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Doanh Thu Tổng Quan
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Biểu đồ tăng trưởng doanh thu theo tháng
+                  </p>
                 </div>
               </div>
-            </div>
 
-            {/* 3. SECTION: SO SÁNH DOANH THU (LINE CHART) */}
-            <div className="bg-white rounded-[12px] shadow-[0_2px_10px_rgba(0,0,0,0.04)] border border-gray-100 p-6 md:p-8">
-              <div className="mb-8">
-                <span className="bg-pink-100 text-pink-800 text-[15px] font-bold px-3 py-1.5 rounded-md inline-block shadow-sm">
-                  So Sánh Doanh Thu
-                </span>
-              </div>
-
-              <div className="h-[400px] w-full mt-4">
+              <div className="h-[350px] w-full mt-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
                     data={stats?.monthlyRevenue || []}
-                    margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+                    margin={{ top: 20, right: 10, left: 0, bottom: 0 }}
                   >
                     <CartesianGrid
                       strokeDasharray="3 3"
@@ -334,9 +231,24 @@ const DashboardPage = () => {
                       axisLine={false}
                       tickLine={false}
                       tick={{ fill: "#64748b", fontSize: 12, fontWeight: 600 }}
-                      tickFormatter={(value) =>
-                        `${(value / 1000000).toFixed(0)}M`
-                      }
+                      // ✅ HÀM ĐỘNG: Tự nhận biết giá trị để hiển thị K hoặc M hoặc chữ đ
+                      tickFormatter={(value) => {
+                        if (value === 0) return "0đ";
+
+                        // Nếu dữ liệu lớn hơn hoặc bằng 1 triệu, rút gọn thành M (Ví dụ: 1.5M, 2M)
+                        if (value >= 1000000) {
+                          const formatted = value / 1000000;
+                          // Nếu là số tròn (ví dụ 2.0M) thì hiện 2M, nếu lẻ (ví dụ 1.5M) thì giữ 1 chữ số thập phân
+                          return `${formatted % 1 === 0 ? formatted.toFixed(0) : formatted.toFixed(1)}M`;
+                        }
+
+                        // Nếu dữ liệu dưới 1 triệu, rút gọn thành K (Ví dụ: 300K, 600K)
+                        if (value >= 1000) {
+                          return `${(value / 1000).toFixed(0)}K`;
+                        }
+
+                        return `${value}đ`;
+                      }}
                     />
                     <Tooltip
                       cursor={{
@@ -355,10 +267,7 @@ const DashboardPage = () => {
                         fontWeight: "600",
                       }}
                     />
-                    <Legend
-                      wrapperStyle={{ paddingTop: "20px" }}
-                      iconType="circle"
-                    />
+
                     <Line
                       type="monotone"
                       name="Doanh thu"
@@ -366,12 +275,12 @@ const DashboardPage = () => {
                       stroke="#0EA5E9"
                       strokeWidth={4}
                       dot={{
-                        r: 5,
+                        r: 4,
                         fill: "#ffffff",
                         strokeWidth: 3,
                         stroke: "#0EA5E9",
                       }}
-                      activeDot={{ r: 8, strokeWidth: 0, fill: "#0EA5E9" }}
+                      activeDot={{ r: 7, strokeWidth: 0, fill: "#0EA5E9" }}
                       animationDuration={1500}
                     />
                   </LineChart>
@@ -379,75 +288,319 @@ const DashboardPage = () => {
               </div>
             </div>
 
-            {/* 4. SECTION: BỘ LỌC TÙY CHỈNH (THỐNG KÊ DOANH THU) */}
-            <div className="bg-white rounded-[12px] shadow-[0_2px_10px_rgba(0,0,0,0.04)] border border-gray-100 p-6 md:p-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">
-                Thống Kê Doanh Thu Cụ Thể
-              </h2>
-
-              <div className="flex flex-col md:flex-row gap-4 items-end mb-8 border-b border-gray-100 pb-8">
-                <div className="flex-1 w-full">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Ngày bắt đầu
-                  </label>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full h-11 px-4 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#b51c00] focus:border-[#b51c00] outline-none text-gray-700 bg-gray-50 focus:bg-white transition-colors"
-                  />
+            {/* 3. SECTION: GRID 2 CỘT: PIE CHART & TÌNH HÌNH HIỆN TẠI */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              {/* Cột trái: Pie Chart Trạng Thái (1/3) */}
+              <div className="xl:col-span-1 bg-white rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-gray-100 p-6 flex flex-col">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-[18px] font-bold text-gray-900">
+                    Trạng Thái Đơn
+                  </h2>
+                  <select
+                    value={pieFilter}
+                    onChange={(e) => handlePieFilterChange(e.target.value)}
+                    disabled={isPieLoading}
+                    className="bg-gray-50 border border-gray-200 text-gray-700 text-xs rounded-lg focus:ring-[#b51c00] focus:border-[#b51c00] px-2 py-1 outline-none font-semibold disabled:opacity-50"
+                  >
+                    <option value="Cả năm">Cả năm</option>
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <option key={i + 1} value={`Tháng ${i + 1}`}>
+                        Tháng {i + 1}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                <div className="flex-1 w-full">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Ngày kết thúc
-                  </label>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full h-11 px-4 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#b51c00] focus:border-[#b51c00] outline-none text-gray-700 bg-gray-50 focus:bg-white transition-colors"
-                  />
-                </div>
+                <div className="relative flex-grow flex flex-col justify-center min-h-[300px]">
+                  {isPieLoading && (
+                    <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[1px] flex items-center justify-center rounded-xl">
+                      <Loader2 className="w-8 h-8 animate-spin text-[#b51c00]" />
+                    </div>
+                  )}
 
-                <button
-                  onClick={handleFilterRevenue}
-                  className="h-11 px-8 bg-[#3B82F6] hover:bg-blue-700 text-white font-bold rounded-lg transition-colors shadow-md shadow-blue-500/20 active:scale-95 whitespace-nowrap w-full md:w-auto"
-                >
-                  Thống Kê
-                </button>
+                  {!hasPieData && !isPieLoading ? (
+                    <div className="flex flex-col items-center justify-center text-gray-400 my-auto">
+                      <span className="material-symbols-outlined text-4xl text-gray-300 mb-2">
+                        pie_chart
+                      </span>
+                      <p className="font-medium text-sm">Chưa có dữ liệu</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="h-[220px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={orderPieData}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={60}
+                              outerRadius={90}
+                              dataKey="value"
+                              stroke="none"
+                            >
+                              {orderPieData.map((entry, index) => (
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={entry.color}
+                                />
+                              ))}
+                            </Pie>
+
+                            {/* ✅ CHÈN TỔNG SỐ ĐƠN VÀO GIỮA VÒNG NHẪN */}
+                            <text
+                              x="50%"
+                              y="48%"
+                              textAnchor="middle"
+                              dominantBaseline="middle"
+                              className="text-xs font-medium fill-gray-500"
+                            >
+                              Tổng đơn
+                            </text>
+                            <text
+                              x="50%"
+                              y="58%"
+                              textAnchor="middle"
+                              dominantBaseline="middle"
+                              className="text-xl font-black fill-gray-900"
+                            >
+                              {orderPieData.reduce(
+                                (sum, item) => sum + item.value,
+                                0,
+                              )}
+                            </text>
+
+                            <Tooltip
+                              contentStyle={{
+                                borderRadius: "8px",
+                                border: "none",
+                                boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+                                fontSize: "12px",
+                              }}
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+
+                      {/* Legend rút gọn dưới Pie chart */}
+                      <div className="grid grid-cols-2 gap-3 mt-4">
+                        {orderPieData.map((entry, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between text-xs"
+                          >
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className="w-2.5 h-2.5 rounded-full"
+                                style={{ backgroundColor: entry.color }}
+                              ></span>
+                              <span className="text-gray-600 truncate max-w-[70px]">
+                                {entry.name}
+                              </span>
+                            </div>
+                            <span className="font-bold text-gray-900">
+                              {entry.value}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex items-center gap-5 p-4 rounded-2xl bg-green-50/50 border border-green-100">
-                  <div className="w-16 h-16 rounded-[12px] bg-[#22C55E] text-white flex items-center justify-center shrink-0 shadow-lg shadow-green-500/20">
-                    <DollarSign size={32} strokeWidth={2.5} />
+              {/* Cột phải: Recent Orders & Top Products (2/3) */}
+              <div className="xl:col-span-2 flex flex-col gap-6">
+                {/* Bảng Đơn Hàng Mới Nhất */}
+                <div className="bg-white rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-gray-100 p-6 flex-grow">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-[18px] font-bold text-gray-900 flex items-center gap-2">
+                      <Clock size={20} className="text-[#b51c00]" /> Đơn Hàng
+                      Mới Nhất
+                    </h2>
+                    <Link
+                      to="/admin/orders"
+                      className="text-sm font-semibold text-[#b51c00] hover:underline flex items-center gap-1"
+                    >
+                      Xem tất cả <ArrowRight size={14} />
+                    </Link>
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-green-700 mb-1 uppercase tracking-wider">
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                      <thead className="text-[12px] text-gray-500 bg-[#f8fafc] uppercase font-bold border-b border-gray-100">
+                        <tr>
+                          <th className="px-4 py-3 rounded-tl-lg">Mã Đơn</th>
+                          <th className="px-4 py-3">Khách Hàng</th>
+                          <th className="px-4 py-3 text-right">Tổng Tiền</th>
+                          <th className="px-4 py-3 text-center rounded-tr-lg">
+                            Trạng Thái
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {stats?.recentOrders &&
+                        stats.recentOrders.length > 0 ? (
+                          stats.recentOrders.map((order, idx) => (
+                            <tr
+                              key={idx}
+                              className="border-b border-gray-50 hover:bg-gray-50/50"
+                            >
+                              <td className="px-4 py-3 font-bold text-gray-900">
+                                #{order._id.slice(-6).toUpperCase()}
+                              </td>
+                              <td className="px-4 py-3">
+                                <p className="font-semibold text-gray-800">
+                                  {order.userId?.displayName}
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                  {getTimeAgo(order.createdAt)}
+                                </p>
+                              </td>
+                              <td className="px-4 py-3 font-bold text-[#b51c00] text-right">
+                                {order.totalAmount.toLocaleString("vi-VN")}đ
+                              </td>
+                              <td className="px-4 py-3 text-center">
+                                <span
+                                  className={`inline-flex items-center px-2 py-1 rounded-md text-[11px] font-bold ${
+                                    order.orderStatus === "Delivered"
+                                      ? "bg-green-100 text-green-700"
+                                      : order.orderStatus === "Pending"
+                                        ? "bg-amber-100 text-amber-700"
+                                        : order.orderStatus === "Cancelled"
+                                          ? "bg-red-100 text-red-700"
+                                          : order.orderStatus === "Processing"
+                                            ? "bg-blue-100 text-blue-700"
+                                            : "bg-cyan-100 text-cyan-700"
+                                  }`}
+                                >
+                                  {order.orderStatus === "Pending"
+                                    ? "Chờ xử lý"
+                                    : order.orderStatus === "Processing"
+                                      ? "Đang xử lý"
+                                      : order.orderStatus === "Shipped"
+                                        ? "Đang giao"
+                                        : order.orderStatus === "Delivered"
+                                          ? "Đã giao"
+                                          : "Đã hủy"}
+                                </span>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td
+                              colSpan={4}
+                              className="px-4 py-8 text-center text-gray-400"
+                            >
+                              Chưa có đơn hàng nào
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 4. SECTION: BỘ LỌC DOANH THU & TOP SẢN PHẨM */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-white rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-gray-100 p-6 md:p-8">
+                <h2 className="text-[18px] font-bold text-gray-900 mb-6">
+                  Lọc Doanh Thu Cụ Thể
+                </h2>
+                <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                  <div className="flex-1 w-full">
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">
+                      Từ ngày
+                    </label>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-1 focus:ring-[#b51c00] focus:border-[#b51c00] outline-none"
+                    />
+                  </div>
+                  <div className="flex-1 w-full">
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">
+                      Đến ngày
+                    </label>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:ring-1 focus:ring-[#b51c00] focus:border-[#b51c00] outline-none"
+                    />
+                  </div>
+                </div>
+                <button
+                  onClick={handleFilterRevenue}
+                  className="w-full h-10 bg-gray-900 hover:bg-gray-800 text-white font-bold rounded-lg transition-colors mb-6 shadow-sm"
+                >
+                  Tra cứu dữ liệu
+                </button>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-green-50 p-4 rounded-xl border border-green-100">
+                    <p className="text-xs font-bold text-green-700 uppercase mb-1">
                       Tổng Doanh Thu
                     </p>
-                    <h3 className="text-3xl font-black text-gray-900">
+                    <h3 className="text-xl font-black text-gray-900">
                       {stats?.revenueByDateRange?.totalRevenue?.toLocaleString(
                         "vi-VN",
                       ) || 0}{" "}
                       đ
                     </h3>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-5 p-4 rounded-2xl bg-blue-50/50 border border-blue-100">
-                  <div className="w-16 h-16 rounded-[12px] bg-[#3B82F6] text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/20">
-                    <ShoppingCart size={32} strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-blue-700 mb-1 uppercase tracking-wider">
-                      Số Lượng Đơn Hàng
+                  <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                    <p className="text-xs font-bold text-blue-700 uppercase mb-1">
+                      Số Đơn Hàng
                     </p>
-                    <h3 className="text-3xl font-black text-gray-900">
+                    <h3 className="text-xl font-black text-gray-900">
                       {stats?.revenueByDateRange?.totalOrders || 0}
                     </h3>
                   </div>
+                </div>
+              </div>
+
+              {/* Top Món Ăn Bán Chạy */}
+              <div className="bg-white rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-gray-100 p-6 md:p-8">
+                <h2 className="text-[18px] font-bold text-gray-900 flex items-center gap-2 mb-6">
+                  <TrendingUp size={20} className="text-[#b51c00]" /> Top Sản
+                  Phẩm Bán Chạy
+                </h2>
+                <div className="flex flex-col gap-4">
+                  {stats?.topProducts && stats.topProducts.length > 0 ? (
+                    stats.topProducts.map((prod, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-100"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${idx === 0 ? "bg-amber-100 text-amber-700" : idx === 1 ? "bg-gray-100 text-gray-600" : "bg-orange-100 text-orange-700"}`}
+                          >
+                            #{idx + 1}
+                          </div>
+                          <div>
+                            <p className="font-bold text-gray-900 text-sm">
+                              {prod.name}
+                            </p>
+                            <p className="text-xs text-gray-500 font-medium">
+                              Đã bán: {prod.sold}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="font-bold text-[#b51c00] text-sm">
+                          {prod.revenue.toLocaleString("vi-VN")}đ
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center text-gray-400 py-8">
+                      Chưa có dữ liệu sản phẩm bán chạy
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
