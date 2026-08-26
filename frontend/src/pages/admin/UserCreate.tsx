@@ -38,7 +38,7 @@ const UserCreate = () => {
   const { roles, fetchRoles } = useAdminRoleStore();
   const [submitting, setSubmitting] = useState(false);
 
-  const canCreate = hasPermission(user, "users_create");
+  const canCreate = hasPermission(user, "accounts_create");
 
   const {
     register,

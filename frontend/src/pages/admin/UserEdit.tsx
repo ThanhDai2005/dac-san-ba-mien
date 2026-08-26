@@ -49,7 +49,7 @@ const UserEdit = () => {
   const [submitting, setSubmitting] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(true);
 
-  const canEdit = hasPermission(user, "users_edit");
+  const canEdit = hasPermission(user, "accounts_edit");
 
   const {
     register,
