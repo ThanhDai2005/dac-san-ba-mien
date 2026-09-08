@@ -26,8 +26,8 @@ api.interceptors.response.use(
 
     // Bỏ qua các API Auth tránh vòng lặp vô hạn
     if (
-      originalRequest.url.includes("/auth/login") ||
-      originalRequest.url.includes("/auth/refresh")
+      originalRequest.url.includes("/admin/auth/login") ||
+      originalRequest.url.includes("/admin/auth/refresh")
     ) {
       return Promise.reject(error);
     }

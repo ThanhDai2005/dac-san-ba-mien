@@ -63,11 +63,18 @@ export const useAdminAuthStore = create<AdminAuthState>()(
         try {
           set({ loading: true });
 
+          const { user, getDetail, setAccessToken } = get();
           const res = await adminAuthService.refreshToken();
 
-          get().setAccessToken(res.accessToken);
+          setAccessToken(res.accessToken);
+
+          if (!user) {
+            await getDetail();
+          }
         } catch (error) {
           console.log(error);
+          toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+          get().clearState(); // quan trọng: fail thì xóa user để không loop
         } finally {
           set({ loading: false });
         }
