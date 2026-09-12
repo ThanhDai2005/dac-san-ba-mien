@@ -313,7 +313,7 @@ export const getChatbotResponse = async (conversationHistory, userMessage) => {
     };
   } catch (error) {
     logger.logError("Lỗi khi gọi Gemini API", error, {
-      model: "gemini-3.6-flash",
+      model: "gemini-3.8-flash",
     });
     return {
       text: "Em xin lỗi, hệ thống đang gặp chút vấn đề. Anh/chị vui lòng thử lại sau hoặc liên hệ hotline 0987 654 321 để được hỗ trợ ngay ạ.",
