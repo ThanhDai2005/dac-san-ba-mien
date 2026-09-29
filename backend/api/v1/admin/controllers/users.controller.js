@@ -62,7 +62,7 @@ export const list = async (req, res) => {
 };
 
 // [GET] /api/v1/admin/users/:userId
-export const getDetail = async (req, res) => {
+export const detail = async (req, res) => {
   try {
     const userId = req.params.userId;
 
@@ -84,7 +84,7 @@ export const getDetail = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    logger.logError("Lỗi khi gọi getDetail user", error, {
+    logger.logError("Lỗi khi gọi detail user", error, {
       adminId: req.user?._id,
       targetUserId: req.params.userId,
       endpoint: req.originalUrl,

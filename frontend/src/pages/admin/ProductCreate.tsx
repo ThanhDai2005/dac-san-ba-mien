@@ -262,6 +262,10 @@ const ProductCreate = () => {
                     min="0"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b51c00] focus:border-transparent text-gray-900 placeholder-gray-400 transition-shadow"
                   />
+                  <p className="mt-1.5 text-xs text-gray-500">
+                    Chỉ nhập khi tạo mới sản phẩm. Sau này tồn kho sẽ cập nhật
+                    qua phiếu nhập hàng.
+                  </p>
                 </div>
 
                 <div>
@@ -354,10 +358,7 @@ const ProductCreate = () => {
               </div>
             </div>
 
-            <AdminFormActions
-              loading={loading}
-              submitLabel="Lưu sản phẩm"
-            />
+            <AdminFormActions loading={loading} submitLabel="Lưu sản phẩm" />
           </div>
         </form>
       </div>

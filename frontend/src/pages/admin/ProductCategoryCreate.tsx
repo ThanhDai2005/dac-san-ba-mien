@@ -17,7 +17,7 @@ const ProductCategoryCreate = () => {
     status: "active",
   });
 
-  const canCreate = hasPermission(user, "product_categories_create");
+  const canCreate = hasPermission(user, "categories_create");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,10 +129,7 @@ const ProductCategoryCreate = () => {
               </div>
             </div>
 
-            <AdminFormActions
-              loading={loading}
-              submitLabel="Lưu danh mục"
-            />
+            <AdminFormActions loading={loading} submitLabel="Lưu danh mục" />
           </div>
         </form>
       </div>

@@ -311,8 +311,13 @@ const ProductEdit = () => {
                     }
                     placeholder="0"
                     min="0"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b51c00] focus:border-transparent text-gray-900 placeholder-gray-400 transition-shadow"
+                    disabled
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#b51c00] focus:border-transparent placeholder-gray-400 transition-shadow bg-gray-100 text-gray-500 cursor-not-allowed"
                   />
+                  <p className="mt-1.5 text-xs text-gray-500">
+                    Tồn kho chỉ thay đổi qua phiếu nhập. Không chỉnh tay tại
+                    đây.
+                  </p>
                 </div>
 
                 <div>

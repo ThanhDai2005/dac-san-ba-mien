@@ -17,8 +17,14 @@ import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 const userEditSchema = z
   .object({
     displayName: z.string().min(1, "Tên đầy đủ là bắt buộc"),
-    email: z.string().email("Email không hợp lệ"),
-    phone: z.string().min(10, "Số điện thoại phải có ít nhất 10 ký tự"),
+    email: z
+      .string()
+      .min(1, "Email không được để trống")
+      .email("Email không hợp lệ"),
+    phone: z
+      .string()
+      .min(1, "Số điện thoại không được để trống")
+      .regex(/^0[0-9]{9,10}$/, "Số điện thoại không hợp lệ (10-11 chữ số)"),
     password: z.string().optional(),
     confirmPassword: z.string().optional(),
     roleId: z.string().optional(),

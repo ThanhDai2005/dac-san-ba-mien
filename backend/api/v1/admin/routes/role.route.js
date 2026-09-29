@@ -11,7 +11,7 @@ router.post("/", requirePermission("roles_create"), controller.create);
 router.get(
   "/detail/:roleId",
   requirePermission("roles_view"),
-  controller.getDetail,
+  controller.detail,
 );
 
 router.patch(

@@ -46,7 +46,7 @@ export const list = async (req, res) => {
 };
 
 // [GET] /api/v1/admin/role/detail/:roleId
-export const getDetail = async (req, res) => {
+export const detail = async (req, res) => {
   try {
     const roleId = req.params.roleId;
 
@@ -66,7 +66,7 @@ export const getDetail = async (req, res) => {
       data: role,
     });
   } catch (error) {
-    logger.logError("Lỗi khi gọi getDetail role", error, {
+    logger.logError("Lỗi khi gọi detail role", error, {
       adminId: req.user?._id,
       roleId: req.user?.roleId,
       targetRoleId: req.params.roleId,
@@ -233,6 +233,35 @@ export const getPermissions = async (req, res) => {
       { group: "Quản lý sản phẩm", value: "products_create", label: "Thêm" },
       { group: "Quản lý sản phẩm", value: "products_edit", label: "Sửa" },
       { group: "Quản lý sản phẩm", value: "products_delete", label: "Xóa" },
+
+      { group: "Quản lý nhà cung cấp", value: "suppliers_view", label: "Xem" },
+      {
+        group: "Quản lý nhà cung cấp",
+        value: "suppliers_create",
+        label: "Thêm",
+      },
+      { group: "Quản lý nhà cung cấp", value: "suppliers_edit", label: "Sửa" },
+      {
+        group: "Quản lý nhà cung cấp",
+        value: "suppliers_delete",
+        label: "Xóa",
+      },
+
+      {
+        group: "Quản lý phiếu nhập",
+        value: "stock_receipts_view",
+        label: "Xem",
+      },
+      {
+        group: "Quản lý phiếu nhập",
+        value: "stock_receipts_create",
+        label: "Tạo phiếu nhập",
+      },
+      {
+        group: "Quản lý phiếu nhập",
+        value: "stock_receipts_edit",
+        label: "Duyệt/Hủy phiếu",
+      },
 
       {
         group: "Quản lý danh mục bài viết",

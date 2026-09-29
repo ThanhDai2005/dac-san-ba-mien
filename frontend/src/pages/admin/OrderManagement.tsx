@@ -333,9 +333,7 @@ const OrderManagement = () => {
                   <th className="px-6 py-4">Thanh toán (Phương thức)</th>
                   <th className="px-6 py-4">Tổng tiền</th>
                   <th className="px-6 py-4">Ngày đặt</th>
-                  <th className="px-6 py-4 text-center w-[200px]">
-                    Trạng thái đơn
-                  </th>
+                  <th className="px-6 py-4 text-center">Trạng thái đơn</th>
                   <th className="px-6 py-4 text-center">Thao tác</th>
                 </tr>
               </thead>

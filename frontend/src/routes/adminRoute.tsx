@@ -9,6 +9,9 @@ import ProductCategoryEdit from "@/pages/admin/ProductCategoryEdit";
 import ProductManagement from "@/pages/admin/ProductManagement";
 import ProductCreate from "@/pages/admin/ProductCreate";
 import ProductEdit from "@/pages/admin/ProductEdit";
+import SupplierManagement from "@/pages/admin/SupplierManagement";
+import SupplierCreate from "@/pages/admin/SupplierCreate";
+import SupplierEdit from "@/pages/admin/SupplierEdit";
 import BlogCategoryManagement from "@/pages/admin/BlogCategoryManagement";
 import BlogCategoryCreate from "@/pages/admin/BlogCategoryCreate";
 import BlogCategoryEdit from "@/pages/admin/BlogCategoryEdit";
@@ -28,6 +31,9 @@ import RoleManagement from "@/pages/admin/RoleManagement";
 import RoleEdit from "@/pages/admin/RoleEdit";
 import RoleCreate from "@/pages/admin/RoleCreate";
 import ChatManagement from "@/pages/admin/ChatManagement";
+import StockReceiptManagement from "@/pages/admin/StockReceiptManagement";
+import StockReceiptCreate from "@/pages/admin/StockReceiptCreate";
+import StockReceiptDetail from "@/pages/admin/StockReceiptDetail";
 
 const adminRoute = {
   path: "/admin",
@@ -73,6 +79,30 @@ const adminRoute = {
             {
               path: "product/edit/:productId",
               element: <ProductEdit />,
+            },
+            {
+              path: "suppliers",
+              element: <SupplierManagement />,
+            },
+            {
+              path: "supplier/create",
+              element: <SupplierCreate />,
+            },
+            {
+              path: "supplier/edit/:supplierId",
+              element: <SupplierEdit />,
+            },
+            {
+              path: "stock-receipts",
+              element: <StockReceiptManagement />,
+            },
+            {
+              path: "stock-receipt/create",
+              element: <StockReceiptCreate />,
+            },
+            {
+              path: "stock-receipt/:receiptId",
+              element: <StockReceiptDetail />,
             },
             {
               path: "blog-categories",

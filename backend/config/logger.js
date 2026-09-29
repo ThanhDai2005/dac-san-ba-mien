@@ -81,7 +81,7 @@ logger.logError = (message, error, context = {}) => {
   logger.error({
     message,
     error: {
-      message: error.message,
+      message: error?.message,
       stack: error.stack,
       name: error.name,
     },

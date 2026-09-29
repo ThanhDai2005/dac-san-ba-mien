@@ -22,7 +22,7 @@ const ProductCategoryEdit = () => {
     status: "active",
   });
 
-  const canEdit = hasPermission(user, "product_categories_edit");
+  const canEdit = hasPermission(user, "categories_edit");
 
   useEffect(() => {
     loadCategory();

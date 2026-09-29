@@ -247,7 +247,7 @@ export const update = async (req, res) => {
 };
 
 // [GET] /api/v1/admin/promotion/:promotionId
-export const getDetail = async (req, res) => {
+export const detail = async (req, res) => {
   try {
     const promotionId = req.params.promotionId;
 
@@ -267,7 +267,7 @@ export const getDetail = async (req, res) => {
       data: promotion,
     });
   } catch (error) {
-    logger.logError("Lỗi khi gọi getDetail promotion", error, {
+    logger.logError("Lỗi khi gọi detail promotion", error, {
       adminId: req.user?._id,
       promotionId: req.params?.promotionId,
       endpoint: req.originalUrl,

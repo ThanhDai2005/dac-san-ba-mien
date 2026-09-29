@@ -85,17 +85,16 @@ const ProductCategoryManagement = () => {
     return () => clearTimeout(timer);
   }, [localKeyword]);
 
-  useEffect(() => {
-    if (canView) {
-      const status = statusFilter !== "all" ? statusFilter : "";
-      fetchCategories(searchTerm, status, currentPage, limit);
-    }
-  }, [currentPage, limit, searchTerm, statusFilter, fetchCategories, canView]);
-
   const refetchCategories = async () => {
     const status = statusFilter !== "all" ? statusFilter : "";
     await fetchCategories(searchTerm, status, currentPage, limit);
   };
+
+  useEffect(() => {
+    if (canView) {
+      refetchCategories();
+    }
+  }, [currentPage, limit, searchTerm, statusFilter, fetchCategories, canView]);
 
   const handleChangeStatus = async (
     categoryId: string,
@@ -337,7 +336,7 @@ const ProductCategoryManagement = () => {
               <table className="w-full text-sm text-left">
                 <thead className="text-[12px] text-gray-500 bg-[#f1f5f9] uppercase font-bold border-b border-gray-200 tracking-wider">
                   <tr>
-                    <th scope="col" className="p-4 w-12">
+                    <th scope="col" className="p-4">
                       <div className="flex items-center">
                         <input
                           type="checkbox"

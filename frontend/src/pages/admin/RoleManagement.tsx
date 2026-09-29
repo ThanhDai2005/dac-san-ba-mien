@@ -166,7 +166,7 @@ const RoleManagement = () => {
               <table className="w-full text-sm text-left">
                 <thead className="text-[12px] text-gray-500 bg-[#f1f5f9] uppercase font-bold border-b border-gray-200 tracking-wider">
                   <tr>
-                    <th scope="col" className="px-6 py-4 text-center w-16">
+                    <th scope="col" className="px-6 py-4 text-center">
                       STT
                     </th>
                     <th scope="col" className="px-6 py-4 text-center">
@@ -178,7 +178,7 @@ const RoleManagement = () => {
                     <th scope="col" className="px-6 py-4 text-center">
                       Ngày tạo
                     </th>
-                    <th scope="col" className="px-6 py-4 text-center w-32">
+                    <th scope="col" className="px-6 py-4 text-center">
                       Thao tác
                     </th>
                   </tr>

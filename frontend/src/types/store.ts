@@ -9,6 +9,8 @@ import type { BlogCategory } from "./blogCategory";
 import type { Blog } from "./blog";
 import type { Socket } from "socket.io-client";
 import type { Conversation, Message } from "./chat";
+import type { Supplier } from "./supplier";
+import type { StockReceipt, StockReceiptItem } from "./stockReceipt";
 
 export interface AuthState {
   accessToken: string | null;
@@ -613,4 +615,74 @@ export interface AdminSocketState {
   emit: (event: string, data?: any) => void;
   on: (event: string, handler: (data: any) => void) => void;
   off: (event: string, handler?: (data: any) => void) => void;
+}
+
+export interface AdminSupplierState {
+  suppliers: Supplier[];
+  currentSupplier: Supplier | null;
+  totalPages: number;
+  totalItems: number;
+  loading: boolean;
+
+  fetchSuppliers: (
+    keyword?: string,
+    status?: string,
+    page?: number,
+    limit?: number,
+  ) => Promise<void>;
+  getSupplierDetail: (supplierId: string) => Promise<Supplier>;
+  createSupplier: (data: {
+    name: string;
+    phone: string;
+    email: string;
+    address: string;
+    taxCode?: string;
+    status?: string;
+  }) => Promise<void>;
+  updateSupplier: (
+    supplierId: string,
+    data: {
+      name?: string;
+      phone?: string;
+      email?: string;
+      address?: string;
+      taxCode?: string;
+      status?: string;
+    },
+  ) => Promise<void>;
+  changeStatus: (
+    supplierId: string,
+    status: "active" | "inactive",
+  ) => Promise<void>;
+  changeMulti: (
+    ids: string[],
+    type: "active" | "inactive" | "delete-all",
+  ) => Promise<void>;
+  deleteItem: (supplierId: string) => Promise<void>;
+}
+
+export interface AdminStockReceiptState {
+  receipts: StockReceipt[];
+  currentReceipt: StockReceipt | null;
+  totalPages: number;
+  totalItems: number;
+  loading: boolean;
+
+  fetchReceipts: (
+    keyword?: string,
+    status?: string,
+    supplierId?: string,
+    startDate?: string,
+    endDate?: string,
+    page?: number,
+    limit?: number,
+  ) => Promise<void>;
+  getReceiptDetail: (receiptId: string) => Promise<StockReceipt>;
+  createReceipt: (data: {
+    supplierId: string;
+    items: StockReceiptItem[];
+  }) => Promise<StockReceipt>;
+  confirmReceipt: (receiptId: string) => Promise<void>;
+  cancelReceipt: (receiptId: string) => Promise<void>;
+  clearCurrentReceipt: () => void;
 }

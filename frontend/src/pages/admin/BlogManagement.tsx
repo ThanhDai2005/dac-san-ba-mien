@@ -97,14 +97,18 @@ const BlogManagement = () => {
     }
   }, [fetchBlogCategories, canView]);
 
+  const refetchBlogs = async () => {
+    const categorySlug =
+      categoryFilter !== "all"
+        ? blogCategories.find((c) => c._id === categoryFilter)?.slug || ""
+        : "";
+    const status = statusFilter !== "all" ? statusFilter : "";
+    await fetchBlogs(searchTerm, categorySlug, status, currentPage, limit);
+  };
+
   useEffect(() => {
     if (canView) {
-      const categorySlug =
-        categoryFilter !== "all"
-          ? blogCategories.find((c) => c._id === categoryFilter)?.slug || ""
-          : "";
-      const status = statusFilter !== "all" ? statusFilter : "";
-      fetchBlogs(searchTerm, categorySlug, status, currentPage, limit);
+      refetchBlogs();
     }
   }, [
     currentPage,
@@ -115,15 +119,6 @@ const BlogManagement = () => {
     fetchBlogs,
     canView,
   ]);
-
-  const refetchBlogs = async () => {
-    const categorySlug =
-      categoryFilter !== "all"
-        ? blogCategories.find((c) => c._id === categoryFilter)?.slug || ""
-        : "";
-    const status = statusFilter !== "all" ? statusFilter : "";
-    await fetchBlogs(searchTerm, categorySlug, status, currentPage, limit);
-  };
 
   const handleChangeStatus = async (
     blogId: string,
@@ -376,7 +371,7 @@ const BlogManagement = () => {
               <table className="w-full text-sm text-left">
                 <thead className="text-[12px] text-gray-500 bg-[#f1f5f9] uppercase font-bold border-b border-gray-200 tracking-wider">
                   <tr>
-                    <th scope="col" className="p-4 w-12">
+                    <th scope="col" className="p-4">
                       <div className="flex items-center">
                         <input
                           type="checkbox"

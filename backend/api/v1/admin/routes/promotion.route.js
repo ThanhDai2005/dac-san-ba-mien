@@ -9,7 +9,7 @@ router.get("/", requirePermission("promotions_view"), controller.list);
 router.get(
   "/:promotionId",
   requirePermission("promotions_view"),
-  controller.getDetail,
+  controller.detail,
 );
 
 router.post("/", requirePermission("promotions_create"), controller.create);

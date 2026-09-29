@@ -85,17 +85,16 @@ const PromotionManagement = () => {
     return () => clearTimeout(timer);
   }, [localKeyword]);
 
-  useEffect(() => {
-    if (canView) {
-      const status = statusFilter !== "all" ? statusFilter : "";
-      fetchPromotions(searchTerm, status, currentPage, limit);
-    }
-  }, [currentPage, limit, searchTerm, statusFilter, fetchPromotions, canView]);
-
   const refetchPromotions = async () => {
     const status = statusFilter !== "all" ? statusFilter : "";
     await fetchPromotions(searchTerm, status, currentPage, limit);
   };
+
+  useEffect(() => {
+    if (canView) {
+      refetchPromotions();
+    }
+  }, [currentPage, limit, searchTerm, statusFilter, fetchPromotions, canView]);
 
   const handleChangeStatus = async (
     promotionId: string,
@@ -247,14 +246,9 @@ const PromotionManagement = () => {
     return formatCurrency(item.discountValue);
   };
 
-  const discountTypeLabel: Record<string, string> = {
+  const discountTypeLabel = {
     percentage: "Phần trăm",
     fixed: "Cố định",
-  };
-
-  const statusLabel: Record<string, string> = {
-    active: "Hoạt động",
-    inactive: "Tạm dừng",
   };
 
   if (!canView) {
@@ -371,7 +365,7 @@ const PromotionManagement = () => {
               <table className="w-full text-sm text-left">
                 <thead className="text-[12px] text-gray-500 bg-[#f1f5f9] uppercase font-bold border-b border-gray-200 tracking-wider">
                   <tr>
-                    <th scope="col" className="p-4 w-12">
+                    <th scope="col" className="p-4">
                       <div className="flex items-center">
                         <input
                           type="checkbox"

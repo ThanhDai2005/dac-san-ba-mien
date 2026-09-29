@@ -8,6 +8,7 @@ import {
   Tag,
   Users,
   Utensils,
+  Warehouse,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { NavMain } from "@/components/sidebar/nav-main";
@@ -42,6 +43,24 @@ const data = {
           title: "Sản phẩm",
           url: "/admin/products",
           permission: "products_view",
+        },
+      ],
+    },
+    {
+      title: "Quản Lý Phiếu Nhập",
+      url: "#",
+      icon: Warehouse,
+      permission: "suppliers_view",
+      items: [
+        {
+          title: "Nhà cung cấp",
+          url: "/admin/suppliers",
+          permission: "suppliers_view",
+        },
+        {
+          title: "Phiếu nhập hàng",
+          url: "/admin/stock-receipts",
+          permission: "stock_receipts_view",
         },
       ],
     },
