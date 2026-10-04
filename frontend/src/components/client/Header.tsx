@@ -113,6 +113,17 @@ const Header = () => {
                 )}
                 {user && (
                   <button
+                    onClick={() => handleMobileNavClick("/vouchers")}
+                    className="flex items-center gap-4 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors text-left"
+                  >
+                    <span className="material-symbols-outlined text-[24px]">
+                      card_giftcard
+                    </span>
+                    <span className="text-base font-medium">Ưu đãi</span>
+                  </button>
+                )}
+                {user && (
+                  <button
                     onClick={() => handleMobileNavClick("/profile")}
                     className="flex items-center gap-4 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors text-left"
                   >
@@ -276,6 +287,18 @@ const Header = () => {
                         person
                       </span>
                       Hồ sơ
+                    </button>
+                    <button
+                      onClick={() => {
+                        navigate("/vouchers");
+                        setUserMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition text-left"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">
+                        card_giftcard
+                      </span>
+                      Ưu đãi
                     </button>
                     <button
                       onClick={() => {

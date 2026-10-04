@@ -1,5 +1,7 @@
 import Cart from "../../../../models/cart.model.js";
+import Customer from "../../../../models/customer.model.js";
 import Product from "../../../../models/product.model.js";
+import { getEffectivePrice } from "../../../../helpers/productPromotion.js";
 import logger from "../../../../config/logger.js";
 
 // [GET] /api/v1/cart
@@ -7,13 +9,20 @@ export const getCart = async (req, res) => {
   try {
     const userId = req.user._id;
 
+    const customer = await Customer.findOne({ userId: userId });
+    if (!customer) {
+      return res.status(400).json({
+        message: "Không tìm thấy thông tin khách hàng",
+      });
+    }
+
     let cart = await Cart.findOne({
-      userId: userId,
+      customerId: customer._id,
     }).populate("items.productId");
 
     if (!cart) {
       cart = new Cart({
-        userId: userId,
+        customerId: customer._id,
         items: [],
       });
 
@@ -64,11 +73,18 @@ export const addToCart = async (req, res) => {
       });
     }
 
-    let cart = await Cart.findOne({ userId: userId });
+    const customer = await Customer.findOne({ userId: userId });
+    if (!customer) {
+      return res.status(400).json({
+        message: "Không tìm thấy thông tin khách hàng",
+      });
+    }
+
+    let cart = await Cart.findOne({ customerId: customer._id });
 
     if (!cart) {
       cart = new Cart({
-        userId: userId,
+        customerId: customer._id,
         items: [],
       });
     }
@@ -89,11 +105,16 @@ export const addToCart = async (req, res) => {
 
     if (existingItem) {
       existingItem.quantity += quantity;
+      // Cập nhật lại giá thực tế (Flash Sale có thể thay đổi)
+      const effectivePrice = await getEffectivePrice(productId, product.price);
+      existingItem.price = effectivePrice;
     } else {
+      // Tính giá thực tế theo Flash Sale (nếu có)
+      const effectivePrice = await getEffectivePrice(productId, product.price);
       cart.items.push({
         productId: productId,
         quantity: quantity,
-        price: product.price,
+        price: effectivePrice,
       });
     }
 
@@ -137,7 +158,15 @@ export const updateQuantity = async (req, res) => {
       });
     }
 
-    let cart = await Cart.findOne({ userId: userId });
+    // Get customer from userId
+    const customer = await Customer.findOne({ userId: userId });
+    if (!customer) {
+      return res.status(400).json({
+        message: "Không tìm thấy thông tin khách hàng",
+      });
+    }
+
+    let cart = await Cart.findOne({ customerId: customer._id });
 
     if (!cart) {
       return res.status(404).json({
@@ -172,6 +201,8 @@ export const updateQuantity = async (req, res) => {
     }
 
     item.quantity = quantity;
+    // Làm mới giá theo Flash Sale hiện tại
+    item.price = await getEffectivePrice(productId, product.price);
     await cart.save();
 
     cart = await Cart.findOne({ _id: cart._id }).populate("items.productId");
@@ -205,7 +236,15 @@ export const removeFromCart = async (req, res) => {
       });
     }
 
-    let cart = await Cart.findOne({ userId: userId });
+    // Get customer from userId
+    const customer = await Customer.findOne({ userId: userId });
+    if (!customer) {
+      return res.status(400).json({
+        message: "Không tìm thấy thông tin khách hàng",
+      });
+    }
+
+    let cart = await Cart.findOne({ customerId: customer._id });
 
     if (!cart) {
       return res.status(404).json({
@@ -214,7 +253,7 @@ export const removeFromCart = async (req, res) => {
     }
 
     cart = await Cart.findOneAndUpdate(
-      { userId: userId },
+      { customerId: customer._id },
       { $pull: { items: { productId: productId } } },
       { new: true },
     ).populate("items.productId");
@@ -240,8 +279,16 @@ export const clearCart = async (req, res) => {
   try {
     const userId = req.user._id;
 
+    // Get customer from userId
+    const customer = await Customer.findOne({ userId: userId });
+    if (!customer) {
+      return res.status(400).json({
+        message: "Không tìm thấy thông tin khách hàng",
+      });
+    }
+
     const cart = await Cart.findOneAndUpdate(
-      { userId: userId },
+      { customerId: customer._id },
       { items: [] },
       { new: true },
     );

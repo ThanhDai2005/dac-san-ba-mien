@@ -22,9 +22,9 @@ const lastMessageSchema = mongoose.Schema(
 
 const conversationSchema = new mongoose.Schema(
   {
-    userId: {
+    customerId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Customer",
       default: null,
     },
     guestInfo: {
@@ -38,7 +38,7 @@ const conversationSchema = new mongoose.Schema(
     },
     assignedStaffId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Staff",
       default: null,
     },
     lastMessage: {

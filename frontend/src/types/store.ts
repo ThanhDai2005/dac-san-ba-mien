@@ -3,7 +3,15 @@ import type { Category } from "./category";
 import type { Product } from "./product";
 import type { Cart } from "./cart";
 import type { CreateOrderData, Order } from "./order";
-import type { ApplyPromotionResponse, Promotion } from "./promotion";
+import type {
+  AppliedPromotion,
+  AvailablePromotion,
+  CalculateDiscountResponse,
+  CustomerVoucher,
+  OrderPromotion,
+  ProductPromotion,
+  Promotion,
+} from "./promotion";
 import type { Review } from "./review";
 import type { BlogCategory } from "./blogCategory";
 import type { Blog } from "./blog";
@@ -141,13 +149,34 @@ export interface OrderState {
   clearCurrentOrder: () => void;
 }
 
+export interface CollectibleVoucher {
+  promotion: Promotion;
+  isCollected: boolean;
+}
+
 export interface PromotionState {
-  appliedPromotion: ApplyPromotionResponse | null;
+  availablePromotions: {
+    orderPromotions: AvailablePromotion[];
+    customerVouchers: AvailablePromotion[];
+  } | null;
+  collectibleVouchers: CollectibleVoucher[];
+  appliedPromotion: AppliedPromotion | null;
+  discountResult: CalculateDiscountResponse | null;
   loading: boolean;
-  applyPromotion: (
-    code: string,
+  collectLoading: boolean;
+  getAvailablePromotions: () => Promise<void>;
+  getCollectibleVouchers: () => Promise<void>;
+  collectVoucher: (promotionId: string) => Promise<void>;
+  applyPromotion: (code: string, orderValue: number) => Promise<void>;
+  applyPromotionById: (
+    selectedPromo: AvailablePromotion,
     orderValue: number,
-  ) => Promise<ApplyPromotionResponse>;
+  ) => Promise<void>;
+  calculateDiscount: (
+    orderValue: number,
+    orderPromotionId?: string,
+    customerVoucherId?: string,
+  ) => Promise<CalculateDiscountResponse>;
   clearPromotion: () => void;
 }
 
@@ -224,7 +253,7 @@ export interface AdminAuthState {
 export interface AdminDashboardState {
   stats: {
     overview: {
-      totalUsers: number;
+      totalCustomers: number;
       totalProducts: number;
       totalOrders: number;
       totalCategories: number;
@@ -246,9 +275,12 @@ export interface AdminDashboardState {
     }>;
     recentOrders: Array<{
       _id: string;
-      userId?: {
-        displayName: string;
+      customerId?: {
+        userId?: {
+          displayName: string;
+        };
       };
+      customerName?: string;
       totalAmount: number;
       orderStatus: string;
       createdAt: string;
@@ -432,10 +464,8 @@ export interface AdminPromotionStore {
   createPromotion: (data: {
     title: string;
     code: string;
-    description?: string;
     discountType: "percentage" | "fixed";
     discountValue: number;
-    minOrderValue?: number;
     maxDiscountAmount?: number | null;
     usageLimit?: number | null;
     startDate: string;
@@ -445,16 +475,14 @@ export interface AdminPromotionStore {
   updatePromotion: (
     promotionId: string,
     data: {
-      title: string;
-      code: string;
-      description?: string;
-      discountType: "percentage" | "fixed";
-      discountValue: number;
-      minOrderValue?: number;
+      title?: string;
+      code?: string;
+      discountType?: "percentage" | "fixed";
+      discountValue?: number;
       maxDiscountAmount?: number | null;
       usageLimit?: number | null;
-      startDate: string;
-      endDate: string;
+      startDate?: string;
+      endDate?: string;
       status?: "active" | "inactive";
     },
   ) => Promise<void>;
@@ -467,6 +495,94 @@ export interface AdminPromotionStore {
     type: "active" | "inactive" | "delete-all",
   ) => Promise<void>;
   deleteItem: (promotionId: string) => Promise<void>;
+}
+
+export interface AdminOrderPromotionStore {
+  orderPromotions: OrderPromotion[];
+  currentOrderPromotion: OrderPromotion | null;
+  loading: boolean;
+  totalPages: number;
+
+  fetchOrderPromotions: (
+    keyword?: string,
+    status?: string,
+    page?: number,
+    limit?: number,
+  ) => Promise<void>;
+  getDetail: (orderPromotionId: string) => Promise<void>;
+  create: (data: {
+    title: string;
+    code: string;
+    discountType: "percentage" | "fixed";
+    discountValue: number;
+    maxDiscountAmount?: number | null;
+    usageLimit?: number | null;
+    startDate: string;
+    endDate: string;
+    status?: "active" | "inactive";
+    minOrderValue: number;
+  }) => Promise<void>;
+  update: (
+    orderPromotionId: string,
+    data: Record<string, unknown>,
+  ) => Promise<void>;
+  changeStatus: (
+    orderPromotionId: string,
+    status: "active" | "inactive",
+  ) => Promise<void>;
+  deleteItem: (orderPromotionId: string) => Promise<void>;
+}
+
+export interface AdminProductPromotionStore {
+  productPromotions: ProductPromotion[];
+  currentProductPromotion: ProductPromotion | null;
+  loading: boolean;
+  totalPages: number;
+
+  fetchProductPromotions: (
+    keyword?: string,
+    status?: string,
+    page?: number,
+    limit?: number,
+  ) => Promise<void>;
+  getDetail: (productPromotionId: string) => Promise<void>;
+  create: (data: {
+    title: string;
+    code: string;
+    discountType: "percentage" | "fixed";
+    discountValue: number;
+    maxDiscountAmount?: number | null;
+    usageLimit?: number | null;
+    startDate: string;
+    endDate: string;
+    status?: "active" | "inactive";
+    productIds: string[];
+  }) => Promise<void>;
+  update: (
+    productPromotionId: string,
+    data: Record<string, unknown>,
+  ) => Promise<void>;
+  changeStatus: (
+    productPromotionId: string,
+    status: "active" | "inactive",
+  ) => Promise<void>;
+  deleteItem: (productPromotionId: string) => Promise<void>;
+}
+
+export interface AdminCustomerVoucherStore {
+  vouchers: CustomerVoucher[];
+  loading: boolean;
+  totalPages: number;
+
+  fetchVouchers: (
+    customerId?: string,
+    promotionId?: string,
+    isUsed?: boolean,
+    page?: number,
+    limit?: number,
+  ) => Promise<void>;
+  issueVouchers: (promotionId: string, customerIds: string[]) => Promise<void>;
+  revokeVoucher: (voucherId: string) => Promise<void>;
 }
 
 export interface AdminUserStore {
@@ -512,6 +628,79 @@ export interface AdminUserStore {
     type: "active" | "inactive" | "delete-all",
   ) => Promise<void>;
   deleteItem: (userId: string) => Promise<void>;
+}
+
+export interface AdminStaffStore {
+  staffs: User[];
+  currentStaff: User | null;
+  loading: boolean;
+  totalPages: number;
+
+  fetchStaffs: (
+    keyword?: string,
+    roleId?: string,
+    status?: string,
+    page?: number,
+    limit?: number,
+  ) => Promise<void>;
+  getDetail: (staffId: string) => Promise<void>;
+  createStaff: (data: {
+    displayName: string;
+    email: string;
+    phone: string;
+    password: string;
+    roleId: string;
+    status?: string;
+  }) => Promise<void>;
+  updateStaff: (
+    staffId: string,
+    data: {
+      displayName?: string;
+      email?: string;
+      phone?: string;
+      password?: string;
+      roleId?: string;
+      status?: string;
+    },
+  ) => Promise<void>;
+  changeStatus: (staffId: string, status: string) => Promise<void>;
+  deleteItem: (staffId: string) => Promise<void>;
+}
+
+export interface AdminCustomerStore {
+  customers: User[];
+  currentCustomer: User | null;
+  loading: boolean;
+  totalPages: number;
+
+  fetchCustomers: (
+    keyword?: string,
+    status?: string,
+    page?: number,
+    limit?: number,
+  ) => Promise<void>;
+  getDetail: (customerId: string) => Promise<void>;
+  createCustomer: (data: {
+    displayName: string;
+    email: string;
+    phone: string;
+    password: string;
+    status?: string;
+    address?: string;
+  }) => Promise<void>;
+  updateCustomer: (
+    customerId: string,
+    data: {
+      displayName?: string;
+      email?: string;
+      phone?: string;
+      password?: string;
+      status?: string;
+      address?: string;
+    },
+  ) => Promise<void>;
+  changeStatus: (customerId: string, status: string) => Promise<void>;
+  deleteItem: (customerId: string) => Promise<void>;
 }
 
 export interface RoleStore {

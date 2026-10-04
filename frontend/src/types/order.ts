@@ -18,17 +18,19 @@ export interface ShippingAddress {
 
 export interface Order {
   _id: string;
-  userId: string;
+  customerId: string;
   items: OrderItem[];
   shippingAddress: ShippingAddress;
   paymentMethod: "COD" | "VNPAY" | "MOMO";
   paymentStatus: "Pending" | "Paid" | "Failed" | "Refunded";
   orderStatus: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
   shippingFee: number;
-  promotionId?: string | null;
+  orderPromotionId?: string | null;
+  customerVoucherId?: string | null;
   discountAmount: number;
   totalAmount: number;
   hasReviewed: boolean;
+  updatedBy?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -44,5 +46,6 @@ export interface CreateOrderData {
     address: string;
   };
   paymentMethod: "COD" | "VNPAY" | "MOMO";
-  promotionId?: string;
+  orderPromotionId?: string;
+  customerVoucherId?: string;
 }

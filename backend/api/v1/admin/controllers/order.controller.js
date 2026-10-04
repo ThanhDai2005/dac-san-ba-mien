@@ -1,5 +1,7 @@
 import Order from "../../../../models/order.model.js";
 import Product from "../../../../models/product.model.js";
+import OrderPromotion from "../../../../models/orderPromotion.model.js";
+import CustomerVoucher from "../../../../models/customerVoucher.model.js";
 import Promotion from "../../../../models/promotion.model.js";
 import logger from "../../../../config/logger.js";
 
@@ -56,7 +58,18 @@ export const list = async (req, res) => {
     }
 
     const [data, totalItems] = await Promise.all([
-      Order.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Order.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: "customerId",
+          select: "userId address",
+          populate: {
+            path: "userId",
+            select: "displayName email phone",
+          },
+        }),
       Order.countDocuments(filter),
     ]);
 
@@ -83,8 +96,37 @@ export const detail = async (req, res) => {
     const orderId = req.params.orderId;
 
     const order = await Order.findOne({ _id: orderId })
-      .populate("userId", "displayName email phone")
-      .populate("items.productId", "name images price");
+      .populate({
+        path: "customerId",
+        select: "userId address",
+        populate: {
+          path: "userId",
+          select: "displayName email phone avatarUrl",
+        },
+      })
+      .populate("items.productId", "name images price")
+      .populate({
+        path: "orderPromotionId",
+        populate: {
+          path: "promotionId",
+          select: "title code discountType discountValue",
+        },
+      })
+      .populate({
+        path: "customerVoucherId",
+        populate: {
+          path: "promotionId",
+          select: "title code discountType discountValue",
+        },
+      })
+      .populate({
+        path: "updatedBy",
+        select: "userId",
+        populate: {
+          path: "userId",
+          select: "displayName",
+        },
+      });
 
     if (!order) {
       return res.status(404).json({
@@ -140,7 +182,7 @@ export const updateStatus = async (req, res) => {
       existedOrder.orderStatus == "Delivered" ||
       existedOrder.orderStatus == "Cancelled"
     ) {
-      return res.status(400).json({
+      return res.status(409).json({
         message: `Không thể cập nhật đơn hàng đã ${existedOrder.orderStatus == "Delivered" ? "giao thành công" : "hủy"}`,
       });
     }
@@ -155,16 +197,18 @@ export const updateStatus = async (req, res) => {
     if (orderStatus && orderStatus != existedOrder.orderStatus) {
       const allowedStatuses = validTransitions[existedOrder.orderStatus];
       if (!allowedStatuses || !allowedStatuses.includes(orderStatus)) {
-        return res.status(400).json({
+        return res.status(409).json({
           message: `Không thể chuyển từ trạng thái ${existedOrder.orderStatus} sang ${orderStatus}`,
         });
       }
     }
 
+    // Khi hủy đơn: hoàn trả stock + rollback promotion
     if (
       orderStatus === "Cancelled" &&
       existedOrder.orderStatus !== "Cancelled"
     ) {
+      // Hoàn trả stock (chỉ với Pending)
       if (existedOrder.orderStatus === "Pending") {
         for (const item of existedOrder.items) {
           await Product.updateOne(
@@ -174,18 +218,39 @@ export const updateStatus = async (req, res) => {
         }
       }
 
-      if (existedOrder.promotionId) {
-        await Promotion.updateOne(
-          { _id: existedOrder.promotionId },
+      // Rollback OrderPromotion usage
+      if (existedOrder.orderPromotionId) {
+        const orderPromo = await OrderPromotion.findOne({
+          _id: existedOrder.orderPromotionId,
+        });
+        if (orderPromo) {
+          // Rollback promotion cha
+          await Promotion.updateOne(
+            { _id: orderPromo.promotionId },
+            {
+              $inc: { usedCount: -1 },
+              $pull: { customersUsed: existedOrder.customerId },
+            },
+          );
+        }
+      }
+
+      // Rollback CustomerVoucher usage
+      if (existedOrder.customerVoucherId) {
+        await CustomerVoucher.updateOne(
+          { _id: existedOrder.customerVoucherId },
           {
-            $inc: { usedCount: -1 },
-            $pull: { usersUsed: existedOrder.userId },
+            isUsed: false,
+            usedAt: null,
+            orderId: null,
           },
         );
       }
     }
 
-    const updatePayload = {};
+    const updatePayload = {
+      updatedBy: req.staffId || null,
+    };
 
     if (orderStatus) {
       updatePayload.orderStatus = orderStatus;
@@ -195,8 +260,7 @@ export const updateStatus = async (req, res) => {
       updatePayload.paymentStatus = paymentStatus;
     }
 
-    // Quy tắc tự động: Nếu đơn là COD + Đang chờ tiền + Shipper báo Giao thành công (Delivered)
-    // -> Hệ thống tự động chuyển sang Đã thanh toán (Paid)
+    // Auto: COD + Delivered → Paid
     if (
       orderStatus === "Delivered" &&
       existedOrder.paymentMethod === "COD" &&
@@ -210,7 +274,14 @@ export const updateStatus = async (req, res) => {
       updatePayload,
       { new: true },
     )
-      .populate("userId", "displayName email")
+      .populate({
+        path: "customerId",
+        select: "userId address",
+        populate: {
+          path: "userId",
+          select: "displayName email",
+        },
+      })
       .populate("items.productId", "name images price");
 
     res.status(200).json({

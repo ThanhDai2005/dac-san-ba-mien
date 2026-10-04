@@ -1,6 +1,9 @@
 import Order from "../../../../models/order.model.js";
 import Product from "../../../../models/product.model.js";
+import OrderPromotion from "../../../../models/orderPromotion.model.js";
+import CustomerVoucher from "../../../../models/customerVoucher.model.js";
 import Promotion from "../../../../models/promotion.model.js";
+import Customer from "../../../../models/customer.model.js";
 import Cart from "../../../../models/cart.model.js";
 import Review from "../../../../models/review.model.js";
 import crypto from "crypto";
@@ -16,7 +19,13 @@ import logger from "../../../../config/logger.js";
 // [POST] /api/v1/order
 export const create = async (req, res) => {
   try {
-    const { items, shippingAddress, paymentMethod, promotionId } = req.body;
+    const {
+      items,
+      shippingAddress,
+      paymentMethod,
+      orderPromotionId,
+      customerVoucherId,
+    } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({
@@ -76,29 +85,47 @@ export const create = async (req, res) => {
     const shippingFeeValue = 30000;
 
     let discountAmountValue = 0;
-    let validatedPromotion = null;
+    let validatedOrderPromotion = null;
+    let validatedCustomerVoucher = null;
 
-    // Re-validate and update promotion if applied
-    if (promotionId) {
-      const now = new Date();
-      const promotion = await Promotion.findOne({
-        _id: promotionId,
-        deleted: false,
-        status: "active",
-        startDate: { $lte: now },
-        endDate: { $gte: now },
+    const customer = await Customer.findOne({ userId: req.user._id });
+    if (!customer) {
+      return res.status(400).json({
+        message: "Không tìm thấy thông tin khách hàng",
       });
+    }
 
-      if (!promotion) {
+    // Validate OrderPromotion if applied
+    if (orderPromotionId) {
+      const orderPromotion = await OrderPromotion.findOne({
+        _id: orderPromotionId,
+      }).populate("promotionId");
+
+      if (!orderPromotion || !orderPromotion.promotionId) {
         return res.status(400).json({
-          message: "Mã khuyến mãi không còn hợp lệ",
+          message: "Mã khuyến mãi đơn hàng không tồn tại",
         });
       }
 
-      // Check if user already used this promotion
+      const promotion = orderPromotion.promotionId;
+      const now = new Date();
+
+      // Kiểm tra promotion cha còn active và trong thời hạn
       if (
-        promotion.usersUsed.some(
-          (uid) => uid.toString() === req.user._id.toString(),
+        promotion.deleted ||
+        promotion.status !== "active" ||
+        promotion.startDate > now ||
+        promotion.endDate < now
+      ) {
+        return res.status(400).json({
+          message: "Mã khuyến mãi đơn hàng không còn hợp lệ",
+        });
+      }
+
+      // Check if customer already used this promotion
+      if (
+        promotion.customersUsed.some(
+          (cid) => cid.toString() === customer._id.toString(),
         )
       ) {
         return res.status(400).json({
@@ -117,13 +144,13 @@ export const create = async (req, res) => {
       }
 
       // Check minimum order value
-      if (subtotal < promotion.minOrderValue) {
+      if (subtotal < orderPromotion.minOrderValue) {
         return res.status(400).json({
-          message: `Đơn hàng tối thiểu ${promotion.minOrderValue.toLocaleString("vi-VN")} VND để áp dụng mã này`,
+          message: `Đơn hàng tối thiểu ${orderPromotion.minOrderValue.toLocaleString("vi-VN")} VND để áp dụng mã này`,
         });
       }
 
-      // Calculate discount server-side based on promotion type
+      // Calculate discount
       if (promotion.discountType === "percentage") {
         discountAmountValue = (subtotal * promotion.discountValue) / 100;
         if (
@@ -136,9 +163,65 @@ export const create = async (req, res) => {
         discountAmountValue = promotion.discountValue;
       }
 
+      // Giới hạn discount ≤ subtotal (không trừ vào tiền ship)
+      discountAmountValue = Math.min(discountAmountValue, subtotal);
       discountAmountValue = Math.round(discountAmountValue);
+      validatedOrderPromotion = { orderPromotion, promotion };
+    }
 
-      validatedPromotion = promotion;
+    // Validate CustomerVoucher if applied (override orderPromotion)
+    if (customerVoucherId) {
+      const customerVoucher = await CustomerVoucher.findOne({
+        _id: customerVoucherId,
+        customerId: customer._id,
+        isUsed: false,
+      }).populate("promotionId");
+
+      if (!customerVoucher || !customerVoucher.promotionId) {
+        return res.status(400).json({
+          message: "Voucher không còn hợp lệ hoặc đã được sử dụng",
+        });
+      }
+
+      const voucherPromotion = customerVoucher.promotionId;
+      const now = new Date();
+
+      // Kiểm tra promotion cha còn active
+      if (
+        voucherPromotion.deleted ||
+        voucherPromotion.status !== "active" ||
+        voucherPromotion.startDate > now ||
+        voucherPromotion.endDate < now
+      ) {
+        return res.status(400).json({
+          message: "Voucher không còn trong thời hạn sử dụng",
+        });
+      }
+
+      // Calculate voucher discount (override previous discount)
+      let voucherDiscount = 0;
+      if (voucherPromotion.discountType === "percentage") {
+        voucherDiscount = (subtotal * voucherPromotion.discountValue) / 100;
+        if (
+          voucherPromotion.maxDiscountAmount &&
+          voucherDiscount > voucherPromotion.maxDiscountAmount
+        ) {
+          voucherDiscount = voucherPromotion.maxDiscountAmount;
+        }
+      } else if (voucherPromotion.discountType === "fixed") {
+        voucherDiscount = voucherPromotion.discountValue;
+      }
+
+      // Giới hạn discount ≤ subtotal (không trừ vào tiền ship)
+      voucherDiscount = Math.min(voucherDiscount, subtotal);
+      voucherDiscount = Math.round(voucherDiscount);
+
+      // Voucher overrides orderPromotion if higher
+      if (voucherDiscount > discountAmountValue) {
+        discountAmountValue = voucherDiscount;
+        validatedOrderPromotion = null; // Clear order promotion
+        validatedCustomerVoucher = customerVoucher;
+      }
     }
 
     const totalAmount = subtotal + shippingFeeValue - discountAmountValue;
@@ -175,7 +258,7 @@ export const create = async (req, res) => {
     }
 
     const createdOrder = await Order.create({
-      userId: req.user._id,
+      customerId: customer._id,
       items: normalizedItems,
       shippingAddress: {
         recipient: shippingAddress.recipient,
@@ -186,26 +269,45 @@ export const create = async (req, res) => {
       paymentStatus: "Pending", // Mặc định chờ xử lý
       orderStatus: "Pending", // Mặc định chờ xử lý
       shippingFee: shippingFeeValue,
-      promotionId: promotionId || null,
+      orderPromotionId: validatedOrderPromotion
+        ? validatedOrderPromotion.orderPromotion._id
+        : null,
+      customerVoucherId: validatedCustomerVoucher
+        ? validatedCustomerVoucher._id
+        : null,
       discountAmount: discountAmountValue,
       totalAmount: totalAmount,
     });
 
-    if (validatedPromotion) {
+    // Update promotion usage (chỉ Promotion cha)
+    if (validatedOrderPromotion) {
+      // Ghi nhận customer đã dùng promotion cha
       await Promotion.updateOne(
-        { _id: promotionId },
+        { _id: validatedOrderPromotion.promotion._id },
         {
           $inc: { usedCount: 1 },
-          $addToSet: { usersUsed: req.user._id },
+          $addToSet: { customersUsed: customer._id },
+        },
+      );
+    }
+
+    // Mark voucher as used
+    if (validatedCustomerVoucher) {
+      await CustomerVoucher.updateOne(
+        { _id: validatedCustomerVoucher._id },
+        {
+          isUsed: true,
+          usedAt: new Date(),
+          orderId: createdOrder._id,
         },
       );
     }
 
     // Clear cart after successful order creation
-    await Cart.updateOne({ userId: req.user._id }, { items: [] });
+    await Cart.updateOne({ customerId: customer._id }, { items: [] });
 
     const populatedOrder = await Order.findOne({ _id: createdOrder._id })
-      .populate("userId", "displayName email")
+      .populate("customerId")
       .populate("items.productId", "name images price");
 
     // Send order confirmation email
@@ -422,10 +524,17 @@ export const retryPayment = async (req, res) => {
     const orderId = req.params.orderId;
     const userId = req.user._id;
 
-    // Kiểm tra đơn hàng tồn tại và thuộc về user
+    const customer = await Customer.findOne({ userId: userId });
+    if (!customer) {
+      return res.status(400).json({
+        message: "Không tìm thấy thông tin khách hàng",
+      });
+    }
+
+    // Kiểm tra đơn hàng tồn tại và thuộc về customer
     const order = await Order.findOne({
       _id: orderId,
-      userId: userId,
+      customerId: customer._id,
     });
 
     if (!order) {
@@ -501,7 +610,14 @@ export const myOrders = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const filter = { userId: req.user._id };
+    const customer = await Customer.findOne({ userId: req.user._id });
+    if (!customer) {
+      return res.status(400).json({
+        message: "Không tìm thấy thông tin khách hàng",
+      });
+    }
+
+    const filter = { customerId: customer._id };
 
     if (req.query.orderStatus) {
       filter.orderStatus = req.query.orderStatus;
@@ -538,9 +654,16 @@ export const detail = async (req, res) => {
   try {
     const orderId = req.params.orderId;
 
+    const customer = await Customer.findOne({ userId: req.user._id });
+    if (!customer) {
+      return res.status(400).json({
+        message: "Không tìm thấy thông tin khách hàng",
+      });
+    }
+
     const order = await Order.findOne({
       _id: orderId,
-      userId: req.user._id,
+      customerId: customer._id,
     }).populate("items.productId", "name images price");
 
     if (!order) {
@@ -569,12 +692,18 @@ export const detail = async (req, res) => {
 export const getOrderReviews = async (req, res) => {
   try {
     const orderId = req.params.orderId;
-    const userId = req.user._id;
 
-    // Kiểm tra đơn hàng tồn tại và thuộc về user
+    const customer = await Customer.findOne({ userId: req.user._id });
+    if (!customer) {
+      return res.status(400).json({
+        message: "Không tìm thấy thông tin khách hàng",
+      });
+    }
+
+    // Kiểm tra đơn hàng tồn tại và thuộc về customer
     const order = await Order.findOne({
       _id: orderId,
-      userId: userId,
+      customerId: customer._id,
     }).populate("items.productId", "name images price");
 
     if (!order) {
@@ -586,11 +715,18 @@ export const getOrderReviews = async (req, res) => {
     // Lấy danh sách productId trong đơn hàng
     const productIds = order.items.map((item) => item.productId._id);
 
-    // Lấy tất cả reviews của user cho các sản phẩm trong đơn hàng
+    // Lấy tất cả reviews của customer cho các sản phẩm trong đơn hàng
     const reviews = await Review.find({
-      userId: userId,
+      customerId: customer._id,
       productId: { $in: productIds },
-    }).populate("userId", "displayName avatarUrl");
+    }).populate({
+      path: "customerId",
+      select: "userId",
+      populate: {
+        path: "userId",
+        select: "displayName avatarUrl",
+      },
+    });
 
     res.status(200).json({
       message: "Lấy danh sách đánh giá thành công",
@@ -615,11 +751,17 @@ export const getOrderReviews = async (req, res) => {
 export const cancelOrder = async (req, res) => {
   try {
     const orderId = req.params.orderId;
-    const userId = req.user._id;
+
+    const customer = await Customer.findOne({ userId: req.user._id });
+    if (!customer) {
+      return res.status(400).json({
+        message: "Không tìm thấy thông tin khách hàng",
+      });
+    }
 
     const order = await Order.findOne({
       _id: orderId,
-      userId: userId,
+      customerId: customer._id,
     });
 
     if (!order) {
@@ -651,13 +793,30 @@ export const cancelOrder = async (req, res) => {
       );
     }
 
-    // Restore promotion usage
-    if (order.promotionId) {
-      await Promotion.updateOne(
-        { _id: order.promotionId },
+    // Rollback OrderPromotion usage (chỉ rollback promotion cha)
+    if (order.orderPromotionId) {
+      const orderPromo = await OrderPromotion.findOne({
+        _id: order.orderPromotionId,
+      });
+      if (orderPromo) {
+        await Promotion.updateOne(
+          { _id: orderPromo.promotionId },
+          {
+            $inc: { usedCount: -1 },
+            $pull: { customersUsed: customer._id },
+          },
+        );
+      }
+    }
+
+    // Rollback CustomerVoucher usage
+    if (order.customerVoucherId) {
+      await CustomerVoucher.updateOne(
+        { _id: order.customerVoucherId },
         {
-          $inc: { usedCount: -1 },
-          $pull: { usersUsed: userId },
+          isUsed: false,
+          usedAt: null,
+          orderId: null,
         },
       );
     }

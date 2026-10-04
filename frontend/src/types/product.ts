@@ -1,3 +1,14 @@
+export interface ActivePromotion {
+  _id: string;
+  promotionId: string;
+  title: string;
+  code: string;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  maxDiscountAmount: number | null;
+  endDate: string;
+}
+
 export interface Product {
   _id: string;
   name: string;
@@ -19,4 +30,5 @@ export interface Product {
   deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  activePromotion?: ActivePromotion | null;
 }

@@ -24,18 +24,8 @@ const userSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
-    address: {
-      type: String,
-      trim: true,
-      default: "",
-    },
     avatarUrl: {
       type: String,
-    },
-    roleId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Role",
-      default: null,
     },
     status: {
       type: String,
@@ -54,7 +44,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-userSchema.index({ roleId: 1, status: 1, deleted: 1 });
+userSchema.index({ status: 1, deleted: 1 });
 
 const User = mongoose.model("User", userSchema, "users");
 

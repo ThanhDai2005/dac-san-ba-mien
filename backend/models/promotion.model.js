@@ -14,11 +14,6 @@ const promotionSchema = new mongoose.Schema(
       uppercase: true,
       trim: true,
     },
-    description: {
-      type: String,
-      trim: true,
-      default: "",
-    },
     discountType: {
       type: String,
       enum: ["percentage", "fixed"],
@@ -27,11 +22,6 @@ const promotionSchema = new mongoose.Schema(
     discountValue: {
       type: Number,
       required: true,
-      min: 0,
-    },
-    minOrderValue: {
-      type: Number,
-      default: 0,
       min: 0,
     },
     maxDiscountAmount: {
@@ -47,9 +37,9 @@ const promotionSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
-    usersUsed: {
+    customersUsed: {
       type: [mongoose.Schema.Types.ObjectId],
-      ref: "User",
+      ref: "Customer",
       default: [],
     },
     startDate: {
@@ -85,5 +75,4 @@ promotionSchema.index({
 });
 
 const Promotion = mongoose.model("Promotion", promotionSchema, "promotions");
-
 export default Promotion;

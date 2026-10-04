@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../../../../models/user.model.js";
+import Staff from "../../../../models/staff.model.js";
 import logger from "../../../../config/logger.js";
 
 export const requireAuth = async (req, res, next) => {
@@ -26,8 +27,8 @@ export const requireAuth = async (req, res, next) => {
       _id: decoded.userId,
       deleted: false,
     })
-      .populate("roleId")
-      .select("-hashedPassword");
+      .select("-hashedPassword")
+      .lean(); // chuyển Mongoose Document thành Object JS thuần để thêm các trường tùy biến (như roleId) vào object user sau này.
 
     if (!user) {
       return res.status(404).json({
@@ -41,13 +42,25 @@ export const requireAuth = async (req, res, next) => {
       });
     }
 
-    if (!user.roleId) {
+    const staff = await Staff.findOne({ userId: user._id })
+      .populate("roleId")
+      .lean();
+
+    if (!staff) {
+      return res.status(403).json({
+        message: "Bạn chưa được gán vai trò nhân viên",
+      });
+    }
+
+    if (!staff.roleId) {
       return res.status(403).json({
         message: "Bạn chưa được gán vai trò",
       });
     }
 
     req.user = user;
+    req.user.roleId = staff.roleId;
+    req.staffId = staff._id;
     next();
   } catch (error) {
     logger.logError("Lỗi khi xác minh admin auth", error, {

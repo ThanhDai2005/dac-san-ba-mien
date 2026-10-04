@@ -1,4 +1,5 @@
 import User from "../../../../models/user.model.js";
+import Customer from "../../../../models/customer.model.js";
 import Session from "../../../../models/session.model.js";
 import ForgotPassword from "../../../../models/forgot-password.model.js";
 import { sendEmail } from "../../../../helpers/mailer.js";
@@ -59,6 +60,11 @@ export const signUp = async (req, res) => {
     });
 
     await user.save();
+
+    await Customer.create({
+      userId: user._id,
+      address: "",
+    });
 
     res.status(201).json({
       message: "Đăng ký thành công",
@@ -421,6 +427,11 @@ export const googleAuth = async (req, res) => {
       });
 
       await user.save();
+
+      await Customer.create({
+        userId: user._id,
+        address: "",
+      });
     }
 
     // Tạo accessToken và refreshToken

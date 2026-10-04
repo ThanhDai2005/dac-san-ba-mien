@@ -1,6 +1,7 @@
 import Review from "../../../../models/review.model.js";
 import Product from "../../../../models/product.model.js";
 import Order from "../../../../models/order.model.js";
+import Customer from "../../../../models/customer.model.js";
 import logger from "../../../../config/logger.js";
 
 // [POST] /api/v1/review
@@ -24,6 +25,14 @@ export const create = async (req, res) => {
       return res.status(400).json({ message: "Tối đa 5 ảnh cho mỗi đánh giá" });
     }
 
+    // Get customer from userId
+    const customer = await Customer.findOne({ userId: userId });
+    if (!customer) {
+      return res.status(400).json({
+        message: "Không tìm thấy thông tin khách hàng",
+      });
+    }
+
     // Kiểm tra sản phẩm tồn tại
     const product = await Product.findOne({
       _id: productId,
@@ -34,10 +43,10 @@ export const create = async (req, res) => {
       return res.status(404).json({ message: "Sản phẩm không tồn tại" });
     }
 
-    // Kiểm tra đơn hàng tồn tại, thuộc về user, đã giao và chứa sản phẩm này
+    // Kiểm tra đơn hàng tồn tại, thuộc về customer, đã giao và chứa sản phẩm này
     const order = await Order.findOne({
       _id: orderId,
-      userId: userId,
+      customerId: customer._id,
       orderStatus: "Delivered",
       "items.productId": productId,
     });
@@ -47,9 +56,9 @@ export const create = async (req, res) => {
       });
     }
 
-    // Kiểm tra user đã review sản phẩm này trong đơn hàng này chưa
+    // Kiểm tra customer đã review sản phẩm này trong đơn hàng này chưa
     const existingReview = await Review.findOne({
-      userId: userId,
+      customerId: customer._id,
       productId: productId,
       orderId: orderId,
     });
@@ -61,7 +70,7 @@ export const create = async (req, res) => {
 
     const review = await Review.create({
       productId,
-      userId,
+      customerId: customer._id,
       orderId,
       rating: Number(rating),
       comment: comment ? comment.trim() : "",
@@ -82,13 +91,13 @@ export const create = async (req, res) => {
       },
     );
 
-    // Kiểm tra xem user đã review hết tất cả sản phẩm trong đơn hàng chưa
+    // Kiểm tra xem customer đã review hết tất cả sản phẩm trong đơn hàng chưa
     // Nếu có thì cập nhật hasReviewed = true cho đơn hàng đó
     const productIdsInOrder = order.items.map((item) =>
       item.productId.toString(),
     );
     const reviewedProductsInOrder = await Review.find({
-      userId: userId,
+      customerId: customer._id,
       orderId: orderId,
       productId: { $in: productIdsInOrder },
     });
@@ -98,14 +107,30 @@ export const create = async (req, res) => {
       await Order.updateOne({ _id: orderId }, { hasReviewed: true });
     }
 
-    const populatedReview = await Review.findOne({ _id: review._id }).populate(
-      "userId",
-      "displayName avatarUrl",
-    );
+    const populatedReview = await Review.findOne({ _id: review._id })
+      .populate({
+        path: "customerId",
+        select: "userId",
+        populate: {
+          path: "userId",
+          select: "displayName avatarUrl",
+        },
+      })
+      .lean();
+
+    const user = await Customer.findOne({
+      _id: populatedReview.customerId._id,
+    }).populate("userId", "displayName avatarUrl");
 
     res.status(201).json({
       message: "Đánh giá sản phẩm thành công",
-      data: populatedReview,
+      data: {
+        ...populatedReview,
+        customerId: {
+          displayName: user?.userId?.displayName,
+          avatarUrl: user?.userId?.avatarUrl,
+        },
+      },
     });
   } catch (error) {
     logger.logError("Lỗi khi tạo review", error, {
@@ -138,16 +163,33 @@ export const listByProduct = async (req, res) => {
 
     const [data, totalItems] = await Promise.all([
       Review.find({ productId: productId })
-        .populate("userId", "displayName avatarUrl")
+        .populate({
+          path: "customerId",
+          select: "userId",
+          populate: {
+            path: "userId",
+            select: "displayName avatarUrl",
+          },
+        })
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(limit),
+        .limit(limit)
+        .lean(),
       Review.countDocuments({ productId: productId }),
     ]);
 
+    // Format response
+    const formattedData = data.map((review) => ({
+      ...review,
+      customerId: {
+        displayName: review.customerId?.userId?.displayName,
+        avatarUrl: review.customerId?.userId?.avatarUrl,
+      },
+    }));
+
     res.status(200).json({
       message: "Lấy danh sách đánh giá thành công",
-      data: data,
+      data: formattedData,
       totalItems: totalItems,
       totalPages: Math.ceil(totalItems / limit),
     });

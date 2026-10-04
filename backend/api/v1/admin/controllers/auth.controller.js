@@ -1,4 +1,5 @@
 import User from "../../../../models/user.model.js";
+import Staff from "../../../../models/staff.model.js";
 import Session from "../../../../models/session.model.js";
 import Role from "../../../../models/role.model.js";
 import bcrypt from "bcrypt";
@@ -51,15 +52,16 @@ export const login = async (req, res) => {
       });
     }
 
-    if (!user.roleId) {
+    const staff = await Staff.findOne({ userId: user._id }).populate("roleId");
+
+    if (!staff) {
       return res.status(403).json({
-        message:
-          "Tài khoản chưa được gán vai trò. Vui lòng liên hệ quản trị viên.",
+        message: "Tài khoản không có quyền truy cập hệ thống quản trị",
       });
     }
 
     const role = await Role.findOne({
-      _id: user.roleId,
+      _id: staff.roleId,
       deleted: false,
     });
 

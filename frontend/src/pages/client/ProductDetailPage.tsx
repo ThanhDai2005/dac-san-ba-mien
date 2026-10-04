@@ -273,6 +273,43 @@ const ProductDetailPage = () => {
 
   if (!currentProduct) return null;
 
+  // Helper tính giá sau giảm
+  const calcDiscountedPrice = (
+    price: number,
+    discountType: "percentage" | "fixed",
+    discountValue: number,
+    maxDiscountAmount: number | null,
+  ): number => {
+    let discount = 0;
+    if (discountType === "percentage") {
+      discount = (price * discountValue) / 100;
+      if (maxDiscountAmount && discount > maxDiscountAmount) {
+        discount = maxDiscountAmount;
+      }
+    } else {
+      discount = discountValue;
+    }
+    return Math.max(0, Math.round(price - discount));
+  };
+
+  const promo = currentProduct.activePromotion;
+  const discountedPrice = promo
+    ? calcDiscountedPrice(
+        currentProduct.price,
+        promo.discountType,
+        promo.discountValue,
+        promo.maxDiscountAmount,
+      )
+    : null;
+
+  const discountPercent =
+    promo && discountedPrice !== null
+      ? Math.round(
+          ((currentProduct.price - discountedPrice) / currentProduct.price) *
+            100,
+        )
+      : 0;
+
   return (
     <div className="chitietSP pt-20 pb-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 lg:px-6">
@@ -352,8 +389,40 @@ const ProductDetailPage = () => {
                   </span>
                 </div>
 
-                <div className="text-4xl font-bold text-red-600 mb-6">
-                  {(currentProduct.price ?? 0).toLocaleString("vi-VN")} ₫
+                {/* === PRICE SECTION WITH FLASH SALE === */}
+                <div className="mb-6">
+                  {!promo || discountedPrice === null ? (
+                    <div className="text-4xl font-bold text-red-600 mb-6">
+                      {(currentProduct.price ?? 0).toLocaleString("vi-VN")} ₫
+                    </div>
+                  ) : (
+                    <div>
+                      {/* Flash Sale Banner */}
+                      <div className="inline-flex items-center gap-2 bg-[#b51c00] text-white px-3 py-1.5 rounded-lg mb-3 text-sm font-bold shadow-sm">
+                        <span
+                          className="material-symbols-outlined text-[16px]"
+                          style={{ fontVariationSettings: "'FILL' 1" }}
+                        >
+                          bolt
+                        </span>
+                        FLASH SALE · Giảm {discountPercent}%
+                      </div>
+                      {/* Giá giảm */}
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-4xl font-bold text-red-600">
+                          {discountedPrice.toLocaleString("vi-VN")} ₫
+                        </span>
+                        <span className="text-xl text-gray-400 line-through font-medium">
+                          {(currentProduct.price ?? 0).toLocaleString("vi-VN")}{" "}
+                          ₫
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Kết thúc:{" "}
+                        {new Date(promo.endDate).toLocaleDateString("vi-VN")}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="text-gray-600 leading-relaxed mb-8 text-[15px]">

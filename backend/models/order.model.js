@@ -19,9 +19,9 @@ const orderItemSchema = new mongoose.Schema(
 
 const orderSchema = new mongoose.Schema(
   {
-    userId: {
+    customerId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Customer",
       required: true,
     },
     items: [orderItemSchema],
@@ -46,19 +46,29 @@ const orderSchema = new mongoose.Schema(
       default: "Pending",
     },
     shippingFee: { type: Number, default: 0 },
-    promotionId: {
+    orderPromotionId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Promotion",
+      ref: "OrderPromotion",
+      default: null,
+    },
+    customerVoucherId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "CustomerVoucher",
       default: null,
     },
     discountAmount: { type: Number, default: 0 },
-    totalAmount: { type: Number, required: true },
+    totalAmount: { type: Number, required: true, min: 0 },
     hasReviewed: { type: Boolean, default: false },
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Staff",
+      default: null,
+    },
   },
   { timestamps: true },
 );
 
-orderSchema.index({ userId: 1, orderStatus: 1, createdAt: -1 });
+orderSchema.index({ customerId: 1, orderStatus: 1, createdAt: -1 });
 
 const Order = mongoose.model("Order", orderSchema, "orders");
 

@@ -1,5 +1,6 @@
 import Product from "../../../../models/product.model.js";
 import Category from "../../../../models/category.model.js";
+import { getActiveProductPromotions } from "../../../../helpers/productPromotion.js";
 import logger from "../../../../config/logger.js";
 
 // [GET] /api/v1/product
@@ -68,9 +69,18 @@ export const list = async (req, res) => {
       Product.countDocuments(filter),
     ]);
 
+    // Gắn activePromotion cho từng product trong list
+    const productIds = data.map((p) => p._id);
+    const promoMap = await getActiveProductPromotions(productIds);
+
+    const dataWithPromo = data.map((product) => ({
+      ...product,
+      activePromotion: promoMap[product._id.toString()] || null,
+    }));
+
     res.status(200).json({
       message: "Lấy danh sách product thành công",
-      data: data,
+      data: dataWithPromo,
       totalItems: totalItems,
       totalPages: Math.ceil(totalItems / limit),
     });
@@ -106,9 +116,15 @@ export const detail = async (req, res) => {
       });
     }
 
+    // Gắn activePromotion cho product detail
+    const promoMap = await getActiveProductPromotions([data._id]);
+
     res.status(200).json({
       message: "Lấy chi tiết product thành công",
-      data: data,
+      data: {
+        ...data,
+        activePromotion: promoMap[data._id.toString()] || null,
+      },
     });
   } catch (error) {
     logger.logError("Lỗi khi gọi detail product", error, {

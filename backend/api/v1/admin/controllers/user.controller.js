@@ -6,6 +6,7 @@ export const getDetail = (req, res) => {
     res.status(200).json({
       message: "lấy thông tin thành công",
       user: req.user,
+      staffId: req.staffId,
     });
   } catch (error) {
     logger.logError("Lỗi khi gọi getDetail", error, {

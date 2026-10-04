@@ -2,14 +2,12 @@ export interface Promotion {
   _id: string;
   title: string;
   code: string;
-  description: string;
   discountType: "percentage" | "fixed";
   discountValue: number;
-  minOrderValue: number;
   maxDiscountAmount: number | null;
   usageLimit: number | null;
   usedCount: number;
-  usersUsed: string[];
+  customersUsed: string[];
   startDate: string;
   endDate: string;
   status: "active" | "inactive";
@@ -19,12 +17,57 @@ export interface Promotion {
   updatedAt: string;
 }
 
-export interface ApplyPromotionResponse {
-  promotionId: string;
+export interface OrderPromotion {
+  _id: string;
+  promotionId: Promotion;
+  minOrderValue: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProductPromotion {
+  _id: string;
+  promotionId: Promotion;
+  productIds: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CustomerVoucher {
+  _id: string;
+  promotionId: Promotion;
+  customerId: string;
+  isUsed: boolean;
+  usedAt: string | null;
+  orderId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AvailablePromotion {
+  type: "orderPromotion" | "customerVoucher";
+  orderPromotionId?: string;
+  voucherId?: string;
+  promotion: Promotion;
+  minOrderValue?: number;
+}
+
+export interface AppliedPromotion {
+  type: "orderPromotion" | "customerVoucher";
+  orderPromotionId?: string;
+  customerVoucherId?: string;
   code: string;
   title: string;
-  discountType: string;
-  discountValue: number;
+  discountAmount: number;
+}
+
+export interface CalculateDiscountResponse {
+  orderValue: number;
   discountAmount: number;
   finalAmount: number;
+  appliedPromo: {
+    type: "orderPromotion" | "customerVoucher";
+    code: string;
+    title: string;
+  } | null;
 }

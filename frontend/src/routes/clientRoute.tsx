@@ -20,6 +20,7 @@ import OrderReviewsViewPage from "@/pages/client/OrderReviewsViewPage";
 import BlogPage from "@/pages/client/BlogPage";
 import BlogDetailPage from "@/pages/client/BlogDetailPage";
 import AboutPage from "@/pages/client/AboutPage";
+import VoucherPage from "@/pages/client/VoucherPage";
 
 const clientRoute = {
   path: "/",
@@ -78,6 +79,10 @@ const clientRoute = {
         {
           element: <PrivateRouter />,
           children: [
+            {
+              path: "vouchers",
+              element: <VoucherPage />,
+            },
             {
               path: "profile",
               element: <ProfilePage />,

@@ -27,6 +27,41 @@ const ProductCard = ({ product, onQuickAdd }: ProductCardProps) => {
     }
   };
 
+  // Helper tính giá sau giảm
+  const calcDiscountedPrice = (
+    price: number,
+    discountType: "percentage" | "fixed",
+    discountValue: number,
+    maxDiscountAmount: number | null,
+  ): number => {
+    let discount = 0;
+    if (discountType === "percentage") {
+      discount = (price * discountValue) / 100;
+      if (maxDiscountAmount && discount > maxDiscountAmount) {
+        discount = maxDiscountAmount;
+      }
+    } else {
+      discount = discountValue;
+    }
+    return Math.max(0, Math.round(price - discount));
+  };
+
+  const promo = product.activePromotion;
+  const discountedPrice = promo
+    ? calcDiscountedPrice(
+        product.price,
+        promo.discountType,
+        promo.discountValue,
+        promo.maxDiscountAmount,
+      )
+    : null;
+
+  // Tính % giảm để hiện badge
+  const discountPercent =
+    promo && discountedPrice !== null
+      ? Math.round(((product.price - discountedPrice) / product.price) * 100)
+      : 0;
+
   return (
     <article
       onClick={handleCardClick}
@@ -41,6 +76,19 @@ const ProductCard = ({ product, onQuickAdd }: ProductCardProps) => {
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           src={product.images[0] || "/placeholder.png"}
         />
+
+        {/* Flash Sale Badge */}
+        {promo && discountPercent > 0 && product.stock > 0 && (
+          <div className="absolute top-3 left-3 bg-[#b51c00] text-white text-[11px] font-black px-2 py-0.5 rounded-md shadow-md flex items-center gap-0.5 uppercase tracking-wide">
+            <span
+              className="material-symbols-outlined text-[13px]"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
+              bolt
+            </span>
+            -{discountPercent}%
+          </div>
+        )}
 
         {/* Rating Badge */}
         <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-md px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
@@ -73,9 +121,20 @@ const ProductCard = ({ product, onQuickAdd }: ProductCardProps) => {
 
         {/* Footer: Price + Add Button */}
         <div className="mt-auto flex items-end justify-between">
-          <span className="text-base md:text-lg font-black text-[#b51c00]">
-            {product.price.toLocaleString("vi-VN")}đ
-          </span>
+          <div className="flex flex-col">
+            {/* Giá sau giảm */}
+            <span className="text-base md:text-lg font-black text-[#b51c00]">
+              {(discountedPrice ?? product.price).toLocaleString("vi-VN")}đ
+            </span>
+            {/* Giá gốc gạch ngang */}
+            {promo &&
+              discountedPrice !== null &&
+              discountedPrice < product.price && (
+                <span className="text-xs text-gray-400 line-through">
+                  {product.price.toLocaleString("vi-VN")}đ
+                </span>
+              )}
+          </div>
 
           <button
             onClick={handleQuickAdd}
