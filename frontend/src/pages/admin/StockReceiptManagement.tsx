@@ -21,6 +21,16 @@ import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
 import { useAdminStockReceiptStore } from "@/stores/useAdminStockReceiptStore";
 import { useAdminSupplierStore } from "@/stores/useAdminSupplierStore";
 import { hasPermission } from "@/lib/permissions";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // ─── Status badge config ───────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -121,19 +131,23 @@ const StockReceiptManagement = () => {
     return () => clearTimeout(t);
   }, [localKeyword]);
 
+  const refetchReceipts = async () => {
+    const sFilter = statusFilter !== "all" ? statusFilter : "";
+    const supFilter = supplierFilter !== "all" ? supplierFilter : "";
+    await fetchReceipts(
+      keyword,
+      sFilter,
+      supFilter,
+      startDate,
+      endDate,
+      currentPage,
+      limit,
+    );
+  };
+
   useEffect(() => {
     if (canView) {
-      const sFilter = statusFilter !== "all" ? statusFilter : "";
-      const supFilter = supplierFilter !== "all" ? supplierFilter : "";
-      fetchReceipts(
-        keyword,
-        sFilter,
-        supFilter,
-        startDate,
-        endDate,
-        currentPage,
-        limit,
-      );
+      refetchReceipts();
     }
   }, [
     keyword,
@@ -143,6 +157,7 @@ const StockReceiptManagement = () => {
     endDate,
     currentPage,
     limit,
+    fetchReceipts,
     canView,
   ]);
 
@@ -168,17 +183,7 @@ const StockReceiptManagement = () => {
       setActionLoading(true);
       await confirmReceipt(confirmId);
       setConfirmId(null);
-      const sFilter = statusFilter !== "all" ? statusFilter : "";
-      const supFilter = supplierFilter !== "all" ? supplierFilter : "";
-      fetchReceipts(
-        keyword,
-        sFilter,
-        supFilter,
-        startDate,
-        endDate,
-        currentPage,
-        limit,
-      );
+      await refetchReceipts();
     } catch {
       // handled in store
     } finally {
@@ -192,17 +197,7 @@ const StockReceiptManagement = () => {
       setActionLoading(true);
       await cancelReceipt(cancelId);
       setCancelId(null);
-      const sFilter = statusFilter !== "all" ? statusFilter : "";
-      const supFilter = supplierFilter !== "all" ? supplierFilter : "";
-      fetchReceipts(
-        keyword,
-        sFilter,
-        supFilter,
-        startDate,
-        endDate,
-        currentPage,
-        limit,
-      );
+      await refetchReceipts();
     } catch {
       // handled in store
     } finally {
@@ -401,26 +396,17 @@ const StockReceiptManagement = () => {
           </div>
 
           <div className="relative w-full overflow-x-auto">
-            {/* LƯU Ý: Đã bỏ whitespace-nowrap ở thẻ table để các cột dài có thể xuống dòng */}
             <table className="w-full text-sm text-left">
               <thead className="text-[12px] text-gray-500 bg-gray-50 uppercase font-bold tracking-wider border-b border-gray-200">
                 <tr>
-                  <th className="px-4 py-4 whitespace-nowrap">Mã phiếu</th>
+                  <th className="px-4 py-4 ">Mã phiếu</th>
                   <th className="px-4 py-4">Nhà cung cấp</th>
-                  <th className="px-4 py-4  text-right whitespace-nowrap">
-                    Tổng tiền
-                  </th>
-                  <th className="px-4 py-4 text-center whitespace-nowrap">
-                    Mặt hàng
-                  </th>
-                  <th className="px-4 py-4  whitespace-nowrap">Người tạo</th>
-                  <th className="px-4 py-4  whitespace-nowrap">Ngày tạo</th>
-                  <th className="px-4 py-4  text-center whitespace-nowrap">
-                    Trạng thái
-                  </th>
-                  <th className="px-4 py-4  text-center whitespace-nowrap">
-                    Thao tác
-                  </th>
+                  <th className="px-4 py-4  text-right ">Tổng tiền</th>
+                  <th className="px-4 py-4 text-center ">Mặt hàng</th>
+                  <th className="px-4 py-4  ">Người tạo</th>
+                  <th className="px-4 py-4  ">Ngày tạo</th>
+                  <th className="px-4 py-4  text-center">Trạng thái</th>
+                  <th className="px-4 py-4  text-center">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -463,7 +449,7 @@ const StockReceiptManagement = () => {
                         className="bg-white hover:bg-gray-50 transition-colors"
                       >
                         <td className="px-4 py-4 align-top">
-                          <span className="font-mono font-bold text-[#b51c00] text-[13px] tracking-wide whitespace-nowrap">
+                          <span className="font-mono font-bold text-[#b51c00] text-[13px] tracking-wide">
                             #{receipt._id.slice(-8).toUpperCase()}
                           </span>
                         </td>
@@ -472,7 +458,7 @@ const StockReceiptManagement = () => {
                             {receipt.supplierId?.name || "—"}
                           </div>
                         </td>
-                        <td className="px-4 py-4 align-top text-right font-bold text-gray-900 whitespace-nowrap">
+                        <td className="px-4 py-4 align-top text-right font-bold text-gray-900 ">
                           {formatMoney(receipt.totalAmount)}
                         </td>
                         <td className="px-4 py-4 align-top text-center">
@@ -481,14 +467,14 @@ const StockReceiptManagement = () => {
                           </span>
                         </td>
                         <td className="px-4 py-4 align-top">
-                          <div className="text-gray-700 font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]">
-                            {receipt.createdBy?.displayName || "—"}
+                          <div className="text-gray-700 font-medium overflow-hidden text-ellipsis max-w-[120px]">
+                            {receipt.createdBy?.userId?.displayName || "—"}
                           </div>
                         </td>
-                        <td className="px-4 py-4 align-top text-gray-500 font-medium whitespace-nowrap">
+                        <td className="px-4 py-4 align-top text-gray-500 font-medium">
                           {formatDate(receipt.createdAt)}
                         </td>
-                        <td className="px-4 py-4 align-top text-center whitespace-nowrap">
+                        <td className="px-4 py-4 align-top text-center">
                           <span
                             className={`inline-flex items-center px-2.5 py-1 rounded-md text-[12px] font-bold ${cfg.bg} ${cfg.text}`}
                           >
@@ -573,99 +559,100 @@ const StockReceiptManagement = () => {
         </div>
       </div>
 
-      {/* ═══════════════ MODAL XÁC NHẬN ═══════════════ */}
-      {confirmId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex items-center gap-4 mb-4">
+      {/* ═══════════════ ALERT DIALOG XÁC NHẬN ═══════════════ */}
+      <AlertDialog open={!!confirmId} onOpenChange={setConfirmId}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-4 mb-2">
               <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
                 <CheckCircle2 className="w-6 h-6 text-emerald-600" />
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">
+              <div className="text-left">
+                <AlertDialogTitle className="text-lg font-bold text-gray-900">
                   Xác nhận phiếu nhập
-                </h3>
-                <p className="text-sm text-gray-500 mt-0.5">
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-sm text-gray-500 mt-0.5">
                   Hành động này sẽ cộng số lượng vào kho
-                </p>
+                </AlertDialogDescription>
               </div>
             </div>
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-5">
-              <p className="text-sm text-emerald-800 font-medium">
-                ✅ Sau khi xác nhận, số lượng tồn kho của các sản phẩm trong
-                phiếu sẽ được tự động cập nhật và không thể hoàn tác.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setConfirmId(null)}
-                disabled={actionLoading}
-                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50"
-              >
-                Hủy bỏ
-              </button>
-              <button
-                onClick={handleConfirm}
-                disabled={actionLoading}
-                className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
-              >
-                {actionLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Xác nhận phiếu"
-                )}
-              </button>
-            </div>
+          </AlertDialogHeader>
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 my-4">
+            <p className="text-sm text-emerald-800 font-medium">
+              ✅ Sau khi xác nhận, số lượng tồn kho của các sản phẩm trong phiếu
+              sẽ được tự động cập nhật và không thể hoàn tác.
+            </p>
           </div>
-        </div>
-      )}
+          <AlertDialogFooter className="gap-3 sm:gap-3">
+            <AlertDialogCancel
+              disabled={actionLoading}
+              className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              Hủy bỏ
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirm}
+              disabled={actionLoading}
+              className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {actionLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Xác nhận phiếu"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-      {/* ═══════════════ MODAL HỦY ═══════════════ */}
-      {cancelId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex items-center gap-4 mb-4">
+      {/* ═══════════════ ALERT DIALOG HỦY ═══════════════ */}
+      <AlertDialog
+        open={!!cancelId}
+        onOpenChange={(open) => !open && setCancelId(null)}
+      >
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-4 mb-2">
               <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
                 <XCircle className="w-6 h-6 text-red-600" />
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">
+              <div className="text-left">
+                <AlertDialogTitle className="text-lg font-bold text-gray-900">
                   Hủy phiếu nhập
-                </h3>
-                <p className="text-sm text-gray-500 mt-0.5">
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-sm text-gray-500 mt-0.5">
                   Phiếu sẽ bị hủy và không thể khôi phục
-                </p>
+                </AlertDialogDescription>
               </div>
             </div>
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-5">
-              <p className="text-sm text-red-800 font-medium">
-                ⚠️ Hành động này không thể hoàn tác. Phiếu nhập sẽ chuyển sang
-                trạng thái "Đã hủy".
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setCancelId(null)}
-                disabled={actionLoading}
-                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50"
-              >
-                Quay lại
-              </button>
-              <button
-                onClick={handleCancel}
-                disabled={actionLoading}
-                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
-              >
-                {actionLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Xác nhận hủy"
-                )}
-              </button>
-            </div>
+          </AlertDialogHeader>
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 my-4">
+            <p className="text-sm text-red-800 font-medium">
+              ⚠️ Hành động này không thể hoàn tác. Phiếu nhập sẽ chuyển sang
+              trạng thái "Đã hủy".
+            </p>
           </div>
-        </div>
-      )}
+          <AlertDialogFooter className="gap-3 sm:gap-3">
+            <AlertDialogCancel
+              disabled={actionLoading}
+              className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              Quay lại
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCancel}
+              disabled={actionLoading}
+              className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {actionLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Xác nhận hủy"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

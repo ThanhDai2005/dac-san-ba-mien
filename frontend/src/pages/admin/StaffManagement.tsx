@@ -1,34 +1,33 @@
-import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router";
 import {
   Search,
   Plus,
-  Trash2,
-  Loader2,
-  Pencil,
-  RotateCcw,
+  Edit,
   Lock,
+  RotateCcw,
+  Trash2,
+  UserCog,
 } from "lucide-react";
-import { useAdminUserStore } from "@/stores/useAdminUserStore";
-import { useAdminRoleStore } from "@/stores/useAdminRoleStore";
-import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useAdminStaffStore } from "@/stores/useAdminStaffStore";
+import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
+import { useAdminRoleStore } from "@/stores/useAdminRoleStore";
+import AdminHeader from "@/components/admin/AdminHeader";
+import AdminPagination from "@/components/admin/AdminPagination";
+import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
+import { hasPermission } from "@/lib/permissions";
 import {
   confirmDelete,
   confirmRestore,
   confirmPermanentDelete,
 } from "@/lib/sweetalert";
-import { hasPermission } from "@/lib/permissions";
-import AdminHeader from "@/components/admin/AdminHeader";
-import AdminPagination from "@/components/admin/AdminPagination";
-import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 
-const UserManagement = () => {
+const StaffManagement = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get("keyword") || "";
-  const roleFilter = searchParams.get("role") || "all";
+  const roleFilter = searchParams.get("roleId") || "all";
   const statusFilter = searchParams.get("status") || "all";
   const currentPage = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "10");
@@ -37,24 +36,23 @@ const UserManagement = () => {
 
   const { user } = useAdminAuthStore();
   const {
-    users,
+    staffs,
     totalPages,
     loading,
-    fetchUsers,
+    fetchStaffs,
     changeStatus,
     changeMulti,
     deleteItem,
-  } = useAdminUserStore();
-
+  } = useAdminStaffStore();
   const { roles, fetchRoles } = useAdminRoleStore();
 
-  const showSkeleton = loading && users.length === 0;
-  const showOverlay = loading && users.length > 0;
+  const showSkeleton = loading && staffs.length === 0;
+  const showOverlay = loading && staffs.length > 0;
 
-  const canView = hasPermission(user, "accounts_view");
-  const canCreate = hasPermission(user, "accounts_create");
-  const canEdit = hasPermission(user, "accounts_edit");
-  const canDelete = hasPermission(user, "accounts_delete");
+  const canView = hasPermission(user, "staffs_view");
+  const canCreate = hasPermission(user, "staffs_create");
+  const canEdit = hasPermission(user, "staffs_edit");
+  const canDelete = hasPermission(user, "staffs_delete");
 
   const updateURL = (newParams: Record<string, string>) => {
     const params = Object.fromEntries(searchParams.entries());
@@ -65,7 +63,7 @@ const UserManagement = () => {
         !mergedParams[key] ||
         (key === "page" && mergedParams[key] === "1") ||
         (key === "status" && mergedParams[key] === "all") ||
-        (key === "role" && mergedParams[key] === "all") ||
+        (key === "roleId" && mergedParams[key] === "all") ||
         (key === "limit" && mergedParams[key] === "10") ||
         (key === "keyword" && mergedParams[key] === "")
       ) {
@@ -79,7 +77,6 @@ const UserManagement = () => {
     setLocalKeyword(searchTerm);
   }, [searchTerm]);
 
-  // Debounce: dừng gõ 300ms mới đẩy lên URL → useEffect cũ tự fetch
   useEffect(() => {
     const timer = setTimeout(() => {
       if (localKeyword !== searchTerm) {
@@ -90,19 +87,15 @@ const UserManagement = () => {
     return () => clearTimeout(timer);
   }, [localKeyword]);
 
-  useEffect(() => {
-    fetchRoles();
-  }, [fetchRoles]);
-
-  const refetchUsers = async () => {
+  const refetchStaffs = async () => {
     const roleId = roleFilter !== "all" ? roleFilter : "";
     const status = statusFilter !== "all" ? statusFilter : "";
-    await fetchUsers(searchTerm, roleId, status, currentPage, limit);
+    await fetchStaffs(searchTerm, roleId, status, currentPage, limit);
   };
 
   useEffect(() => {
     if (canView) {
-      refetchUsers();
+      refetchStaffs();
     }
   }, [
     currentPage,
@@ -110,60 +103,76 @@ const UserManagement = () => {
     searchTerm,
     roleFilter,
     statusFilter,
-    fetchUsers,
+    fetchStaffs,
     canView,
   ]);
 
+  useEffect(() => {
+    fetchRoles("", 1, 100);
+  }, [fetchRoles]);
+
   const handleChangeStatus = async (
-    userId: string,
+    staffId: string,
     status: "active" | "inactive",
   ) => {
     if (!canEdit) {
-      toast.error("Bạn không có quyền chỉnh sửa tài khoản");
+      toast.error("Bạn không có quyền chỉnh sửa nhân viên");
       return;
     }
 
     const result =
       status === "active"
         ? await confirmRestore(
-            "Khôi phục tài khoản?",
-            "Tài khoản sẽ được kích hoạt và có thể đăng nhập lại",
+            "Khôi phục nhân viên?",
+            "Nhân viên sẽ được kích hoạt và có thể đăng nhập lại",
           )
         : await confirmDelete(
-            "Khóa tài khoản?",
-            "Tài khoản sẽ bị khóa và không thể đăng nhập",
+            "Khóa nhân viên?",
+            "Nhân viên sẽ bị khóa và không thể đăng nhập",
           );
 
     if (!result.isConfirmed) return;
 
     try {
-      await changeStatus(userId, status);
-      await refetchUsers();
-      setSelectedItems(selectedItems.filter((id) => id !== userId));
-    } catch (error) {
-      // Error already handled in store
+      await changeStatus(staffId, status);
+      await refetchStaffs();
+      // Find the staff's staffId to remove from selectedItems
+      const staff = staffs.find((s) => s._id === staffId);
+      if (staff) {
+        setSelectedItems(selectedItems.filter((id) => id !== staff.staffId));
+      }
+    } catch (error: any) {
+      if (error?.response?.data?.message) {
+        toast.error(error.response.data.message);
+      }
     }
   };
 
-  const handleDeleteItem = async (userId: string) => {
+  const handleDeleteItem = async (staffId: string) => {
     if (!canDelete) {
-      toast.error("Bạn không có quyền xóa tài khoản");
+      toast.error("Bạn không có quyền xóa nhân viên");
       return;
     }
 
     const result = await confirmPermanentDelete(
       "Xóa vĩnh viễn?",
-      "Hành động này không thể hoàn tác! Tài khoản sẽ bị xóa vĩnh viễn khỏi hệ thống.",
+      "Hành động này không thể hoàn tác! Nhân viên sẽ bị xóa vĩnh viễn khỏi hệ thống.",
     );
 
     if (!result.isConfirmed) return;
 
     try {
-      await deleteItem(userId);
-      await refetchUsers();
-      setSelectedItems(selectedItems.filter((id) => id !== userId));
-    } catch (error) {
-      // Error already handled in store
+      await deleteItem(staffId);
+      await refetchStaffs();
+      // Find the staff's staffId to remove from selectedItems
+      const staff = staffs.find((s) => s._id === staffId);
+      if (staff) {
+        setSelectedItems(selectedItems.filter((id) => id !== staff.staffId));
+      }
+    } catch (error: any) {
+      if (error?.response?.data?.message) {
+        toast.error(error.response.data.message);
+      }
     }
   };
 
@@ -171,35 +180,35 @@ const UserManagement = () => {
     type: "active" | "inactive" | "delete-all",
   ) => {
     if (selectedItems.length === 0) {
-      toast.warning("Vui lòng chọn ít nhất một tài khoản");
+      toast.warning("Vui lòng chọn ít nhất một nhân viên");
       return;
     }
 
     if ((type === "active" || type === "inactive") && !canEdit) {
-      toast.error("Bạn không có quyền chỉnh sửa tài khoản");
+      toast.error("Bạn không có quyền chỉnh sửa nhân viên");
       return;
     }
 
     if (type === "delete-all" && !canDelete) {
-      toast.error("Bạn không có quyền xóa tài khoản");
+      toast.error("Bạn không có quyền xóa nhân viên");
       return;
     }
 
     let result;
     if (type === "active") {
       result = await confirmRestore(
-        "Khôi phục nhiều tài khoản?",
-        `Bạn đang khôi phục ${selectedItems.length} tài khoản`,
+        "Khôi phục nhiều nhân viên?",
+        `Bạn đang khôi phục ${selectedItems.length} nhân viên`,
       );
     } else if (type === "inactive") {
       result = await confirmDelete(
-        "Khóa nhiều tài khoản?",
-        `Bạn đang khóa ${selectedItems.length} tài khoản`,
+        "Khóa nhiều nhân viên?",
+        `Bạn đang khóa ${selectedItems.length} nhân viên`,
       );
     } else {
       result = await confirmPermanentDelete(
-        "Xóa vĩnh viễn nhiều tài khoản?",
-        `Bạn đang xóa vĩnh viễn ${selectedItems.length} tài khoản. Hành động này không thể hoàn tác!`,
+        "Xóa vĩnh viễn nhiều nhân viên?",
+        `Bạn đang xóa vĩnh viễn ${selectedItems.length} nhân viên. Hành động này không thể hoàn tác!`,
       );
     }
 
@@ -207,38 +216,40 @@ const UserManagement = () => {
 
     try {
       await changeMulti(selectedItems, type);
-      await refetchUsers();
+      await refetchStaffs();
       setSelectedItems([]);
     } catch (error) {
       // Error already handled in store
     }
   };
 
-  const selectedUsers = users.filter((u) => selectedItems.includes(u._id));
-  const hasActiveSelected = selectedUsers.some((u) => u.status === "active");
-  const hasInactiveSelected = selectedUsers.some(
-    (u) => u.status === "inactive",
+  const selectedStaffs = staffs.filter((s) =>
+    selectedItems.includes(s.staffId),
+  );
+  const hasActiveSelected = selectedStaffs.some((s) => s.status === "active");
+  const hasInactiveSelected = selectedStaffs.some(
+    (s) => s.status === "inactive",
   );
 
-  const isSuperAdmin = (user) => {
-    return user?.roleId && user?.roleId?.title === "Super Admin";
+  const isSuperAdmin = (staff) => {
+    return staff?.roleId && staff?.roleId?.title === "Super Admin";
   };
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
-      // Exclude Super Admin users from bulk selection
-      const selectableUsers = users.filter((item) => !isSuperAdmin(item));
-      setSelectedItems(selectableUsers.map((item) => item._id));
+      // Exclude Super Admin staffs from bulk selection
+      const selectableStaffs = staffs.filter((item) => !isSuperAdmin(item));
+      setSelectedItems(selectableStaffs.map((item) => item.staffId));
     } else {
       setSelectedItems([]);
     }
   };
 
-  const handleSelectItem = (id: string) => {
-    if (selectedItems.includes(id)) {
-      setSelectedItems(selectedItems.filter((itemId) => itemId !== id));
+  const handleSelectItem = (staffId: string) => {
+    if (selectedItems.includes(staffId)) {
+      setSelectedItems(selectedItems.filter((itemId) => itemId !== staffId));
     } else {
-      setSelectedItems([...selectedItems, id]);
+      setSelectedItems([...selectedItems, staffId]);
     }
   };
 
@@ -247,7 +258,7 @@ const UserManagement = () => {
       <NoPermissionScreen
         breadcrumbItems={[
           { label: "Admin", href: "/admin/dashboard" },
-          { label: "Quản lý tài khoản", isCurrentPage: true },
+          { label: "Quản lý nhân viên", isCurrentPage: true },
         ]}
       />
     );
@@ -259,7 +270,7 @@ const UserManagement = () => {
       <AdminHeader
         items={[
           { label: "Admin", href: "/admin/dashboard" },
-          { label: "Quản lý tài khoản", isCurrentPage: true },
+          { label: "Quản lý nhân viên", isCurrentPage: true },
         ]}
       />
 
@@ -267,7 +278,7 @@ const UserManagement = () => {
         {/* TITLE & FILTERS */}
         <div>
           <h1 className="text-[24px] font-bold text-gray-900 mb-6 tracking-tight">
-            Quản lý tài khoản
+            Quản lý nhân viên
           </h1>
 
           <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
@@ -288,7 +299,9 @@ const UserManagement = () => {
 
               <select
                 value={roleFilter}
-                onChange={(e) => updateURL({ role: e.target.value, page: "1" })}
+                onChange={(e) =>
+                  updateURL({ roleId: e.target.value, page: "1" })
+                }
                 className="w-full sm:w-48 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#b51c00] focus:border-[#b51c00] bg-white cursor-pointer"
               >
                 <option value="all">Tất cả vai trò</option>
@@ -331,7 +344,7 @@ const UserManagement = () => {
                   className="flex items-center justify-center gap-2 px-5 py-2 bg-[#ffdad6] text-[#ba1a1a] rounded-[20px] font-semibold text-sm hover:bg-[#ffb4a5] transition-colors active:scale-95 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Lock className="w-4 h-4" />
-                  Khóa tài khoản đã chọn
+                  Khóa đã chọn
                 </button>
               )}
 
@@ -347,11 +360,11 @@ const UserManagement = () => {
 
               {canCreate && (
                 <button
-                  onClick={() => navigate("/admin/user/create")}
+                  onClick={() => navigate("/admin/staff/create")}
                   className="flex items-center justify-center gap-2 px-5 py-2 bg-[#b51c00] text-white rounded-[20px] font-semibold text-sm hover:bg-[#8e1400] shadow-sm shadow-red-500/20 transition-all active:scale-95 whitespace-nowrap"
                 >
                   <Plus className="w-4 h-4" />
-                  Thêm tài khoản
+                  Thêm nhân viên
                 </button>
               )}
             </div>
@@ -365,6 +378,17 @@ const UserManagement = () => {
           </div>
 
           <div className="relative">
+            {showOverlay && (
+              <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                <div className="flex items-center gap-3 bg-white px-6 py-3 rounded-lg shadow-lg border border-gray-200">
+                  <div className="w-5 h-5 border-2 border-[#b51c00] border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-sm text-gray-600 font-medium">
+                    Đang tải...
+                  </span>
+                </div>
+              </div>
+            )}
+
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
                 <thead className="text-[12px] text-gray-500 bg-[#f1f5f9] uppercase font-bold border-b border-gray-200 tracking-wider">
@@ -376,16 +400,16 @@ const UserManagement = () => {
                           className="w-4 h-4 bg-white border-gray-300 rounded focus:ring-blue-500 cursor-pointer accent-blue-600"
                           onChange={handleSelectAll}
                           checked={
-                            selectedItems.length === users.length &&
-                            users.length > 0
+                            selectedItems.length === staffs.length &&
+                            staffs.length > 0
                           }
                         />
                       </div>
                     </th>
-                    <th scope="col" className="px-6 py-4">
+                    <th scope="col" className="px-6 py-4 ">
                       STT
                     </th>
-                    <th scope="col" className="px-6 py-4 text-center">
+                    <th scope="col" className="px-6 py-4 text-center ">
                       Ảnh đại diện
                     </th>
                     <th scope="col" className="px-6 py-4">
@@ -400,17 +424,16 @@ const UserManagement = () => {
                     <th scope="col" className="px-6 py-4 text-center">
                       Vai trò
                     </th>
-                    <th scope="col" className="px-6 py-4 text-center">
+                    <th scope="col" className="px-6 py-4 text-center ">
                       Trạng thái
                     </th>
-                    <th scope="col" className="px-6 py-4 text-center">
+                    <th scope="col" className="px-6 py-4 text-center ">
                       Thao tác
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {showSkeleton ? (
-                    // Skeleton rows on first load
                     Array.from({ length: limit }).map((_, index) => (
                       <tr
                         key={index}
@@ -420,7 +443,7 @@ const UserManagement = () => {
                           <div className="w-4 h-4 bg-gray-200 rounded"></div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="h-4 bg-gray-200 rounded w-8"></div>
+                          <div className="h-4 bg-gray-200 rounded w-8 "></div>
                         </td>
                         <td className="px-6 py-4 flex justify-center">
                           <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
@@ -448,8 +471,8 @@ const UserManagement = () => {
                         </td>
                       </tr>
                     ))
-                  ) : users.length > 0 ? (
-                    users.map((item, index) => {
+                  ) : staffs.length > 0 ? (
+                    staffs.map((item, index) => {
                       const isSuperAdminUser = isSuperAdmin(item);
                       return (
                         <tr
@@ -461,8 +484,8 @@ const UserManagement = () => {
                               <input
                                 type="checkbox"
                                 className="w-4 h-4 bg-white border-gray-300 rounded focus:ring-blue-500 cursor-pointer accent-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                                checked={selectedItems.includes(item._id)}
-                                onChange={() => handleSelectItem(item._id)}
+                                checked={selectedItems.includes(item.staffId)}
+                                onChange={() => handleSelectItem(item.staffId)}
                                 disabled={isSuperAdminUser}
                               />
                             </div>
@@ -483,25 +506,21 @@ const UserManagement = () => {
                               </div>
                             )}
                           </td>
-                          <td className="px-6 py-4 font-semibold text-gray-900">
-                            {item.displayName}
+                          <td className="px-6 py-4">
+                            <div className="font-semibold text-gray-900">
+                              {item.displayName}
+                            </div>
                           </td>
-                          <td className="px-6 py-4 text-gray-600 font-medium">
-                            {item.email}
-                          </td>
-                          <td className="px-6 py-4 text-center font-medium text-gray-700">
-                            {item.phone}
+                          <td className="px-6 py-4">
+                            <div className="text-gray-600">{item.email}</div>
                           </td>
                           <td className="px-6 py-4 text-center">
-                            {item.roleId ? (
-                              <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[12px] font-bold bg-[#dbeafe] text-[#2563eb]">
-                                {item.roleId.title}
-                              </span>
-                            ) : (
-                              <span className="text-gray-400 text-xs">
-                                Khách hàng
-                              </span>
-                            )}
+                            <div className="text-gray-600">{item.phone}</div>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-[#e0e7ff] text-[#4338ca]">
+                              {item.roleId?.title || "N/A"}
+                            </span>
                           </td>
                           <td className="px-6 py-4 text-center">
                             {item.status === "active" ? (
@@ -515,7 +534,7 @@ const UserManagement = () => {
                             )}
                           </td>
                           <td className="px-6 py-4">
-                            <div className="flex items-center justify-center gap-2">
+                            <div className="flex gap-2 justify-center">
                               {isSuperAdminUser ? (
                                 <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-[6px]">
                                   <Lock className="w-3.5 h-3.5 text-amber-600" />
@@ -528,18 +547,23 @@ const UserManagement = () => {
                                   {canEdit && (
                                     <button
                                       onClick={() =>
-                                        navigate(`/admin/user/edit/${item._id}`)
+                                        navigate(
+                                          `/admin/staff/edit/${item.staffId}`,
+                                        )
                                       }
                                       className="px-3 py-1.5 border border-[#22c55e] text-[#16a34a] rounded-[6px] text-xs font-bold hover:bg-[#f0fdf4] transition-colors flex items-center gap-1"
                                     >
-                                      <Pencil className="w-3 h-3" />
+                                      <Edit className="w-3 h-3" />
                                       Sửa
                                     </button>
                                   )}
                                   {canEdit && (
                                     <button
                                       onClick={() =>
-                                        handleChangeStatus(item._id, "inactive")
+                                        handleChangeStatus(
+                                          item.staffId!,
+                                          "inactive",
+                                        )
                                       }
                                       className="px-3 py-1.5 border border-[#ef4444] text-[#dc2626] rounded-[6px] text-xs font-bold hover:bg-[#fef2f2] transition-colors flex items-center gap-1"
                                     >
@@ -553,7 +577,10 @@ const UserManagement = () => {
                                   {canEdit && (
                                     <button
                                       onClick={() =>
-                                        handleChangeStatus(item._id, "active")
+                                        handleChangeStatus(
+                                          item.staffId!,
+                                          "active",
+                                        )
                                       }
                                       className="px-3 py-1.5 border border-[#ec4899] text-[#db2777] rounded-[6px] text-xs font-bold hover:bg-[#fdf2f8] transition-colors flex items-center gap-1"
                                     >
@@ -563,7 +590,9 @@ const UserManagement = () => {
                                   )}
                                   {canDelete && (
                                     <button
-                                      onClick={() => handleDeleteItem(item._id)}
+                                      onClick={() =>
+                                        handleDeleteItem(item.staffId!)
+                                      }
                                       className="px-3 py-1.5 border border-[#ef4444] text-[#dc2626] rounded-[6px] text-xs font-bold hover:bg-[#fef2f2] transition-colors flex items-center gap-1"
                                     >
                                       <Trash2 className="w-3 h-3" />
@@ -579,42 +608,36 @@ const UserManagement = () => {
                     })
                   ) : (
                     <tr>
-                      <td
-                        colSpan={9}
-                        className="px-6 py-12 text-center text-gray-500"
-                      >
-                        Không tìm thấy tài khoản nào.
+                      <td colSpan={9} className="px-6 py-12 text-center">
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                            <UserCog className="w-8 h-8 text-gray-400" />
+                          </div>
+                          <p className="text-gray-500 font-medium">
+                            Không tìm thấy nhân viên nào
+                          </p>
+                        </div>
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
-
-            {/* Overlay spinner for subsequent loads */}
-            {showOverlay && (
-              <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center z-10 rounded-lg">
-                <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="w-7 h-7 animate-spin text-[#b51c00]" />
-                  <span className="text-sm font-semibold text-gray-600">
-                    Đang tải...
-                  </span>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* PAGINATION */}
-          {users.length > 0 && (
-            <AdminPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              limit={limit}
-              onPageChange={(page) => updateURL({ page: page.toString() })}
-              onLimitChange={(newLimit) =>
-                updateURL({ limit: newLimit.toString(), page: "1" })
-              }
-            />
+          {!showSkeleton && staffs.length > 0 && (
+            <div className="px-6 py-4 border-t border-gray-100">
+              <AdminPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                limit={limit}
+                onPageChange={(page) => updateURL({ page: String(page) })}
+                onLimitChange={(newLimit) =>
+                  updateURL({ limit: String(newLimit), page: "1" })
+                }
+              />
+            </div>
           )}
         </div>
       </div>
@@ -622,4 +645,4 @@ const UserManagement = () => {
   );
 };
 
-export default UserManagement;
+export default StaffManagement;

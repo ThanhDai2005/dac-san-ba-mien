@@ -75,15 +75,16 @@ const ReviewSection = ({ productId }: ReviewSectionProps) => {
             >
               <div className="flex gap-4">
                 <div className="shrink-0">
-                  {review.userId?.avatarUrl ? (
+                  {review.customerId?.userId?.avatarUrl ? (
                     <img
-                      src={review.userId.avatarUrl}
-                      alt={review.userId.displayName}
+                      src={review.customerId.userId.avatarUrl}
+                      alt={review.customerId.userId.displayName}
                       className="w-12 h-12 rounded-full object-cover border"
                     />
                   ) : (
                     <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                      {review.userId?.displayName?.[0]?.toUpperCase() || "U"}
+                      {review.customerId?.userId?.displayName?.[0]?.toUpperCase() ||
+                        "U"}
                     </div>
                   )}
                 </div>
@@ -91,7 +92,8 @@ const ReviewSection = ({ productId }: ReviewSectionProps) => {
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
                     <p className="font-semibold text-gray-900">
-                      {review.userId?.displayName || "Người dùng ẩn danh"}
+                      {review.customerId?.userId?.displayName ||
+                        "Người dùng ẩn danh"}
                     </p>
                     <p className="text-xs text-gray-500">
                       {new Date(review.createdAt).toLocaleDateString("vi-VN")}

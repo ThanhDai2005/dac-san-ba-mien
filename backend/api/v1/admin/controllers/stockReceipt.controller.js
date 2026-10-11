@@ -55,7 +55,14 @@ export const list = async (req, res) => {
         .skip(skip)
         .limit(limit)
         .populate("supplierId", "name phone email")
-        .populate("createdBy", "displayName email")
+        .populate({
+          path: "createdBy",
+          select: "userId",
+          populate: {
+            path: "userId",
+            select: "displayName",
+          },
+        })
         .lean(),
       StockReceipt.countDocuments(filter),
     ]);
@@ -87,7 +94,14 @@ export const detail = async (req, res) => {
 
     const receipt = await StockReceipt.findOne({ _id: receiptId })
       .populate("supplierId", "name phone email address taxCode")
-      .populate("createdBy", "displayName email")
+      .populate({
+        path: "createdBy",
+        select: "userId",
+        populate: {
+          path: "userId",
+          select: "displayName",
+        },
+      })
       .populate("items.productId", "name images price stock")
       .lean();
 
@@ -150,21 +164,6 @@ export const create = async (req, res) => {
         .json({ message: "Nhà cung cấp không tồn tại hoặc không hoạt động" });
     }
 
-    const productIds = items.map((i) => i.productId);
-    const foundProducts = await Product.find({
-      _id: { $in: productIds },
-      status: "active",
-      deleted: false,
-    })
-      .select("_id")
-      .lean();
-
-    if (foundProducts.length !== productIds.length) {
-      return res
-        .status(404)
-        .json({ message: "Một hoặc nhiều sản phẩm không tồn tại" });
-    }
-
     // Tính totalAmount
     const totalAmount = items.reduce(
       (sum, i) => sum + i.quantity * i.importPrice,
@@ -180,12 +179,19 @@ export const create = async (req, res) => {
       })),
       totalAmount,
       status: "pending",
-      createdBy: req.user._id,
+      createdBy: req.staffId,
     });
 
     const populated = await StockReceipt.findOne({ _id: receipt._id })
       .populate("supplierId", "name phone email")
-      .populate("createdBy", "displayName email")
+      .populate({
+        path: "createdBy",
+        select: "userId",
+        populate: {
+          path: "userId",
+          select: "displayName",
+        },
+      })
       .populate("items.productId", "name images price stock")
       .lean();
 
@@ -235,9 +241,16 @@ export const confirm = async (req, res) => {
     receipt.status = "completed";
     await receipt.save();
 
-    const populated = await StockReceipt.findById(receipt._id)
+    const populated = await StockReceipt.findOne({ _id: receipt._id })
       .populate("supplierId", "name phone email")
-      .populate("createdBy", "displayName email")
+      .populate({
+        path: "createdBy",
+        select: "userId",
+        populate: {
+          path: "userId",
+          select: "displayName",
+        },
+      })
       .populate("items.productId", "name images price stock")
       .lean();
 

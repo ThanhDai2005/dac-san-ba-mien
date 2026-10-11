@@ -30,7 +30,13 @@ export interface Order {
   discountAmount: number;
   totalAmount: number;
   hasReviewed: boolean;
-  updatedBy?: string | null;
+  updatedBy?: {
+    _id: string;
+    userId: {
+      _id: string;
+      displayName: string;
+    };
+  } | null;
   createdAt: string;
   updatedAt: string;
 }

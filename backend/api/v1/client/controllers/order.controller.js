@@ -400,7 +400,7 @@ export const momoCallback = async (req, res) => {
 
     const realOrderId = orderId.split("_")[0];
 
-    const order = await Order.findById(realOrderId);
+    const order = await Order.findOne({ _id: realOrderId });
     if (!order) {
       return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
     }
@@ -464,7 +464,7 @@ export const vnpayIpn = async (req, res) => {
 
     const realOrderId = txnRef.split("_")[0];
 
-    const order = await Order.findById(realOrderId);
+    const order = await Order.findOne({ _id: realOrderId });
     if (!order) {
       return res
         .status(200)

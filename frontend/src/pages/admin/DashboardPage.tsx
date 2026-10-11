@@ -131,7 +131,7 @@ const DashboardPage = () => {
         </div>
 
         {/* CẢI TIẾN: Chỉ hiện Loader toàn cục khi lần đầu tiên vào trang (chưa có data overview) */}
-        {loading && !stats?.overview?.totalUsers ? (
+        {loading && !stats?.overview?.totalCustomers ? (
           <div className="flex items-center justify-center h-[50vh]">
             <Loader2 className="w-10 h-10 animate-spin text-[#b51c00]" />
           </div>
@@ -145,10 +145,10 @@ const DashboardPage = () => {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">
-                    Tài khoản
+                    Khách hàng
                   </p>
                   <h3 className="text-2xl font-black text-gray-900">
-                    {stats?.overview?.totalUsers || 0}
+                    {stats?.overview?.totalCustomers || 0}
                   </h3>
                 </div>
               </div>
@@ -451,7 +451,7 @@ const DashboardPage = () => {
                               </td>
                               <td className="px-4 py-3">
                                 <p className="font-semibold text-gray-800">
-                                  {order.userId?.displayName}
+                                  {order.customerName}
                                 </p>
                                 <p className="text-xs text-gray-400">
                                   {getTimeAgo(order.createdAt)}

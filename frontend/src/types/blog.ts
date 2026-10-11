@@ -17,8 +17,10 @@ export interface Blog {
   publishedAt: string | null;
   authorId: {
     _id: string;
-    displayName: string;
-    avatarUrl?: string;
+    userId: {
+      _id: string;
+      displayName: string;
+    };
   };
   deleted: boolean;
   deletedAt: string | null;

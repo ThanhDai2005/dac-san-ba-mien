@@ -69,6 +69,19 @@ const StockReceiptCreate = () => {
     fetchSuppliers("", "active", 1, 200);
   }, []);
 
+  const handleSearchChange = (lineId: string, value: string) => {
+    setProductSearch((prev) => ({ ...prev, [lineId]: value }));
+    setProductDropdown((prev) => ({ ...prev, [lineId]: true }));
+
+    if (searchTimers.current[lineId]) {
+      clearTimeout(searchTimers.current[lineId]);
+    }
+
+    searchTimers.current[lineId] = setTimeout(() => {
+      searchProducts(lineId, value);
+    }, 300);
+  };
+
   // ── Tìm sản phẩm theo keyword (debounce) ─────────────────────────────
   const searchProducts = async (lineId: string, keyword: string) => {
     if (!keyword.trim()) {
@@ -112,21 +125,12 @@ const StockReceiptCreate = () => {
     setProductResults((prev) => ({ ...prev, [lineId]: [] }));
   };
 
-  const handleSearchChange = (lineId: string, value: string) => {
-    setProductSearch((prev) => ({ ...prev, [lineId]: value }));
-    setProductDropdown((prev) => ({ ...prev, [lineId]: true }));
-
-    if (searchTimers.current[lineId]) {
-      clearTimeout(searchTimers.current[lineId]);
-    }
-
-    searchTimers.current[lineId] = setTimeout(() => {
-      searchProducts(lineId, value);
-    }, 300);
-  };
-
   // ── Xử lý thay đổi số liệu ──────────────────────────────────────────
-  const updateItem = (lineId: string, field: LineItem, value: unknown) => {
+  const updateItem = (
+    lineId: string,
+    field: keyof LineItem,
+    value: unknown,
+  ) => {
     setItems((prev) =>
       prev.map((item) =>
         item.id === lineId ? { ...item, [field]: value } : item,
@@ -284,7 +288,7 @@ const StockReceiptCreate = () => {
               </div>
 
               {/* Card: Danh sách sản phẩm */}
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden pb-16">
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <ShoppingBag className="w-4 h-4 text-[#b51c00]" />
@@ -319,7 +323,7 @@ const StockReceiptCreate = () => {
                     <span />
                   </div>
 
-                  {items.map((item, idx) => (
+                  {items.map((item) => (
                     <div key={item.id} className="px-6 py-5">
                       <div className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 items-center">
                         {/* Product selector */}
@@ -501,7 +505,7 @@ const StockReceiptCreate = () => {
                   </h2>
                 </div>
                 <div className="p-6 space-y-4">
-                  {items.map((item, idx) =>
+                  {items.map((item) =>
                     item.productId ? (
                       <div
                         key={item.id}

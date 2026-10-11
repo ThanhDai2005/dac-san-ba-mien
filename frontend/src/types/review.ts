@@ -1,10 +1,13 @@
 export interface Review {
   _id: string;
   productId: string;
-  userId: {
+  customerId: {
     _id: string;
-    displayName: string;
-    avatarUrl?: string;
+    userId: {
+      _id: string;
+      displayName: string;
+      avatarUrl?: string;
+    };
   };
   orderId: string;
   rating: number;

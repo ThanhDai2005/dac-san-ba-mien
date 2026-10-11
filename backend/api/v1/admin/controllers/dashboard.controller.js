@@ -1,4 +1,4 @@
-import User from "../../../../models/user.model.js";
+import Customer from "../../../../models/customer.model.js";
 import Product from "../../../../models/product.model.js";
 import Order from "../../../../models/order.model.js";
 import Category from "../../../../models/category.model.js";
@@ -8,12 +8,12 @@ import logger from "../../../../config/logger.js";
 export const dashboard = async (req, res) => {
   try {
     // 1. Thống kê tổng quan (4 cards trên cùng)
-    const [totalUsers, totalProducts, totalOrders, totalCategories] =
+    const [totalCustomers, totalProducts, totalOrders, totalCategories] =
       await Promise.all([
-        User.countDocuments({ deleted: false }),
-        Product.countDocuments({ deleted: false }),
+        Customer.countDocuments({}),
+        Product.countDocuments({ deleted: false, status: "active" }),
         Order.countDocuments({}),
-        Category.countDocuments({ deleted: false }),
+        Category.countDocuments({ deleted: false, status: "active" }),
       ]);
 
     // 2. Thống kê hóa đơn theo trạng thái (biểu đồ tròn)
@@ -121,11 +121,24 @@ export const dashboard = async (req, res) => {
     const recentOrders = await Order.find({})
       .sort({ createdAt: -1 })
       .limit(4)
-      .populate("userId", "displayName")
-      .select("_id totalAmount orderStatus createdAt userId")
+      .populate({
+        path: "customerId",
+        select: "userId",
+        populate: {
+          path: "userId",
+          select: "displayName",
+        },
+      })
+      .select("_id totalAmount orderStatus createdAt customerId")
       .lean();
 
     // 6. Top 3 sản phẩm bán chạy nhất (Top Products) - Query thông thường
+    const formattedRecentOrders = recentOrders.map((order) => ({
+      ...order,
+      customerName: order.customerId?.userId?.displayName || "Khách",
+    }));
+
+    // 6. Top 3 sản phẩm bán chạy nhất
     const topProductsAggregation = await Order.aggregate([
       { $match: { orderStatus: { $in: ["Delivered"] } } },
       { $unwind: "$items" },
@@ -162,7 +175,7 @@ export const dashboard = async (req, res) => {
       message: "Lấy thống kê dashboard thành công",
       data: {
         overview: {
-          totalUsers,
+          totalCustomers,
           totalProducts,
           totalOrders,
           totalCategories,
@@ -170,7 +183,7 @@ export const dashboard = async (req, res) => {
         orderStatus: orderStatusData,
         revenueByDateRange: revenueStats,
         monthlyRevenue: monthlyRevenue,
-        recentOrders: recentOrders,
+        recentOrders: formattedRecentOrders,
         topProducts: topProducts,
       },
     });

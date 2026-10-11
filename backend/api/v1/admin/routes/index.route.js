@@ -2,12 +2,15 @@ import { requireAuth } from "../middlewares/auth.middleware.js";
 import authRoute from "./auth.route.js";
 import dashboardRoute from "./dashboard.route.js";
 import userRoute from "./user.route.js";
-import usersRoute from "./users.route.js";
+import customerRoute from "./customer.route.js";
+import staffRoute from "./staff.route.js";
 import categoryRoute from "./category.route.js";
 import productRoute from "./product.route.js";
 import orderRoute from "./order.route.js";
 import roleRoute from "./role.route.js";
-import promotionRoute from "./promotion.route.js";
+import orderPromotionRoute from "./orderPromotion.route.js";
+import productPromotionRoute from "./productPromotion.route.js";
+import customerVoucherRoute from "./customerVoucher.route.js";
 import blogRoute from "./blog.route.js";
 import uploadRoute from "./upload.route.js";
 import blogCategoryRoute from "./blogCategory.route.js";
@@ -27,13 +30,19 @@ export const adminV1Routes = (app) => {
 
   app.use(version + "/product", requireAuth, productRoute);
 
-  app.use(version + "/users", requireAuth, usersRoute);
+  app.use(version + "/customer", requireAuth, customerRoute);
+
+  app.use(version + "/staff", requireAuth, staffRoute);
 
   app.use(version + "/order", requireAuth, orderRoute);
 
   app.use(version + "/role", requireAuth, roleRoute);
 
-  app.use(version + "/promotion", requireAuth, promotionRoute);
+  app.use(version + "/order-promotions", requireAuth, orderPromotionRoute);
+
+  app.use(version + "/product-promotions", requireAuth, productPromotionRoute);
+
+  app.use(version + "/customer-vouchers", requireAuth, customerVoucherRoute);
 
   app.use(version + "/blog", requireAuth, blogRoute);
 

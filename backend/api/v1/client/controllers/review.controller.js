@@ -118,19 +118,9 @@ export const create = async (req, res) => {
       })
       .lean();
 
-    const user = await Customer.findOne({
-      _id: populatedReview.customerId._id,
-    }).populate("userId", "displayName avatarUrl");
-
     res.status(201).json({
       message: "Đánh giá sản phẩm thành công",
-      data: {
-        ...populatedReview,
-        customerId: {
-          displayName: user?.userId?.displayName,
-          avatarUrl: user?.userId?.avatarUrl,
-        },
-      },
+      data: populatedReview,
     });
   } catch (error) {
     logger.logError("Lỗi khi tạo review", error, {
@@ -178,18 +168,9 @@ export const listByProduct = async (req, res) => {
       Review.countDocuments({ productId: productId }),
     ]);
 
-    // Format response
-    const formattedData = data.map((review) => ({
-      ...review,
-      customerId: {
-        displayName: review.customerId?.userId?.displayName,
-        avatarUrl: review.customerId?.userId?.avatarUrl,
-      },
-    }));
-
     res.status(200).json({
       message: "Lấy danh sách đánh giá thành công",
-      data: formattedData,
+      data: data,
       totalItems: totalItems,
       totalPages: Math.ceil(totalItems / limit),
     });

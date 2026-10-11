@@ -89,8 +89,18 @@ const data = {
       permission: "promotions_view",
       items: [
         {
-          title: "Danh sách khuyến mãi",
-          url: "/admin/promotions",
+          title: "Khuyến mãi sản phẩm",
+          url: "/admin/product-promotions",
+          permission: "promotions_view",
+        },
+        {
+          title: "Khuyến mãi đơn hàng",
+          url: "/admin/order-promotions",
+          permission: "promotions_view",
+        },
+        {
+          title: "Voucher khách hàng",
+          url: "/admin/customer-vouchers",
           permission: "promotions_view",
         },
       ],
@@ -99,12 +109,17 @@ const data = {
       title: "Quản Lý Tài Khoản",
       url: "#",
       icon: Users,
-      permission: "accounts_view",
+      permission: "customers_view",
       items: [
         {
-          title: "Danh sách tài khoản",
-          url: "/admin/users",
-          permission: "accounts_view",
+          title: "Khách hàng",
+          url: "/admin/customers",
+          permission: "customers_view",
+        },
+        {
+          title: "Nhân viên",
+          url: "/admin/staffs",
+          permission: "staffs_view",
         },
       ],
     },

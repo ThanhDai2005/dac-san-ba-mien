@@ -25,8 +25,10 @@ export interface StockReceipt {
   status: "pending" | "completed" | "cancelled";
   createdBy: {
     _id: string;
-    displayName: string;
-    email: string;
+    userId: {
+      _id: string;
+      displayName: string;
+    };
   };
   createdAt: string;
   updatedAt: string;

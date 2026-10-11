@@ -69,6 +69,14 @@ export const list = async (req, res) => {
             path: "userId",
             select: "displayName email phone",
           },
+        })
+        .populate({
+          path: "updatedBy",
+          select: "userId",
+          populate: {
+            path: "userId",
+            select: "displayName",
+          },
         }),
       Order.countDocuments(filter),
     ]);

@@ -499,13 +499,11 @@ const SupplierManagement = () => {
                         </td>
                         <td className="px-6 py-4 text-center">
                           {item.status === "active" ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[12px] font-bold bg-[#d1fae5] text-[#15803d]">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[12px] font-bold bg-[#d1fae5] text-[#15803d]">
                               Hoạt động
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[12px] font-bold bg-[#fee2e2] text-[#b91c1c]">
-                              <span className="w-1.5 h-1.5 rounded-full bg-red-400 inline-block" />
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[12px] font-bold bg-[#fee2e2] text-[#b91c1c]">
                               Ngưng hoạt động
                             </span>
                           )}

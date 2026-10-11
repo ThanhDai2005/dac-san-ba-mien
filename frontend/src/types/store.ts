@@ -664,6 +664,10 @@ export interface AdminStaffStore {
     },
   ) => Promise<void>;
   changeStatus: (staffId: string, status: string) => Promise<void>;
+  changeMulti: (
+    ids: string[],
+    type: "active" | "inactive" | "delete-all",
+  ) => Promise<void>;
   deleteItem: (staffId: string) => Promise<void>;
 }
 
@@ -700,6 +704,10 @@ export interface AdminCustomerStore {
     },
   ) => Promise<void>;
   changeStatus: (customerId: string, status: string) => Promise<void>;
+  changeMulti: (
+    ids: string[],
+    type: "active" | "inactive" | "delete-all",
+  ) => Promise<void>;
   deleteItem: (customerId: string) => Promise<void>;
 }
 

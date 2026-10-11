@@ -298,10 +298,15 @@ export const getPermissions = async (req, res) => {
       { group: "Quản lý khuyến mãi", value: "promotions_edit", label: "Sửa" },
       { group: "Quản lý khuyến mãi", value: "promotions_delete", label: "Xóa" },
 
-      { group: "Quản lý tài khoản", value: "accounts_view", label: "Xem" },
-      { group: "Quản lý tài khoản", value: "accounts_create", label: "Thêm" },
-      { group: "Quản lý tài khoản", value: "accounts_edit", label: "Sửa" },
-      { group: "Quản lý tài khoản", value: "accounts_delete", label: "Xóa" },
+      { group: "Quản lý khách hàng", value: "customers_view", label: "Xem" },
+      { group: "Quản lý khách hàng", value: "customers_create", label: "Thêm" },
+      { group: "Quản lý khách hàng", value: "customers_edit", label: "Sửa" },
+      { group: "Quản lý khách hàng", value: "customers_delete", label: "Xóa" },
+
+      { group: "Quản lý nhân viên", value: "staffs_view", label: "Xem" },
+      { group: "Quản lý nhân viên", value: "staffs_create", label: "Thêm" },
+      { group: "Quản lý nhân viên", value: "staffs_edit", label: "Sửa" },
+      { group: "Quản lý nhân viên", value: "staffs_delete", label: "Xóa" },
 
       { group: "Quản lý đơn hàng", value: "orders_view", label: "Xem" },
       { group: "Quản lý đơn hàng", value: "orders_edit", label: "Sửa" },

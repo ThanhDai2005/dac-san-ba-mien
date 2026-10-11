@@ -18,6 +18,16 @@ import { useAdminStockReceiptStore } from "@/stores/useAdminStockReceiptStore";
 import { hasPermission } from "@/lib/permissions";
 import type { StockReceipt } from "@/types/stockReceipt";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // ─── Status config ─────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -139,6 +149,7 @@ const StockReceiptDetail = () => {
       setConfirmOpen(false);
       await getReceiptDetail(receiptId);
     } catch {
+      // handled in store
     } finally {
       setActionLoading(false);
     }
@@ -152,6 +163,7 @@ const StockReceiptDetail = () => {
       setCancelOpen(false);
       await getReceiptDetail(receiptId);
     } catch {
+      // handled in store
     } finally {
       setActionLoading(false);
     }
@@ -416,99 +428,97 @@ const StockReceiptDetail = () => {
         </div>
       </div>
 
-      {/* ═══════════════ MODAL XÁC NHẬN ═══════════════ */}
-      {confirmOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+      {/* ═══════════════ ALERT DIALOG XÁC NHẬN ═══════════════ */}
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-4 mb-2">
+              <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
                 <CheckCircle2 className="w-6 h-6 text-emerald-600" />
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">
+              <div className="text-left">
+                <AlertDialogTitle className="text-lg font-bold text-gray-900">
                   Xác nhận phiếu nhập
-                </h3>
-                <p className="text-sm text-gray-500 mt-0.5">
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-sm text-gray-500 mt-0.5">
                   Hành động này sẽ cộng số lượng vào kho
-                </p>
+                </AlertDialogDescription>
               </div>
             </div>
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-5">
-              <p className="text-sm text-emerald-800 font-medium">
-                ✅ Sau khi xác nhận, số lượng tồn kho của các sản phẩm trong
-                phiếu sẽ được tự động cập nhật và không thể hoàn tác.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setConfirmOpen(false)}
-                disabled={actionLoading}
-                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50"
-              >
-                Hủy bỏ
-              </button>
-              <button
-                onClick={handleConfirm}
-                disabled={actionLoading}
-                className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
-              >
-                {actionLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Xác nhận phiếu"
-                )}
-              </button>
-            </div>
+          </AlertDialogHeader>
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 my-4">
+            <p className="text-sm text-emerald-800 font-medium">
+              ✅ Sau khi xác nhận, số lượng tồn kho của các sản phẩm trong phiếu
+              sẽ được tự động cập nhật và không thể hoàn tác.
+            </p>
           </div>
-        </div>
-      )}
+          <AlertDialogFooter className="gap-3 sm:gap-3">
+            <AlertDialogCancel
+              disabled={actionLoading}
+              className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              Hủy bỏ
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirm}
+              disabled={actionLoading}
+              className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {actionLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Xác nhận phiếu"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-      {/* ═══════════════ MODAL HỦY ═══════════════ */}
-      {cancelOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
+      {/* ═══════════════ ALERT DIALOG HỦY ═══════════════ */}
+      <AlertDialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-4 mb-2">
+              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
                 <XCircle className="w-6 h-6 text-red-600" />
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">
+              <div className="text-left">
+                <AlertDialogTitle className="text-lg font-bold text-gray-900">
                   Hủy phiếu nhập
-                </h3>
-                <p className="text-sm text-gray-500 mt-0.5">
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-sm text-gray-500 mt-0.5">
                   Phiếu sẽ bị hủy và không thể khôi phục
-                </p>
+                </AlertDialogDescription>
               </div>
             </div>
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-5">
-              <p className="text-sm text-red-800 font-medium">
-                ⚠️ Hành động này không thể hoàn tác. Phiếu nhập sẽ chuyển sang
-                trạng thái "Đã hủy".
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setCancelOpen(false)}
-                disabled={actionLoading}
-                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50"
-              >
-                Quay lại
-              </button>
-              <button
-                onClick={handleCancel}
-                disabled={actionLoading}
-                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
-              >
-                {actionLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Xác nhận hủy"
-                )}
-              </button>
-            </div>
+          </AlertDialogHeader>
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 my-4">
+            <p className="text-sm text-red-800 font-medium">
+              ⚠️ Hành động này không thể hoàn tác. Phiếu nhập sẽ chuyển sang
+              trạng thái "Đã hủy".
+            </p>
           </div>
-        </div>
-      )}
+          <AlertDialogFooter className="gap-3 sm:gap-3">
+            <AlertDialogCancel
+              disabled={actionLoading}
+              className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              Quay lại
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCancel}
+              disabled={actionLoading}
+              className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {actionLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Xác nhận hủy"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

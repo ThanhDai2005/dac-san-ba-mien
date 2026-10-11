@@ -5,7 +5,7 @@ import { adminDashboardService } from "@/services/adminDashboardService";
 export const useAdminDashboardStore = create<AdminDashboardState>((set) => ({
   stats: {
     overview: {
-      totalUsers: 0,
+      totalCustomers: 0,
       totalProducts: 0,
       totalOrders: 0,
       totalCategories: 0,

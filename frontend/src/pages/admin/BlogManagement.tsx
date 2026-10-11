@@ -483,7 +483,7 @@ const BlogManagement = () => {
                           {item.blogCategoryId?.name || "N/A"}
                         </td>
                         <td className="px-6 py-4 text-gray-600 font-medium text-center">
-                          {item.authorId?.displayName || "N/A"}
+                          {item.authorId?.userId?.displayName || "N/A"}
                         </td>
                         <td className="px-6 py-4 text-center">
                           {item.status === "active" ? (

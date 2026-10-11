@@ -21,9 +21,12 @@ import BlogEdit from "@/pages/admin/BlogEdit";
 import PromotionManagement from "@/pages/admin/PromotionManagement";
 import PromotionCreate from "@/pages/admin/PromotionCreate";
 import PromotionEdit from "@/pages/admin/PromotionEdit";
-import UserManagement from "@/pages/admin/UserManagement";
-import UserCreate from "@/pages/admin/UserCreate";
-import UserEdit from "@/pages/admin/UserEdit";
+import CustomerManagement from "@/pages/admin/CustomerManagement";
+import CustomerCreate from "@/pages/admin/CustomerCreate";
+import CustomerEdit from "@/pages/admin/CustomerEdit";
+import StaffManagement from "@/pages/admin/StaffManagement";
+import StaffCreate from "@/pages/admin/StaffCreate";
+import StaffEdit from "@/pages/admin/StaffEdit";
 import OrderManagement from "@/pages/admin/OrderManagement";
 import OrderDetail from "@/pages/admin/OrderDetail";
 import PermissionManagement from "@/pages/admin/PermissionManagement";
@@ -141,16 +144,28 @@ const adminRoute = {
               element: <PromotionEdit />,
             },
             {
-              path: "users",
-              element: <UserManagement />,
+              path: "customers",
+              element: <CustomerManagement />,
             },
             {
-              path: "user/create",
-              element: <UserCreate />,
+              path: "customer/create",
+              element: <CustomerCreate />,
             },
             {
-              path: "user/edit/:userId",
-              element: <UserEdit />,
+              path: "customer/edit/:customerId",
+              element: <CustomerEdit />,
+            },
+            {
+              path: "staffs",
+              element: <StaffManagement />,
+            },
+            {
+              path: "staff/create",
+              element: <StaffCreate />,
+            },
+            {
+              path: "staff/edit/:staffId",
+              element: <StaffEdit />,
             },
             {
               path: "orders",

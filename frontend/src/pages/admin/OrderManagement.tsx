@@ -74,17 +74,21 @@ const OrderManagement = () => {
     return () => clearTimeout(timer);
   }, [localKeyword]);
 
+  const refetchOrders = async () => {
+    const filters: Record<string, string> = {};
+    if (orderStatusFilter !== "all") filters.orderStatus = orderStatusFilter;
+    if (paymentStatusFilter !== "all")
+      filters.paymentStatus = paymentStatusFilter;
+    if (searchTerm) filters.search = searchTerm;
+    if (startDate) filters.startDate = startDate;
+    if (endDate) filters.endDate = endDate;
+
+    await fetchOrders(currentPage, limit, filters);
+  };
+
   useEffect(() => {
     if (canView) {
-      const filters: any = {};
-      if (orderStatusFilter !== "all") filters.orderStatus = orderStatusFilter;
-      if (paymentStatusFilter !== "all")
-        filters.paymentStatus = paymentStatusFilter;
-      if (searchTerm) filters.search = searchTerm;
-      if (startDate) filters.startDate = startDate;
-      if (endDate) filters.endDate = endDate;
-
-      fetchOrders(currentPage, limit, filters);
+      refetchOrders();
     }
   }, [
     currentPage,
@@ -94,6 +98,7 @@ const OrderManagement = () => {
     paymentStatusFilter,
     startDate,
     endDate,
+    fetchOrders,
     canView,
   ]);
 
@@ -194,15 +199,7 @@ const OrderManagement = () => {
       setUpdatingOrderId(orderId);
       await updateOrderStatus(orderId, { orderStatus: newStatus });
 
-      const filters: any = {};
-      if (orderStatusFilter !== "all") filters.orderStatus = orderStatusFilter;
-      if (paymentStatusFilter !== "all")
-        filters.paymentStatus = paymentStatusFilter;
-      if (searchTerm) filters.search = searchTerm;
-      if (startDate) filters.startDate = startDate;
-      if (endDate) filters.endDate = endDate;
-
-      await fetchOrders(currentPage, limit, filters);
+      refetchOrders();
     } catch (error) {
       // Error handled in store
     } finally {
@@ -325,13 +322,14 @@ const OrderManagement = () => {
           </div>
 
           <div className="w-full relative">
-            <table className="w-full text-sm text-left whitespace-nowrap">
+            <table className="w-full text-sm text-left">
               <thead className="text-xs text-gray-500 bg-gray-50 uppercase font-bold border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-4">Mã đơn</th>
                   <th className="px-6 py-4">Khách hàng</th>
                   <th className="px-6 py-4">Thanh toán (Phương thức)</th>
                   <th className="px-6 py-4">Tổng tiền</th>
+                  <th className="px-6 py-4">Người cập nhật</th>
                   <th className="px-6 py-4">Ngày đặt</th>
                   <th className="px-6 py-4 text-center">Trạng thái đơn</th>
                   <th className="px-6 py-4 text-center">Thao tác</th>
@@ -353,6 +351,9 @@ const OrderManagement = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="h-4 bg-gray-200 rounded w-24"></div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="h-4 bg-gray-200 rounded w-28"></div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="h-4 bg-gray-200 rounded w-28"></div>
@@ -397,6 +398,9 @@ const OrderManagement = () => {
                         </td>
                         <td className="px-6 py-4 font-bold text-gray-900">
                           {order.totalAmount.toLocaleString("vi-VN")}₫
+                        </td>
+                        <td className="px-6 py-4 text-gray-500 font-medium">
+                          {order.updatedBy?.userId?.displayName || "—"}
                         </td>
                         <td className="px-6 py-4 text-gray-500 font-medium">
                           {formatDate(order.createdAt)}
@@ -464,7 +468,7 @@ const OrderManagement = () => {
                 ) : (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={8}
                       className="px-6 py-16 text-center text-gray-500 font-medium"
                     >
                       Không tìm thấy đơn hàng nào phù hợp với bộ lọc.
