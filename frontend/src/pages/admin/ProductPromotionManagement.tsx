@@ -8,9 +8,10 @@ import {
   Pencil,
   RotateCcw,
   PauseCircle,
+  Package,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAdminPromotionStore } from "@/stores/useAdminPromotionStore";
+import { useAdminProductPromotionStore } from "@/stores/useAdminProductPromotionStore";
 import { toast } from "sonner";
 import {
   confirmDelete,
@@ -23,7 +24,7 @@ import AdminHeader from "@/components/admin/AdminHeader";
 import AdminPagination from "@/components/admin/AdminPagination";
 import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 
-const PromotionManagement = () => {
+const ProductPromotionManagement = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get("keyword") || "";
@@ -35,22 +36,22 @@ const PromotionManagement = () => {
 
   const { user } = useAdminAuthStore();
   const {
-    promotions,
+    productPromotions,
     totalPages,
     loading,
-    fetchPromotions,
+    fetchProductPromotions,
     changeStatus,
     changeMulti,
     deleteItem,
-  } = useAdminPromotionStore();
+  } = useAdminProductPromotionStore();
 
-  const showSkeleton = loading && promotions.length === 0;
-  const showOverlay = loading && promotions.length > 0;
+  const showSkeleton = loading && productPromotions.length === 0;
+  const showOverlay = loading && productPromotions.length > 0;
 
-  const canView = hasPermission(user, "promotions_view");
-  const canCreate = hasPermission(user, "promotions_create");
-  const canEdit = hasPermission(user, "promotions_edit");
-  const canDelete = hasPermission(user, "promotions_delete");
+  const canView = hasPermission(user, "product_promotions_view");
+  const canCreate = hasPermission(user, "product_promotions_create");
+  const canEdit = hasPermission(user, "product_promotions_edit");
+  const canDelete = hasPermission(user, "product_promotions_delete");
 
   const updateURL = (newParams: Record<string, string>) => {
     const params = Object.fromEntries(searchParams.entries());
@@ -74,30 +75,35 @@ const PromotionManagement = () => {
     setLocalKeyword(searchTerm);
   }, [searchTerm]);
 
-  // Debounce: dừng gõ 300ms mới đẩy lên URL → useEffect cũ tự fetch
   useEffect(() => {
     const timer = setTimeout(() => {
       if (localKeyword !== searchTerm) {
         updateURL({ keyword: localKeyword, page: "1" });
       }
     }, 300);
-
     return () => clearTimeout(timer);
   }, [localKeyword]);
 
   const refetchPromotions = async () => {
     const status = statusFilter !== "all" ? statusFilter : "";
-    await fetchPromotions(searchTerm, status, currentPage, limit);
+    await fetchProductPromotions(searchTerm, status, currentPage, limit);
   };
 
   useEffect(() => {
     if (canView) {
       refetchPromotions();
     }
-  }, [currentPage, limit, searchTerm, statusFilter, fetchPromotions, canView]);
+  }, [
+    currentPage,
+    limit,
+    searchTerm,
+    statusFilter,
+    fetchProductPromotions,
+    canView,
+  ]);
 
   const handleChangeStatus = async (
-    promotionId: string,
+    productPromotionId: string,
     status: "active" | "inactive",
   ) => {
     if (!canEdit) {
@@ -119,15 +125,17 @@ const PromotionManagement = () => {
     if (!result.isConfirmed) return;
 
     try {
-      await changeStatus(promotionId, status);
+      await changeStatus(productPromotionId, status);
       await refetchPromotions();
-      setSelectedItems(selectedItems.filter((id) => id !== promotionId));
-    } catch (error) {
-      // Error already handled in store
+      setSelectedItems((prev) =>
+        prev.filter((id) => id !== productPromotionId),
+      );
+    } catch {
+      // handled in store
     }
   };
 
-  const handleDeleteItem = async (promotionId: string) => {
+  const handleDeleteItem = async (productPromotionId: string) => {
     if (!canDelete) {
       toast.error("Bạn không có quyền xóa khuyến mãi");
       return;
@@ -141,11 +149,13 @@ const PromotionManagement = () => {
     if (!result.isConfirmed) return;
 
     try {
-      await deleteItem(promotionId);
+      await deleteItem(productPromotionId);
       await refetchPromotions();
-      setSelectedItems(selectedItems.filter((id) => id !== promotionId));
-    } catch (error) {
-      // Error already handled in store
+      setSelectedItems((prev) =>
+        prev.filter((id) => id !== productPromotionId),
+      );
+    } catch {
+      // handled in store
     }
   };
 
@@ -161,7 +171,6 @@ const PromotionManagement = () => {
       toast.error("Bạn không có quyền xóa khuyến mãi");
       return;
     }
-
     if ((type === "active" || type === "inactive") && !canEdit) {
       toast.error("Bạn không có quyền chỉnh sửa khuyến mãi");
       return;
@@ -191,24 +200,24 @@ const PromotionManagement = () => {
       await changeMulti(selectedItems, type);
       await refetchPromotions();
       setSelectedItems([]);
-    } catch (error) {
-      // Error already handled in store
+    } catch {
+      // handled in store
     }
   };
 
-  const selectedPromotions = promotions.filter((p) =>
-    selectedItems.includes(p._id),
+  const selectedRows = productPromotions.filter((item) =>
+    selectedItems.includes(item._id),
   );
-  const hasActiveSelected = selectedPromotions.some(
-    (p) => p.status === "active",
+  const hasActiveSelected = selectedRows.some(
+    (item) => item.promotionId?.status === "active",
   );
-  const hasInactiveSelected = selectedPromotions.some(
-    (p) => p.status === "inactive",
+  const hasInactiveSelected = selectedRows.some(
+    (item) => item.promotionId?.status === "inactive",
   );
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
-      setSelectedItems(promotions.map((item) => item._id));
+      setSelectedItems(productPromotions.map((item) => item._id));
     } else {
       setSelectedItems([]);
     }
@@ -231,24 +240,23 @@ const PromotionManagement = () => {
 
   const formatDateTime = (iso: string) => {
     const d = new Date(iso);
-    const date = d.toLocaleDateString("vi-VN");
-    const time = d.toLocaleTimeString("vi-VN", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    return { date, time };
+    return {
+      date: d.toLocaleDateString("vi-VN"),
+      time: d.toLocaleTimeString("vi-VN", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
   };
 
-  const formatDiscount = (item: any) => {
-    if (item.discountType === "percentage") {
-      return `${item.discountValue}%`;
+  const formatDiscount = (promotion: {
+    discountType: string;
+    discountValue: number;
+  }) => {
+    if (promotion.discountType === "percentage") {
+      return `${promotion.discountValue}%`;
     }
-    return formatCurrency(item.discountValue);
-  };
-
-  const discountTypeLabel = {
-    percentage: "Phần trăm",
-    fixed: "Cố định",
+    return formatCurrency(promotion.discountValue);
   };
 
   if (!canView) {
@@ -256,7 +264,7 @@ const PromotionManagement = () => {
       <NoPermissionScreen
         breadcrumbItems={[
           { label: "Admin", href: "/admin/dashboard" },
-          { label: "Quản lý khuyến mãi", isCurrentPage: true },
+          { label: "Quản lý khuyến mãi sản phẩm", isCurrentPage: true },
         ]}
       />
     );
@@ -264,11 +272,10 @@ const PromotionManagement = () => {
 
   return (
     <div className="bg-[#f7f9fb] min-h-screen pb-12">
-      {/* HEADER BREADCRUMB */}
       <AdminHeader
         items={[
           { label: "Admin", href: "/admin/dashboard" },
-          { label: "Quản lý khuyến mãi", isCurrentPage: true },
+          { label: "Quản lý khuyến mãi sản phẩm", isCurrentPage: true },
         ]}
       />
 
@@ -276,7 +283,7 @@ const PromotionManagement = () => {
         {/* TITLE & FILTERS */}
         <div>
           <h1 className="text-[24px] font-bold text-gray-900 mb-6 tracking-tight">
-            Quản lý khuyến mãi
+            Quản lý khuyến mãi sản phẩm
           </h1>
 
           <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
@@ -343,7 +350,7 @@ const PromotionManagement = () => {
 
               {canCreate && (
                 <button
-                  onClick={() => navigate("/admin/promotion/create")}
+                  onClick={() => navigate("/admin/product-promotion/create")}
                   className="flex items-center justify-center gap-2 px-5 py-2 bg-[#b51c00] text-white rounded-[20px] font-semibold text-sm hover:bg-[#8e1400] shadow-sm shadow-red-500/20 transition-all active:scale-95 whitespace-nowrap"
                 >
                   <Plus className="w-4 h-4" />
@@ -354,7 +361,7 @@ const PromotionManagement = () => {
           </div>
         </div>
 
-        {/* DATA TABLE SECTION */}
+        {/* DATA TABLE */}
         <div className="bg-white rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-gray-200 overflow-hidden flex flex-col">
           <div className="px-6 py-4 border-b border-gray-100">
             <h2 className="text-[18px] font-bold text-gray-900">Danh sách</h2>
@@ -372,8 +379,8 @@ const PromotionManagement = () => {
                           className="w-4 h-4 bg-white border-gray-300 rounded focus:ring-blue-500 cursor-pointer accent-blue-600"
                           onChange={handleSelectAll}
                           checked={
-                            selectedItems.length === promotions.length &&
-                            promotions.length > 0
+                            selectedItems.length === productPromotions.length &&
+                            productPromotions.length > 0
                           }
                         />
                       </div>
@@ -381,8 +388,8 @@ const PromotionManagement = () => {
                     <th scope="col" className="px-4 py-4 text-center">
                       STT
                     </th>
-                    <th scope="col" className="px-4 py-4 text-center">
-                      Mã
+                    <th scope="col" className="px-4 py-4">
+                      Tên / Mã
                     </th>
                     <th
                       scope="col"
@@ -396,9 +403,9 @@ const PromotionManagement = () => {
                       scope="col"
                       className="px-4 py-4 text-center leading-tight"
                     >
-                      Loại
+                      Sản phẩm
                       <br />
-                      giảm
+                      áp dụng
                     </th>
                     <th
                       scope="col"
@@ -435,52 +442,59 @@ const PromotionManagement = () => {
 
                 <tbody>
                   {showSkeleton ? (
-                    // Skeleton rows on first load
                     Array.from({ length: limit }).map((_, index) => (
                       <tr
                         key={index}
                         className="animate-pulse bg-white border-b border-gray-50"
                       >
                         <td className="p-4">
-                          <div className="w-4 h-4 bg-gray-200 rounded"></div>
+                          <div className="w-4 h-4 bg-gray-200 rounded" />
                         </td>
                         <td className="px-4 py-5">
-                          <div className="h-4 bg-gray-200 rounded w-8 mx-auto"></div>
+                          <div className="h-4 bg-gray-200 rounded w-8 mx-auto" />
                         </td>
                         <td className="px-4 py-5">
-                          <div className="h-4 bg-gray-200 rounded w-20 mx-auto"></div>
+                          <div className="h-4 bg-gray-200 rounded w-32" />
                         </td>
                         <td className="px-4 py-5">
-                          <div className="h-4 bg-gray-200 rounded w-16 mx-auto"></div>
+                          <div className="h-4 bg-gray-200 rounded w-16 mx-auto" />
                         </td>
                         <td className="px-4 py-5">
-                          <div className="h-4 bg-gray-200 rounded w-24 mx-auto"></div>
+                          <div className="h-4 bg-gray-200 rounded w-20 mx-auto" />
                         </td>
                         <td className="px-4 py-5">
-                          <div className="h-4 bg-gray-200 rounded w-16 mx-auto"></div>
+                          <div className="h-4 bg-gray-200 rounded w-16 mx-auto" />
                         </td>
                         <td className="px-4 py-5 text-center">
-                          <div className="h-6 bg-gray-200 rounded-md w-20 mx-auto"></div>
+                          <div className="h-6 bg-gray-200 rounded-md w-20 mx-auto" />
                         </td>
                         <td className="px-4 py-5">
-                          <div className="h-4 bg-gray-200 rounded w-20 mx-auto"></div>
+                          <div className="h-4 bg-gray-200 rounded w-20 mx-auto" />
                         </td>
                         <td className="px-4 py-5">
-                          <div className="h-4 bg-gray-200 rounded w-20 mx-auto"></div>
+                          <div className="h-4 bg-gray-200 rounded w-20 mx-auto" />
                         </td>
                         <td className="px-4 py-5">
                           <div className="flex gap-2 justify-center">
-                            <div className="h-7 bg-gray-200 rounded w-16"></div>
-                            <div className="h-7 bg-gray-200 rounded w-16"></div>
+                            <div className="h-7 bg-gray-200 rounded w-16" />
+                            <div className="h-7 bg-gray-200 rounded w-16" />
                           </div>
                         </td>
                       </tr>
                     ))
-                  ) : promotions.length > 0 ? (
-                    promotions.map((item, index) => {
-                      const start = formatDateTime(item.startDate);
-                      const end = formatDateTime(item.endDate);
-                      const isPercentage = item.discountType === "percentage";
+                  ) : productPromotions.length > 0 ? (
+                    productPromotions.map((item, index) => {
+                      const promotion = item.promotionId;
+                      if (!promotion) return null;
+
+                      const start = formatDateTime(promotion.startDate);
+                      const end = formatDateTime(promotion.endDate);
+                      const isPercentage =
+                        promotion.discountType === "percentage";
+                      const isActive = promotion.status === "active";
+                      const now = new Date();
+                      const isExpired = now > new Date(promotion.endDate);
+                      const isUpcoming = now < new Date(promotion.startDate);
 
                       return (
                         <tr
@@ -502,8 +516,23 @@ const PromotionManagement = () => {
                             {(currentPage - 1) * limit + index + 1}
                           </td>
 
-                          <td className="px-4 py-5 font-semibold text-gray-900 text-center">
-                            {item.code}
+                          <td className="px-4 py-5">
+                            <div className="font-semibold text-gray-900">
+                              {promotion.title}
+                            </div>
+                            <code className="text-[12px] font-bold text-[#92400e] bg-[#fef3c7] px-1.5 py-0.5 rounded border border-[#fde68a]">
+                              {promotion.code}
+                            </code>
+                            {isExpired && (
+                              <div className="text-[11px] text-red-600 font-medium mt-0.5">
+                                Đã hết hạn
+                              </div>
+                            )}
+                            {isUpcoming && !isExpired && (
+                              <div className="text-[11px] text-blue-600 font-medium mt-0.5">
+                                Sắp diễn ra
+                              </div>
+                            )}
                           </td>
 
                           <td className="px-4 py-5 text-center">
@@ -512,37 +541,41 @@ const PromotionManagement = () => {
                                 isPercentage ? "bg-[#22c55e]" : "bg-[#3b82f6]"
                               }`}
                             >
-                              {formatDiscount(item)}
+                              {formatDiscount(promotion)}
                             </span>
-                            {isPercentage && item.maxDiscountAmount && (
+                            {isPercentage && promotion.maxDiscountAmount ? (
                               <div className="text-[11px] text-gray-400 mt-1">
-                                Tối đa {formatCurrency(item.maxDiscountAmount)}
+                                Tối đa{" "}
+                                {formatCurrency(promotion.maxDiscountAmount)}
                               </div>
-                            )}
-                            {item.minOrderValue > 0 && (
-                              <div className="text-[11px] text-gray-400 mt-1">
-                                ĐH tối thiểu{" "}
-                                {formatCurrency(item.minOrderValue)}
-                              </div>
-                            )}
+                            ) : null}
                           </td>
 
-                          <td className="px-4 py-5 font-medium text-gray-700 text-center whitespace-nowrap">
-                            {discountTypeLabel[item.discountType]}
+                          <td className="px-4 py-5 text-center">
+                            <div className="flex items-center justify-center gap-1.5 font-bold text-[#3b82f6]">
+                              <Package className="w-4 h-4" />
+                              {item.productIds?.length || 0}
+                            </div>
                           </td>
 
                           <td className="px-4 py-5 font-bold text-gray-700 text-center">
-                            {item.usedCount}
-                            {item.usageLimit !== null && (
+                            {promotion.usedCount ?? 0}
+                            {promotion.usageLimit != null && (
                               <span className="text-gray-400 font-medium">
                                 {" "}
-                                / {item.usageLimit}
+                                / {promotion.usageLimit}
+                              </span>
+                            )}
+                            {promotion.usageLimit == null && (
+                              <span className="text-gray-400 font-medium">
+                                {" "}
+                                / ∞
                               </span>
                             )}
                           </td>
 
                           <td className="px-4 py-5 text-center">
-                            {item.status === "active" ? (
+                            {isActive ? (
                               <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[12px] font-bold bg-[#d1fae5] text-[#15803d]">
                                 Hoạt động
                               </span>
@@ -553,13 +586,13 @@ const PromotionManagement = () => {
                             )}
                           </td>
 
-                          <td className="px-4 py-5 text-gray-500 font-medium text-center whitespace-nowrap">
+                          <td className="px-4 py-5 text-gray-500 font-medium text-center ">
                             {start.date}
                             <br />
                             {start.time}
                           </td>
 
-                          <td className="px-4 py-5 text-gray-500 font-medium text-center whitespace-nowrap">
+                          <td className="px-4 py-5 text-gray-500 font-medium text-center ">
                             {end.date}
                             <br />
                             {end.time}
@@ -567,13 +600,13 @@ const PromotionManagement = () => {
 
                           <td className="px-4 py-5">
                             <div className="flex items-center justify-center gap-2">
-                              {item.status === "active" ? (
+                              {isActive ? (
                                 <>
                                   {canEdit && (
                                     <button
                                       onClick={() =>
                                         navigate(
-                                          `/admin/promotion/edit/${item._id}`,
+                                          `/admin/product-promotion/edit/${item._id}`,
                                         )
                                       }
                                       className="px-3 py-1.5 border border-[#22c55e] text-[#16a34a] rounded-[6px] text-xs font-bold hover:bg-[#f0fdf4] transition-colors flex items-center gap-1"
@@ -629,7 +662,7 @@ const PromotionManagement = () => {
                         colSpan={10}
                         className="px-6 py-12 text-center text-gray-500"
                       >
-                        Không tìm thấy khuyến mãi nào.
+                        Không tìm thấy khuyến mãi sản phẩm nào.
                       </td>
                     </tr>
                   )}
@@ -637,7 +670,6 @@ const PromotionManagement = () => {
               </table>
             </div>
 
-            {/* Overlay spinner for subsequent loads */}
             {showOverlay && (
               <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center z-10 rounded-lg">
                 <div className="flex flex-col items-center gap-2">
@@ -650,8 +682,7 @@ const PromotionManagement = () => {
             )}
           </div>
 
-          {/* PAGINATION */}
-          {promotions.length > 0 && (
+          {productPromotions.length > 0 && (
             <AdminPagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -668,4 +699,4 @@ const PromotionManagement = () => {
   );
 };
 
-export default PromotionManagement;
+export default ProductPromotionManagement;

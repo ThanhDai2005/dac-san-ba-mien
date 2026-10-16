@@ -48,14 +48,14 @@ export const handleClientChat = (io, socket) => {
           }).sort({ lastMessageAt: -1 });
         } else {
           conversation = await Conversation.findOne({
-            userId: user._id,
+            customerId: user.customerId,
             status: { $ne: "closed" },
           }).sort({ lastMessageAt: -1 });
         }
 
         if (!conversation) {
           conversation = await Conversation.create({
-            userId: isGuest ? null : user._id,
+            customerId: isGuest ? null : user.customerId,
             guestInfo: isGuest
               ? { name: user.displayName, phone: user.phone }
               : null,
@@ -86,7 +86,8 @@ export const handleClientChat = (io, socket) => {
       const clientMessage = await Message.create({
         conversationId: conversation._id,
         senderType: "client",
-        senderId: isGuest ? null : user._id,
+        senderId: isGuest ? null : user.customerId,
+        senderModel: isGuest ? null : "Customer",
         content: message,
       });
 
@@ -124,7 +125,7 @@ export const handleClientChat = (io, socket) => {
           },
           conversation: {
             _id: conversation._id,
-            userName: isGuest ? user.displayName : user.displayName,
+            userName: user.displayName,
             phone: user.phone,
             lastMessage: conversation.lastMessage,
             status: conversation.status,
@@ -247,7 +248,7 @@ export const handleClientChat = (io, socket) => {
         }).sort({ lastMessageAt: -1 });
       } else {
         conversation = await Conversation.findOne({
-          userId: user._id,
+          customerId: user.customerId,
           status: { $ne: "closed" },
         }).sort({ lastMessageAt: -1 });
       }
@@ -456,15 +457,23 @@ export const handleAdminChat = (io, socket) => {
       })
         .sort({ lastMessageAt: -1 })
         .limit(50)
-        .populate("userId", "displayName phone")
+        .populate({
+          path: "customerId",
+          populate: {
+            path: "userId",
+            select: "displayName phone",
+          },
+        })
         .lean();
 
       socket.emit("admin:loadConversationsResponse", {
         conversations: conversations.map((c) => ({
           _id: c._id,
           userName:
-            c.userId?.displayName || c.guestInfo?.name || "Khách vãng lai",
-          phone: c.userId?.phone || c.guestInfo?.phone || "N/A",
+            c.customerId?.userId?.displayName ||
+            c.guestInfo?.name ||
+            "Khách vãng lai",
+          phone: c.customerId?.userId?.phone || c.guestInfo?.phone || "N/A",
           lastMessage: c.lastMessage,
           status: c.status,
           unreadByAdmin: c.unreadByAdmin,

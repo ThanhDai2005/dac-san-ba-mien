@@ -18,9 +18,15 @@ import BlogCategoryEdit from "@/pages/admin/BlogCategoryEdit";
 import BlogManagement from "@/pages/admin/BlogManagement";
 import BlogCreate from "@/pages/admin/BlogCreate";
 import BlogEdit from "@/pages/admin/BlogEdit";
-import PromotionManagement from "@/pages/admin/PromotionManagement";
-import PromotionCreate from "@/pages/admin/PromotionCreate";
-import PromotionEdit from "@/pages/admin/PromotionEdit";
+import OrderPromotionManagement from "@/pages/admin/OrderPromotionManagement";
+import OrderPromotionCreate from "@/pages/admin/OrderPromotionCreate";
+import OrderPromotionEdit from "@/pages/admin/OrderPromotionEdit";
+import ProductPromotionManagement from "@/pages/admin/ProductPromotionManagement";
+import ProductPromotionCreate from "@/pages/admin/ProductPromotionCreate";
+import ProductPromotionEdit from "@/pages/admin/ProductPromotionEdit";
+import CustomerVoucherManagement from "@/pages/admin/CustomerVoucherManagement";
+import CustomerVoucherCreate from "@/pages/admin/CustomerVoucherCreate";
+import CustomerVoucherIssue from "@/pages/admin/CustomerVoucherIssue";
 import CustomerManagement from "@/pages/admin/CustomerManagement";
 import CustomerCreate from "@/pages/admin/CustomerCreate";
 import CustomerEdit from "@/pages/admin/CustomerEdit";
@@ -132,16 +138,40 @@ const adminRoute = {
               element: <BlogEdit />,
             },
             {
-              path: "promotions",
-              element: <PromotionManagement />,
+              path: "order-promotions",
+              element: <OrderPromotionManagement />,
             },
             {
-              path: "promotion/create",
-              element: <PromotionCreate />,
+              path: "order-promotion/create",
+              element: <OrderPromotionCreate />,
             },
             {
-              path: "promotion/edit/:promotionId",
-              element: <PromotionEdit />,
+              path: "order-promotion/edit/:orderPromotionId",
+              element: <OrderPromotionEdit />,
+            },
+            {
+              path: "product-promotions",
+              element: <ProductPromotionManagement />,
+            },
+            {
+              path: "product-promotion/create",
+              element: <ProductPromotionCreate />,
+            },
+            {
+              path: "product-promotion/edit/:productPromotionId",
+              element: <ProductPromotionEdit />,
+            },
+            {
+              path: "customer-vouchers",
+              element: <CustomerVoucherManagement />,
+            },
+            {
+              path: "customer-vouchers/create",
+              element: <CustomerVoucherCreate />,
+            },
+            {
+              path: "customer-vouchers/issue/:promotionId",
+              element: <CustomerVoucherIssue />,
             },
             {
               path: "customers",

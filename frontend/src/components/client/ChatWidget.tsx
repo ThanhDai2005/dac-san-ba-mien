@@ -39,7 +39,6 @@ const ChatWidget = () => {
     "GẶP NHÂN VIÊN TƯ VẤN!",
   ];
 
-  // Derive step from user/isOpen
   const effectiveStep = isOpen && user ? "chat" : step;
 
   // Auto scroll to bottom
@@ -49,59 +48,68 @@ const ChatWidget = () => {
     }
   }, [messages, isTyping, isOpen, effectiveStep]);
 
-  // Sync isOpen state to store
+  // Sync widget open → store
   useEffect(() => {
     setWidgetOpen(isOpen);
   }, [isOpen, setWidgetOpen]);
 
-  // Socket connection & listeners
+  // Connect khi mở widget + đã vào bước chat
   useEffect(() => {
-    if (!isConnected) {
-      if (user && accessToken) {
-        connect(accessToken);
-      } else if (
-        step === "chat" &&
-        guestInfo.name.trim() &&
-        guestInfo.phone.trim()
+    if (!isOpen || effectiveStep !== "chat" || isConnected) return;
+
+    if (user && accessToken) {
+      connect(accessToken);
+    } else if (guestInfo.name.trim() && guestInfo.phone.trim()) {
+      connect(undefined, guestInfo);
+    }
+  }, [
+    isOpen,
+    effectiveStep,
+    isConnected,
+    user,
+    accessToken,
+    guestInfo,
+    connect,
+  ]);
+
+  useEffect(() => {
+    if (!isConnected) return;
+
+    const handleNewMessage = (data: any) => {
+      addMessage(data.message);
+      if (
+        data.message.senderType === "bot" ||
+        data.message.senderType === "staff"
       ) {
-        connect(undefined, guestInfo);
+        setIsWaitingReply(false);
       }
-    }
+    };
 
-    if (isConnected) {
-      on("client:newMessage", (data) => {
-        addMessage(data.message);
-        if (
-          data.message.senderType === "bot" ||
-          data.message.senderType === "staff"
-        ) {
-          setIsWaitingReply(false);
-        }
-      });
+    const handleTyping = (data: any) => {
+      setTyping(data.isTyping, data.user);
+    };
 
-      on("client:typing", (data) => {
-        setTyping(data.isTyping, data.user);
-      });
+    const handleStatusChanged = (data: any) => {
+      setConversationStatus(data.status);
+    };
 
-      on("client:conversationStatusChanged", (data) => {
-        setConversationStatus(data.status);
-      });
-
-      loadHistory();
-    }
+    on("client:newMessage", handleNewMessage);
+    on("client:typing", handleTyping);
+    on("client:conversationStatusChanged", handleStatusChanged);
 
     return () => {
-      off("client:newMessage");
-      off("client:typing");
-      off("client:conversationStatusChanged");
+      off("client:newMessage", handleNewMessage);
+      off("client:typing", handleTyping);
+      off("client:conversationStatusChanged", handleStatusChanged);
     };
-  }, [isConnected, user, accessToken, step, guestInfo]);
+  }, [isConnected, addMessage, setTyping, setConversationStatus, on, off]);
 
+  // Mở lại / vào chat → luôn load history
   useEffect(() => {
     if (isOpen && effectiveStep === "chat" && isConnected) {
       loadHistory();
     }
-  }, [isOpen, effectiveStep, isConnected]);
+  }, [isOpen, effectiveStep, isConnected, loadHistory]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -109,13 +117,13 @@ const ChatWidget = () => {
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleInputChange = (value: string) => {
     setInputValue(value);
-    const { emit } = useSocketStore.getState();
+    if (!isConnected) return;
 
+    const { emit } = useSocketStore.getState();
     // Phát sự kiện đang gõ
     emit("client:typing", { isTyping: true });
 
@@ -137,7 +145,7 @@ const ChatWidget = () => {
   };
 
   const handleSendMessage = (text: string) => {
-    if (!text.trim() || isWaitingReply) return;
+    if (!text.trim() || isWaitingReply || !isConnected) return;
 
     // Hủy hẹn giờ và báo ngừng gõ ngay khi gửi tin nhắn
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
@@ -199,9 +207,7 @@ const ChatWidget = () => {
               </div>
             </div>
             <button
-              onClick={() => {
-                setIsOpen(false);
-              }}
+              onClick={() => setIsOpen(false)}
               className="text-white/80 hover:text-white transition-colors"
             >
               <X size={20} />
@@ -362,8 +368,11 @@ const ChatWidget = () => {
                           type="button"
                           disabled={isWaitingReply}
                           onClick={() => handleSendMessage(reply)}
-                          className={`text-[11px] bg-white text-[#b51c00] border border-[#ffb4a5] hover:bg-[#ffdad3] hover:text-[#8e1400]
-px-3 py-1.5 rounded-full transition-all flex-shrink-0 font-bold whitespace-nowrap shadow-sm ${isWaitingReply ? "opacity-40 cursor-not-allowed" : ""}`}
+                          className={`text-[11px] bg-white text-[#b51c00] border border-[#ffb4a5] hover:bg-[#ffdad3] hover:text-[#8e1400] px-3 py-1.5 rounded-full transition-all flex-shrink-0 font-bold whitespace-nowrap shadow-sm ${
+                            isWaitingReply
+                              ? "opacity-40 cursor-not-allowed"
+                              : ""
+                          }`}
                         >
                           {reply}
                         </button>
@@ -391,7 +400,9 @@ px-3 py-1.5 rounded-full transition-all flex-shrink-0 font-bold whitespace-nowra
                   <button
                     disabled={isWaitingReply}
                     onClick={() => handleSendMessage(inputValue)}
-                    className={`bg-[#b51c00] hover:bg-[#db3416] text-white p-2.5 rounded-[8px] transition-all active:scale-95 shadow-sm ${isWaitingReply ? "opacity-50 cursor-not-allowed" : ""}`}
+                    className={`bg-[#b51c00] hover:bg-[#db3416] text-white p-2.5 rounded-[8px] transition-all active:scale-95 shadow-sm ${
+                      isWaitingReply ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   >
                     <Send size={18} />
                   </button>

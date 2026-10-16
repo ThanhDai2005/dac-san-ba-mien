@@ -114,6 +114,16 @@ export const signIn = async (req, res) => {
       });
     }
 
+    // Kiểm tra tài khoản có phải là Customer không
+    const customer = await Customer.findOne({ userId: user._id });
+
+    if (!customer) {
+      return res.status(403).json({
+        message:
+          "Tài khoản này không phải tài khoản khách hàng. Vui lòng sử dụng cổng quản trị để đăng nhập.",
+      });
+    }
+
     // nếu khớp, tạo accessToken với JWT
     const accessToken = jwt.sign(
       { userId: user._id },
@@ -242,6 +252,16 @@ export const forgotPassword = async (req, res) => {
     if (!existEmail) {
       return res.status(400).json({
         message: "email không tồn tại",
+      });
+    }
+
+    // Kiểm tra User này có phải là Customer không
+    const customer = await Customer.findOne({ userId: existEmail._id });
+
+    if (!customer) {
+      return res.status(403).json({
+        message:
+          "Tài khoản quản trị không thể sử dụng chức năng này. Vui lòng liên hệ quản trị viên để được hỗ trợ.",
       });
     }
 
@@ -432,6 +452,16 @@ export const googleAuth = async (req, res) => {
         userId: user._id,
         address: "",
       });
+    } else {
+      // User đã tồn tại - kiểm tra có phải Customer không
+      const customer = await Customer.findOne({ userId: user._id });
+
+      if (!customer) {
+        return res.status(403).json({
+          message:
+            "Tài khoản này không phải tài khoản khách hàng. Vui lòng sử dụng cổng quản trị để đăng nhập.",
+        });
+      }
     }
 
     // Tạo accessToken và refreshToken

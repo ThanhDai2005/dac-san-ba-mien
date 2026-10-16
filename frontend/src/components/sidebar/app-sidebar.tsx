@@ -86,22 +86,22 @@ const data = {
       title: "Quản Lý Khuyến Mãi",
       url: "#",
       icon: Tag,
-      permission: "promotions_view",
+      permission: "order_promotions_view",
       items: [
         {
           title: "Khuyến mãi sản phẩm",
           url: "/admin/product-promotions",
-          permission: "promotions_view",
+          permission: "product_promotions_view",
         },
         {
           title: "Khuyến mãi đơn hàng",
           url: "/admin/order-promotions",
-          permission: "promotions_view",
+          permission: "order_promotions_view",
         },
         {
           title: "Voucher khách hàng",
           url: "/admin/customer-vouchers",
-          permission: "promotions_view",
+          permission: "customer_vouchers_view",
         },
       ],
     },

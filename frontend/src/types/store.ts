@@ -530,6 +530,10 @@ export interface AdminOrderPromotionStore {
     orderPromotionId: string,
     status: "active" | "inactive",
   ) => Promise<void>;
+  changeMulti: (
+    ids: string[],
+    type: "active" | "inactive" | "delete-all",
+  ) => Promise<void>;
   deleteItem: (orderPromotionId: string) => Promise<void>;
 }
 
@@ -566,23 +570,43 @@ export interface AdminProductPromotionStore {
     productPromotionId: string,
     status: "active" | "inactive",
   ) => Promise<void>;
+  changeMulti: (
+    ids: string[],
+    type: "active" | "inactive" | "delete-all",
+  ) => Promise<void>;
   deleteItem: (productPromotionId: string) => Promise<void>;
 }
 
 export interface AdminCustomerVoucherStore {
-  vouchers: CustomerVoucher[];
+  customerVouchers: CustomerVoucher[];
+  currentCustomerVoucher: {
+    promotionId: Promotion;
+    totalIssued: number;
+    totalUsed: number;
+  } | null;
   loading: boolean;
   totalPages: number;
 
-  fetchVouchers: (
-    customerId?: string,
-    promotionId?: string,
-    isUsed?: boolean,
+  fetchCustomerVouchers: (
+    keyword?: string,
+    status?: string,
     page?: number,
     limit?: number,
   ) => Promise<void>;
-  issueVouchers: (promotionId: string, customerIds: string[]) => Promise<void>;
-  revokeVoucher: (voucherId: string) => Promise<void>;
+  getDetail: (promotionId: string) => Promise<void>;
+  create: (data: {
+    title: string;
+    code: string;
+    discountType: "percentage" | "fixed";
+    discountValue: number;
+    maxDiscountAmount?: number | null;
+    usageLimit?: number | null;
+    startDate: string;
+    endDate: string;
+    status?: "active" | "inactive";
+    customerIds: string[];
+  }) => Promise<void>;
+  issueVoucher: (promotionId: string, customerIds: string[]) => Promise<void>;
 }
 
 export interface AdminUserStore {

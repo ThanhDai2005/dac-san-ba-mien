@@ -289,14 +289,58 @@ export const getPermissions = async (req, res) => {
       { group: "Quản lý bài viết", value: "blogs_edit", label: "Sửa" },
       { group: "Quản lý bài viết", value: "blogs_delete", label: "Xóa" },
 
-      { group: "Quản lý khuyến mãi", value: "promotions_view", label: "Xem" },
       {
-        group: "Quản lý khuyến mãi",
-        value: "promotions_create",
+        group: "Quản lý khuyến mãi đơn hàng",
+        value: "order_promotions_view",
+        label: "Xem",
+      },
+      {
+        group: "Quản lý khuyến mãi đơn hàng",
+        value: "order_promotions_create",
         label: "Thêm",
       },
-      { group: "Quản lý khuyến mãi", value: "promotions_edit", label: "Sửa" },
-      { group: "Quản lý khuyến mãi", value: "promotions_delete", label: "Xóa" },
+      {
+        group: "Quản lý khuyến mãi đơn hàng",
+        value: "order_promotions_edit",
+        label: "Sửa",
+      },
+      {
+        group: "Quản lý khuyến mãi đơn hàng",
+        value: "order_promotions_delete",
+        label: "Xóa",
+      },
+
+      {
+        group: "Quản lý khuyến mãi sản phẩm",
+        value: "product_promotions_view",
+        label: "Xem",
+      },
+      {
+        group: "Quản lý khuyến mãi sản phẩm",
+        value: "product_promotions_create",
+        label: "Thêm",
+      },
+      {
+        group: "Quản lý khuyến mãi sản phẩm",
+        value: "product_promotions_edit",
+        label: "Sửa",
+      },
+      {
+        group: "Quản lý khuyến mãi sản phẩm",
+        value: "product_promotions_delete",
+        label: "Xóa",
+      },
+
+      {
+        group: "Quản lý voucher khách hàng",
+        value: "customer_vouchers_view",
+        label: "Xem",
+      },
+      {
+        group: "Quản lý voucher khách hàng",
+        value: "customer_vouchers_create",
+        label: "Tạo & Phát voucher",
+      },
 
       { group: "Quản lý khách hàng", value: "customers_view", label: "Xem" },
       { group: "Quản lý khách hàng", value: "customers_create", label: "Thêm" },
