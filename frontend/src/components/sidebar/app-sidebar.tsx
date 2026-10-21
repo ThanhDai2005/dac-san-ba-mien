@@ -5,6 +5,7 @@ import {
   MessageSquare,
   ShieldCheck,
   ShoppingCart,
+  Star,
   Tag,
   Users,
   Utensils,
@@ -154,16 +155,22 @@ const data = {
         },
       ],
     },
+
     {
-      title: "Quản Lý Chat",
+      title: "Chăm sóc khách hàng",
       url: "#",
       icon: MessageSquare,
       permission: "chats_view",
       items: [
         {
-          title: "Tư vấn khách hàng",
+          title: "Quản lý chat",
           url: "/admin/chats",
           permission: "chats_view",
+        },
+        {
+          title: "Quản lý đánh giá",
+          url: "/admin/reviews",
+          permission: "reviews_view",
         },
       ],
     },

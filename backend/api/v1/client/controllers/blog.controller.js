@@ -1,5 +1,6 @@
 import Blog from "../../../../models/blog.model.js";
 import BlogCategory from "../../../../models/blogCategory.model.js";
+import { getActiveProductPromotions } from "../../../../helpers/productPromotion.js";
 import logger from "../../../../config/logger.js";
 
 // [GET] /api/v1/blog
@@ -41,7 +42,7 @@ export const list = async (req, res) => {
       Blog.find(filter)
         .populate("authorId", "displayName")
         .populate("blogCategoryId", "name slug")
-        .populate("relatedProducts", "name slug price images")
+        .populate("relatedProducts", "name slug price images stock averageRating")
         .sort({ publishedAt: -1, createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -49,9 +50,27 @@ export const list = async (req, res) => {
       Blog.countDocuments(filter),
     ]);
 
+    // Gắn activePromotion cho relatedProducts trong mỗi blog
+    const dataWithPromo = await Promise.all(
+      data.map(async (blog) => {
+        if (blog.relatedProducts && blog.relatedProducts.length > 0) {
+          const productIds = blog.relatedProducts.map((p) => p._id);
+          const promoMap = await getActiveProductPromotions(productIds);
+
+          const productsWithPromo = blog.relatedProducts.map((product) => ({
+            ...product,
+            activePromotion: promoMap[product._id.toString()] || null,
+          }));
+
+          return { ...blog, relatedProducts: productsWithPromo };
+        }
+        return blog;
+      }),
+    );
+
     res.status(200).json({
       message: "Lấy danh sách blog thành công",
-      data: data,
+      data: dataWithPromo,
       totalItems: totalItems,
       totalPages: Math.ceil(totalItems / limit),
     });
@@ -86,6 +105,17 @@ export const detail = async (req, res) => {
       return res.status(404).json({
         message: "Bài viết không tồn tại",
       });
+    }
+
+    // Gắn activePromotion cho relatedProducts
+    if (blog.relatedProducts && blog.relatedProducts.length > 0) {
+      const productIds = blog.relatedProducts.map((p) => p._id);
+      const promoMap = await getActiveProductPromotions(productIds);
+
+      blog.relatedProducts = blog.relatedProducts.map((product) => ({
+        ...product,
+        activePromotion: promoMap[product._id.toString()] || null,
+      }));
     }
 
     res.status(200).json({

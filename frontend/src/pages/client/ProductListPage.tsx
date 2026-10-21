@@ -12,14 +12,19 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Switch } from "@/components/ui/switch";
 import ProductCard from "@/components/client/ProductCard";
 import Pagination from "@/components/client/Pagination";
+import ProductCardSkeleton from "@/components/client/ProductCardSkeleton";
+import PriceRangeSlider from "@/components/client/PriceRangeSlider";
+import ActiveFilters from "@/components/client/ActiveFilters";
 import type { Product } from "@/types/product";
+
 const ProductListPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { accessToken } = useAuthStore();
-  const { product, loading, getList } = useProductStore();
+  const { product, loading, totalItems, getList } = useProductStore();
   const { category, getList: getCategoryList } = useCategoryStore();
   const { addToCart } = useCartStore();
 
@@ -28,15 +33,36 @@ const ProductListPage = () => {
   const currentPage = parseInt(searchParams.get("page") || "1");
   const sortKey = searchParams.get("sortKey") || "averageRating";
   const sortValue = searchParams.get("sortValue") || "-1";
+  const minPrice = searchParams.get("minPrice") || "";
+  const maxPrice = searchParams.get("maxPrice") || "";
+  const hasPromotion = searchParams.get("hasPromotion") || "";
 
   const [totalPages, setTotalPages] = useState(1);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
-
   const [localSearchKeyword, setLocalSearchKeyword] = useState(keyword);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 200000]);
+
+  const updateURL = (newParams: Record<string, string>) => {
+    const params = Object.fromEntries(searchParams.entries());
+    const mergedParams = { ...params, ...newParams };
+
+    Object.keys(mergedParams).forEach((key) => {
+      if (!mergedParams[key] || (key === "page" && mergedParams[key] === "1")) {
+        delete mergedParams[key];
+      }
+    });
+    setSearchParams(mergedParams);
+  };
 
   useEffect(() => {
     setLocalSearchKeyword(keyword);
   }, [keyword]);
+
+  useEffect(() => {
+    const min = minPrice ? Number(minPrice) : 0;
+    const max = maxPrice ? Number(maxPrice) : 200000;
+    setPriceRange([min, max]);
+  }, [minPrice, maxPrice]);
 
   useEffect(() => {
     getCategoryList();
@@ -52,9 +78,12 @@ const ProductListPage = () => {
           12,
           sortKey,
           sortValue,
+          minPrice,
+          maxPrice,
+          hasPromotion,
         );
         if (response) {
-          setTotalPages(response.totalPages || 1);
+          setTotalPages(response.totalPages);
         }
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -62,19 +91,17 @@ const ProductListPage = () => {
     };
     fetchProducts();
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [keyword, selectedCategory, currentPage, sortKey, sortValue, getList]);
-
-  const updateURL = (newParams: Record<string, string>) => {
-    const params = Object.fromEntries(searchParams.entries());
-    const mergedParams = { ...params, ...newParams };
-
-    Object.keys(mergedParams).forEach((key) => {
-      if (!mergedParams[key] || (key === "page" && mergedParams[key] === "1")) {
-        delete mergedParams[key];
-      }
-    });
-    setSearchParams(mergedParams);
-  };
+  }, [
+    keyword,
+    selectedCategory,
+    currentPage,
+    sortKey,
+    sortValue,
+    minPrice,
+    maxPrice,
+    hasPromotion,
+    getList,
+  ]);
 
   // Tối ưu React: Hàm search giờ chỉ đọc thẳng từ State, không chọc vào DOM HTML nữa
   const handleSearch = (e: React.FormEvent) => {
@@ -91,6 +118,90 @@ const ProductListPage = () => {
     updateURL({ sortKey: key, sortValue: value, page: "1" });
     setIsMobileFilterOpen(false);
   };
+
+  const handlePriceRangeChange = (value: [number, number]) => {
+    setPriceRange(value);
+    updateURL({
+      minPrice: value[0] > 0 ? String(value[0]) : "",
+      maxPrice: value[1] < 200000 ? String(value[1]) : "",
+      page: "1",
+    });
+  };
+
+  const handlePromotionFilterChange = (checked: boolean) => {
+    updateURL({ hasPromotion: checked ? "true" : "", page: "1" });
+  };
+
+  const handleRemoveFilter = (key: string) => {
+    if (key === "price") {
+      setPriceRange([0, 200000]);
+      updateURL({ minPrice: "", maxPrice: "", page: "1" });
+      return;
+    }
+    if (key === "category") {
+      updateURL({ category: "", page: "1" });
+      return;
+    }
+    if (key === "hasPromotion") {
+      updateURL({ hasPromotion: "", page: "1" });
+      return;
+    }
+    if (key === "keyword") {
+      setLocalSearchKeyword("");
+      updateURL({ keyword: "", page: "1" });
+      return;
+    }
+    updateURL({ [key]: "", page: "1" });
+  };
+
+  const handleClearAllFilters = () => {
+    setPriceRange([0, 200000]);
+    setLocalSearchKeyword("");
+
+    // Reset sạch filter; giữ sort mặc định (không hiện trong chip)
+    setSearchParams(
+      {
+        sortKey: "averageRating",
+        sortValue: "-1",
+      },
+      { replace: true },
+    );
+  };
+
+  const activeFilters = (() => {
+    const filters = [];
+
+    if (selectedCategory) {
+      const cat = category.find((c) => c.slug === selectedCategory);
+      if (cat) {
+        filters.push({
+          key: "category",
+          label: cat.name,
+          value: selectedCategory,
+        });
+      }
+    }
+
+    if (minPrice || maxPrice) {
+      const min = minPrice || "0";
+      const max = maxPrice || "200000";
+      filters.push({
+        key: "price",
+        label: `${Number(min).toLocaleString("vi-VN")}đ - ${Number(max).toLocaleString("vi-VN")}đ`,
+        value: `${min}-${max}`,
+      });
+    }
+
+    if (hasPromotion === "true") {
+      filters.push({
+        key: "hasPromotion",
+        label: "Đang khuyến mãi",
+        value: "true",
+      });
+    }
+
+    return filters;
+  })();
 
   const handleQuickAdd = async (item: Product) => {
     if (!accessToken) {
@@ -174,9 +285,39 @@ const ProductListPage = () => {
                   ))}
                 </div>
               </div>
+
+              <div>
+                <h3 className="font-bold text-gray-900 mb-3">Khoảng giá</h3>
+                <PriceRangeSlider
+                  min={0}
+                  max={200000}
+                  value={priceRange}
+                  onChange={handlePriceRangeChange}
+                />
+              </div>
+
+              <div>
+                <h3 className="font-bold text-gray-900 mb-3">Khuyến mãi</h3>
+                <label className="flex items-center justify-between cursor-pointer">
+                  <span className="text-sm font-medium text-gray-700">
+                    Đang khuyến mãi
+                  </span>
+                  <Switch
+                    checked={hasPromotion === "true"}
+                    onCheckedChange={handlePromotionFilterChange}
+                  />
+                </label>
+              </div>
+
               <div>
                 <h3 className="font-bold text-gray-900 mb-3">Sắp xếp</h3>
                 <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => handleSortChange("averageRating", "-1")}
+                    className={`p-3 rounded-xl text-sm border text-center ${sortKey === "averageRating" && sortValue === "-1" ? "border-[#b51c00] bg-red-50 text-[#b51c00] font-bold" : "border-gray-200 text-gray-600"}`}
+                  >
+                    Phổ biến nhất
+                  </button>
                   <button
                     onClick={() => handleSortChange("createdAt", "-1")}
                     className={`p-3 rounded-xl text-sm border text-center ${sortKey === "createdAt" && sortValue === "-1" ? "border-[#b51c00] bg-red-50 text-[#b51c00] font-bold" : "border-gray-200 text-gray-600"}`}
@@ -252,6 +393,7 @@ const ProductListPage = () => {
           </h2>
           <ul className="space-y-1.5">
             {[
+              { key: "averageRating", val: "-1", label: "Phổ biến nhất" },
               { key: "createdAt", val: "-1", label: "Mới nhất" },
               { key: "price", val: "1", label: "Giá thấp đến cao" },
               { key: "price", val: "-1", label: "Giá cao xuống thấp" },
@@ -277,16 +419,50 @@ const ProductListPage = () => {
               </li>
             ))}
           </ul>
+
+          <h2 className="text-lg font-extrabold text-gray-900 mb-4 pb-3 border-b border-gray-100">
+            Khoảng giá
+          </h2>
+          <div className="mb-8">
+            <PriceRangeSlider
+              min={0}
+              max={200000}
+              value={priceRange}
+              onChange={handlePriceRangeChange}
+            />
+          </div>
+
+          <h2 className="text-lg font-extrabold text-gray-900 mb-4 pb-3 border-b border-gray-100">
+            Khuyến mãi
+          </h2>
+          <div>
+            <label className="flex items-center justify-between cursor-pointer group">
+              <span className="text-sm font-medium text-gray-700 group-hover:text-[#b51c00] transition-colors">
+                Đang khuyến mãi
+              </span>
+              <Switch
+                checked={hasPromotion === "true"}
+                onCheckedChange={handlePromotionFilterChange}
+              />
+            </label>
+          </div>
         </div>
       </aside>
 
       {/* ================= MAIN CONTENT ================= */}
       <section className="flex-1 flex flex-col gap-6">
+        {/* Active Filters Chips */}
+        <ActiveFilters
+          filters={activeFilters}
+          onRemove={handleRemoveFilter}
+          onClearAll={handleClearAllFilters}
+        />
+
         <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
           <span className="text-sm text-gray-600">
             Tìm thấy{" "}
             <strong className="text-gray-900 font-extrabold">
-              {product.length}
+              {totalItems}
             </strong>{" "}
             món ăn
             {keyword && (
@@ -319,18 +495,7 @@ const ProductListPage = () => {
         {loading ? (
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
             {[...Array(12)].map((_, idx) => (
-              <div
-                key={idx}
-                className="bg-white rounded-2xl p-3 shadow-sm flex flex-col animate-pulse border border-gray-100"
-              >
-                <div className="w-full aspect-square bg-gray-200 rounded-xl mb-4"></div>
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2 mb-5"></div>
-                <div className="flex justify-between items-end mt-auto">
-                  <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-                  <div className="w-9 h-9 bg-gray-200 rounded-full"></div>
-                </div>
-              </div>
+              <ProductCardSkeleton key={idx} />
             ))}
           </div>
         ) : product.length === 0 ? (
@@ -348,9 +513,7 @@ const ProductListPage = () => {
               của bạn. Hãy thử thay đổi danh mục hoặc từ khóa.
             </p>
             <button
-              onClick={() =>
-                updateURL({ keyword: "", category: "", page: "1" })
-              }
+              onClick={handleClearAllFilters}
               className="px-6 py-2.5 bg-[#b51c00] text-white rounded-xl font-bold hover:bg-[#8e1400] transition-colors shadow-md active:scale-95"
             >
               Xóa bộ lọc

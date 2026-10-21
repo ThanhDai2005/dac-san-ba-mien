@@ -77,11 +77,16 @@ export const create = async (req, res) => {
       images: images || [],
     });
 
-    // Cập nhật averageRating và numReviews trên Product
-    const allReviews = await Review.find({ productId: productId });
+    // Cập nhật averageRating và numReviews trên Product (chỉ tính review không bị ẩn)
+    const allReviews = await Review.find({
+      productId: productId,
+      isHidden: false,
+    });
     const numReviews = allReviews.length;
     const averageRating =
-      allReviews.reduce((sum, r) => sum + r.rating, 0) / numReviews;
+      numReviews > 0
+        ? allReviews.reduce((sum, r) => sum + r.rating, 0) / numReviews
+        : 0;
 
     await Product.updateOne(
       { _id: productId },
@@ -152,7 +157,7 @@ export const listByProduct = async (req, res) => {
     }
 
     const [data, totalItems] = await Promise.all([
-      Review.find({ productId: productId })
+      Review.find({ productId: productId, isHidden: false })
         .populate({
           path: "customerId",
           select: "userId",
@@ -161,11 +166,19 @@ export const listByProduct = async (req, res) => {
             select: "displayName avatarUrl",
           },
         })
+        .populate({
+          path: "adminReply.repliedBy",
+          select: "userId roleId",
+          populate: [
+            { path: "userId", select: "displayName avatarUrl" },
+            { path: "roleId", select: "title" },
+          ],
+        })
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
-      Review.countDocuments({ productId: productId }),
+      Review.countDocuments({ productId: productId, isHidden: false }),
     ]);
 
     res.status(200).json({

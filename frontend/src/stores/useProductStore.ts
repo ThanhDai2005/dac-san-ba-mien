@@ -6,6 +6,8 @@ export const useProductStore = create<ProductState>((set, get) => ({
   product: [],
   currentProduct: null,
   loading: false,
+  totalPages: 1,
+  totalItems: 0,
 
   getList: async (
     keyword = "",
@@ -14,6 +16,9 @@ export const useProductStore = create<ProductState>((set, get) => ({
     limit = 12,
     sortKey = "",
     sortValue = "",
+    minPrice = "",
+    maxPrice = "",
+    hasPromotion = "",
   ) => {
     try {
       set({ loading: true });
@@ -24,8 +29,16 @@ export const useProductStore = create<ProductState>((set, get) => ({
         limit,
         sortKey,
         sortValue,
+        minPrice,
+        maxPrice,
+        hasPromotion,
       );
-      set({ product: response.data, loading: false });
+      set({
+        product: response.data,
+        totalPages: response.totalPages,
+        totalItems: response.totalItems,
+        loading: false,
+      });
       return response;
     } catch (error) {
       console.error("Error fetching products:", error);

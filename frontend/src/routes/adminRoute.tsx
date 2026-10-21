@@ -12,6 +12,9 @@ import ProductEdit from "@/pages/admin/ProductEdit";
 import SupplierManagement from "@/pages/admin/SupplierManagement";
 import SupplierCreate from "@/pages/admin/SupplierCreate";
 import SupplierEdit from "@/pages/admin/SupplierEdit";
+import StockReceiptManagement from "@/pages/admin/StockReceiptManagement";
+import StockReceiptCreate from "@/pages/admin/StockReceiptCreate";
+import StockReceiptDetail from "@/pages/admin/StockReceiptDetail";
 import BlogCategoryManagement from "@/pages/admin/BlogCategoryManagement";
 import BlogCategoryCreate from "@/pages/admin/BlogCategoryCreate";
 import BlogCategoryEdit from "@/pages/admin/BlogCategoryEdit";
@@ -40,9 +43,7 @@ import RoleManagement from "@/pages/admin/RoleManagement";
 import RoleEdit from "@/pages/admin/RoleEdit";
 import RoleCreate from "@/pages/admin/RoleCreate";
 import ChatManagement from "@/pages/admin/ChatManagement";
-import StockReceiptManagement from "@/pages/admin/StockReceiptManagement";
-import StockReceiptCreate from "@/pages/admin/StockReceiptCreate";
-import StockReceiptDetail from "@/pages/admin/StockReceiptDetail";
+import ReviewManagement from "@/pages/admin/ReviewManagement";
 
 const adminRoute = {
   path: "/admin",
@@ -224,6 +225,10 @@ const adminRoute = {
             {
               path: "chats",
               element: <ChatManagement />,
+            },
+            {
+              path: "reviews",
+              element: <ReviewManagement />,
             },
           ],
         },

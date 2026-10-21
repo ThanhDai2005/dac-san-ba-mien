@@ -372,7 +372,7 @@ const ProductDetailPage = () => {
                   {currentProduct.name}
                 </h1>
 
-                <div className="flex items-center gap-5 mb-8">
+                <div className="flex items-center gap-5 mb-4">
                   <div className="flex items-center gap-1 bg-yellow-50 px-4 py-2 rounded-full">
                     <span
                       className="material-symbols-outlined text-yellow-500 text-2xl"
@@ -568,41 +568,79 @@ const ProductDetailPage = () => {
               </div>
               <div className="p-4 space-y-4">
                 {notableProducts.length > 0 ? (
-                  notableProducts.map((product) => (
-                    <div
-                      key={product._id}
-                      onClick={() => navigate(`/product/${product.slug}`)}
-                      className="flex gap-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-                    >
-                      <img
-                        src={product.images[0] || "/placeholder.png"}
-                        className="w-20 h-20 object-cover rounded-lg"
-                        alt={product.name}
-                      />
-                      <div className="flex-1">
-                        <div className="font-medium text-sm line-clamp-2 mb-1">
-                          {product.name}
+                  notableProducts.map((product) => {
+                    // Tính giá sau giảm cho sản phẩm nổi bật
+                    const promo = product.activePromotion;
+                    const finalPrice = promo
+                      ? calcDiscountedPrice(
+                          product.price,
+                          promo.discountType,
+                          promo.discountValue,
+                          promo.maxDiscountAmount,
+                        )
+                      : product.price;
+
+                    return (
+                      <div
+                        key={product._id}
+                        onClick={() => navigate(`/product/${product.slug}`)}
+                        className="flex gap-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                      >
+                        <div className="relative">
+                          <img
+                            src={product.images[0] || "/placeholder.png"}
+                            className="w-20 h-20 object-cover rounded-lg"
+                            alt={product.name}
+                          />
+                          {promo && (
+                            <div className="absolute -top-1 -right-1 bg-[#b51c00] text-white text-[9px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                              <span
+                                className="material-symbols-outlined text-[10px]"
+                                style={{ fontVariationSettings: "'FILL' 1" }}
+                              >
+                                bolt
+                              </span>
+                              -
+                              {Math.round(
+                                ((product.price - finalPrice) / product.price) *
+                                  100,
+                              )}
+                              %
+                            </div>
+                          )}
                         </div>
-                        <div className="text-red-600 font-bold">
-                          {(product.price ?? 0).toLocaleString("vi-VN")} ₫
-                        </div>
-                        <div className="flex items-center gap-1 mt-1">
-                          <span
-                            className="material-symbols-outlined text-yellow-500"
-                            style={{
-                              fontSize: "14px",
-                              fontVariationSettings: "'FILL' 1",
-                            }}
-                          >
-                            star
-                          </span>
-                          <span className="text-xs text-gray-600">
-                            {(product.averageRating ?? 0).toFixed(1)}
-                          </span>
+                        <div className="flex-1">
+                          <div className="font-medium text-sm line-clamp-2 mb-1">
+                            {product.name}
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <div className="text-red-600 font-bold text-base">
+                              {finalPrice.toLocaleString("vi-VN")} ₫
+                            </div>
+                            {promo && finalPrice < product.price && (
+                              <div className="text-gray-400 text-xs line-through">
+                                {product.price.toLocaleString("vi-VN")} ₫
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 mt-1">
+                            <span
+                              className="material-symbols-outlined text-yellow-500"
+                              style={{
+                                fontSize: "14px",
+                                fontVariationSettings: "'FILL' 1",
+                              }}
+                            >
+                              star
+                            </span>
+                            <span className="text-xs text-gray-600">
+                              {(product.averageRating ?? 0).toFixed(1)}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <p className="text-center py-6 text-gray-500 text-sm">
                     Đang cập nhật...

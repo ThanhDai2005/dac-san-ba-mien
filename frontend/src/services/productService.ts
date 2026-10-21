@@ -8,9 +8,12 @@ export const productService = {
     limit = 10,
     sortKey = "",
     sortValue = "",
+    minPrice = "",
+    maxPrice = "",
+    hasPromotion = "",
   ) => {
     const response = await api.get(
-      `/product?keyword=${keyword}&categorySlug=${categorySlug}&page=${page}&limit=${limit}&sortKey=${sortKey}&sortValue=${sortValue}`,
+      `/product?keyword=${keyword}&categorySlug=${categorySlug}&page=${page}&limit=${limit}&sortKey=${sortKey}&sortValue=${sortValue}&minPrice=${minPrice}&maxPrice=${maxPrice}&hasPromotion=${hasPromotion}`,
     );
     return response.data;
   },

@@ -7,6 +7,7 @@ import { toast } from "sonner"; // Dùng sonner cho đồng bộ
 import type { Product } from "@/types/product";
 import { useAuthStore } from "@/stores/useAuthStore";
 import ProductCard from "./ProductCard";
+import ProductCardSkeleton from "./ProductCardSkeleton";
 
 // Hàm Helper ánh xạ icon theo slug danh mục chuẩn UX
 const getCategoryIcon = (slug: string) => {
@@ -167,18 +168,7 @@ const ProductList = () => {
         {loading ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {[...Array(8)].map((_, idx) => (
-              <div
-                key={idx}
-                className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 flex flex-col animate-pulse"
-              >
-                <div className="w-full aspect-[4/3] bg-gray-200 rounded-xl mb-4"></div>
-                <div className="h-5 bg-gray-200 rounded w-3/4 mb-3"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2 mb-5"></div>
-                <div className="flex justify-between items-end mt-auto">
-                  <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-                  <div className="w-9 h-9 bg-gray-200 rounded-full"></div>
-                </div>
-              </div>
+              <ProductCardSkeleton key={idx} />
             ))}
           </div>
         ) : product.length === 0 ? (

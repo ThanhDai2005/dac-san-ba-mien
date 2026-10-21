@@ -6,7 +6,15 @@ import logger from "../../../../config/logger.js";
 // [GET] /api/v1/product
 export const list = async (req, res) => {
   try {
-    const { keyword, categorySlug, sortKey, sortValue } = req.query;
+    const {
+      keyword,
+      categorySlug,
+      sortKey,
+      sortValue,
+      minPrice,
+      maxPrice,
+      hasPromotion,
+    } = req.query;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
     const skip = (page - 1) * limit;
@@ -31,6 +39,13 @@ export const list = async (req, res) => {
       filter.categoryId = category._id;
     }
 
+    // Filter theo khoảng giá
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
     const slugify = (str = "") => {
       return str
         .toLowerCase()
@@ -50,6 +65,22 @@ export const list = async (req, res) => {
         { name: { $regex: keyword, $options: "i" } },
         { slug: { $regex: search, $options: "i" } },
       ];
+    }
+
+    // Filter theo khuyến mãi
+    if (hasPromotion === "true") {
+      // Lấy tất cả productIds đang có promotion active
+      const allProducts = await Product.find(filter).select("_id").lean();
+      const allProductIds = allProducts.map((p) => p._id);
+      const promoMap = await getActiveProductPromotions(allProductIds);
+
+      // Chỉ giữ lại productIds có activePromotion
+      const productIdsWithPromo = allProductIds.filter(
+        (id) => promoMap[id.toString()] !== undefined,
+      );
+
+      // Thêm vào filter
+      filter._id = { $in: productIdsWithPromo };
     }
 
     const sort = {};

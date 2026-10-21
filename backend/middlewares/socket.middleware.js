@@ -14,7 +14,9 @@ const verifyTokenClient = async (socket) => {
       _id: decoded.userId,
       status: "active",
       deleted: false,
-    }).select("-hashedPassword");
+    })
+      .select("-hashedPassword")
+      .lean();
 
     if (!user) return null;
 
@@ -38,7 +40,9 @@ const verifyTokenAdmin = async (socket) => {
       _id: decoded.userId,
       status: "active",
       deleted: false,
-    }).select("-hashedPassword");
+    })
+      .select("-hashedPassword")
+      .lean();
 
     if (!user) return null;
 

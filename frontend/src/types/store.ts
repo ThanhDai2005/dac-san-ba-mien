@@ -12,7 +12,7 @@ import type {
   ProductPromotion,
   Promotion,
 } from "./promotion";
-import type { Review } from "./review";
+import type { Review, ReviewStats } from "./review";
 import type { BlogCategory } from "./blogCategory";
 import type { Blog } from "./blog";
 import type { Socket } from "socket.io-client";
@@ -80,6 +80,8 @@ export interface ProductState {
   product: Product[];
   currentProduct: Product | null;
   loading: boolean;
+  totalPages: number;
+  totalItems: number;
 
   getList: (
     keyword: string,
@@ -88,7 +90,10 @@ export interface ProductState {
     limit: number,
     sortKey: string,
     sortValue: string,
-  ) => Promise<void>;
+    minPrice: string,
+    maxPrice: string,
+    hasPromotion: string,
+  ) => Promise<{ totalPages: number; totalItems: number }>;
   getDetail: (slug: string) => Promise<void>;
 }
 
@@ -906,4 +911,29 @@ export interface AdminStockReceiptState {
   confirmReceipt: (receiptId: string) => Promise<void>;
   cancelReceipt: (receiptId: string) => Promise<void>;
   clearCurrentReceipt: () => void;
+}
+
+export interface AdminReviewStore {
+  reviews: Review[];
+  currentReview: Review | null;
+  totalPages: number;
+  totalItems: number;
+  loading: boolean;
+  stats: ReviewStats | null;
+
+  fetchStats: () => Promise<void>;
+  fetchReviews: (
+    keyword?: string,
+    rating?: string,
+    visibility?: string,
+    page?: number,
+    limit?: number,
+    sortKey?: string,
+    sortValue?: string,
+  ) => Promise<void>;
+  getReviewDetail: (reviewId: string) => Promise<void>;
+  replyReview: (reviewId: string, content: string) => Promise<void>;
+  deleteReply: (reviewId: string) => Promise<void>;
+  toggleHidden: (reviewId: string) => Promise<void>;
+  clearCurrentReview: () => void;
 }

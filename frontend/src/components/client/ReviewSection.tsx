@@ -126,7 +126,7 @@ const ReviewSection = ({ productId }: ReviewSectionProps) => {
                       ref={(el) => {
                         imageGalleryRefs.current[review._id] = el;
                       }}
-                      className="flex flex-wrap gap-3"
+                      className="flex flex-wrap gap-3 mb-4"
                     >
                       {review.images.map((img, idx) => (
                         <img
@@ -136,6 +136,51 @@ const ReviewSection = ({ productId }: ReviewSectionProps) => {
                           className="w-20 h-20 object-cover rounded-xl cursor-pointer border border-gray-200 hover:border-red-400 transition-all"
                         />
                       ))}
+                    </div>
+                  )}
+
+                  {/* Admin Reply */}
+                  {review.adminReply?.content && (
+                    <div className="mt-4 ml-0 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="shrink-0">
+                          {review.adminReply.repliedBy?.userId?.avatarUrl ? (
+                            <img
+                              src={review.adminReply.repliedBy.userId.avatarUrl}
+                              alt={
+                                review.adminReply.repliedBy.userId.displayName
+                              }
+                              className="w-9 h-9 rounded-full object-cover border-2 border-emerald-300"
+                            />
+                          ) : (
+                            <div className="w-9 h-9 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                              A
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="text-sm font-bold text-emerald-900">
+                              {review.adminReply.repliedBy?.userId
+                                ?.displayName || "Admin"}
+                            </p>
+                            <span className="text-[10px] px-2 py-0.5 bg-emerald-600 text-white rounded-full font-semibold">
+                              {review.adminReply?.repliedBy?.roleId?.title}
+                            </span>
+                            {review.adminReply.repliedAt && (
+                              <span className="text-xs text-emerald-600">
+                                ·{" "}
+                                {new Date(
+                                  review.adminReply.repliedAt,
+                                ).toLocaleDateString("vi-VN")}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-emerald-900 leading-relaxed">
+                            {review.adminReply.content}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>

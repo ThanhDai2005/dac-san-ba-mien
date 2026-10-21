@@ -224,16 +224,19 @@ export const deleteItem = async (req, res) => {
 export const getPermissions = async (req, res) => {
   try {
     const permissions = [
+      // ── QUẢN LÝ DANH MỤC ──
       { group: "Quản lý danh mục", value: "categories_view", label: "Xem" },
       { group: "Quản lý danh mục", value: "categories_create", label: "Thêm" },
       { group: "Quản lý danh mục", value: "categories_edit", label: "Sửa" },
       { group: "Quản lý danh mục", value: "categories_delete", label: "Xóa" },
 
+      // ── QUẢN LÝ SẢN PHẨM ──
       { group: "Quản lý sản phẩm", value: "products_view", label: "Xem" },
       { group: "Quản lý sản phẩm", value: "products_create", label: "Thêm" },
       { group: "Quản lý sản phẩm", value: "products_edit", label: "Sửa" },
       { group: "Quản lý sản phẩm", value: "products_delete", label: "Xóa" },
 
+      // ── QUẢN LÝ NHÀ CUNG CẤP ──
       { group: "Quản lý nhà cung cấp", value: "suppliers_view", label: "Xem" },
       {
         group: "Quản lý nhà cung cấp",
@@ -247,6 +250,7 @@ export const getPermissions = async (req, res) => {
         label: "Xóa",
       },
 
+      // ── QUẢN LÝ PHIẾU NHẬP ──
       {
         group: "Quản lý phiếu nhập",
         value: "stock_receipts_view",
@@ -263,6 +267,7 @@ export const getPermissions = async (req, res) => {
         label: "Duyệt/Hủy phiếu",
       },
 
+      // ── QUẢN LÝ DANH MỤC BÀI VIẾT ──
       {
         group: "Quản lý danh mục bài viết",
         value: "blog_categories_view",
@@ -284,11 +289,13 @@ export const getPermissions = async (req, res) => {
         label: "Xóa",
       },
 
+      // ── QUẢN LÝ BÀI VIẾT ──
       { group: "Quản lý bài viết", value: "blogs_view", label: "Xem" },
       { group: "Quản lý bài viết", value: "blogs_create", label: "Thêm" },
       { group: "Quản lý bài viết", value: "blogs_edit", label: "Sửa" },
       { group: "Quản lý bài viết", value: "blogs_delete", label: "Xóa" },
 
+      // ── QUẢN LÝ KHUYẾN MÃI ĐƠN HÀNG ──
       {
         group: "Quản lý khuyến mãi đơn hàng",
         value: "order_promotions_view",
@@ -310,6 +317,7 @@ export const getPermissions = async (req, res) => {
         label: "Xóa",
       },
 
+      // ── QUẢN LÝ KHUYẾN MÃI SẢN PHẨM ──
       {
         group: "Quản lý khuyến mãi sản phẩm",
         value: "product_promotions_view",
@@ -331,6 +339,7 @@ export const getPermissions = async (req, res) => {
         label: "Xóa",
       },
 
+      // ── QUẢN LÝ VOUCHER KHÁCH HÀNG ──
       {
         group: "Quản lý voucher khách hàng",
         value: "customer_vouchers_view",
@@ -342,31 +351,45 @@ export const getPermissions = async (req, res) => {
         label: "Tạo & Phát voucher",
       },
 
+      // ── QUẢN LÝ KHÁCH HÀNG ──
       { group: "Quản lý khách hàng", value: "customers_view", label: "Xem" },
       { group: "Quản lý khách hàng", value: "customers_create", label: "Thêm" },
       { group: "Quản lý khách hàng", value: "customers_edit", label: "Sửa" },
       { group: "Quản lý khách hàng", value: "customers_delete", label: "Xóa" },
 
+      // ── QUẢN LÝ NHÂN VIÊN ──
       { group: "Quản lý nhân viên", value: "staffs_view", label: "Xem" },
       { group: "Quản lý nhân viên", value: "staffs_create", label: "Thêm" },
       { group: "Quản lý nhân viên", value: "staffs_edit", label: "Sửa" },
       { group: "Quản lý nhân viên", value: "staffs_delete", label: "Xóa" },
 
+      // ── QUẢN LÝ ĐƠN HÀNG ──
       { group: "Quản lý đơn hàng", value: "orders_view", label: "Xem" },
       { group: "Quản lý đơn hàng", value: "orders_edit", label: "Sửa" },
 
+      // ── QUẢN LÝ VAI TRÒ  & PHÂN QUYỀN ──
+      { group: "Quản lý vai trò", value: "roles_view", label: "Xem" },
+      { group: "Quản lý vai trò", value: "roles_create", label: "Thêm" },
+      { group: "Quản lý vai trò", value: "roles_edit", label: "Sửa" },
+      { group: "Quản lý vai trò", value: "roles_delete", label: "Xóa" },
       {
         group: "Quản lý vai trò",
         value: "roles_permissions",
         label: "Phân quyền",
       },
 
-      { group: "Quản lý vai trò", value: "roles_view", label: "Xem" },
-      { group: "Quản lý vai trò", value: "roles_create", label: "Thêm" },
-      { group: "Quản lý vai trò", value: "roles_edit", label: "Sửa" },
-      { group: "Quản lý vai trò", value: "roles_delete", label: "Xóa" },
-
+      // ── CHĂM SÓC KHÁCH HÀNG ──
       { group: "Quản lý Chat", value: "chats_view", label: "Chat khách hàng" },
+      {
+        group: "Quản lý đánh giá",
+        value: "reviews_view",
+        label: "Xem",
+      },
+      {
+        group: "Quản lý đánh giá",
+        value: "reviews_edit",
+        label: "Phản hồi và xử lý đánh giá",
+      },
     ];
 
     res.status(200).json({
