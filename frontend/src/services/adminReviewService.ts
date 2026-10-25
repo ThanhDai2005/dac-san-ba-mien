@@ -1,8 +1,8 @@
-import adminAxios from "@/lib/adminAxios";
+import api from "@/lib/adminAxios";
 
 export const adminReviewService = {
   stats: async () => {
-    const response = await adminAxios.get("/admin/review/stats");
+    const response = await api.get("/admin/review/stats");
     return response.data;
   },
 
@@ -25,31 +25,31 @@ export const adminReviewService = {
     if (sortKey) params.set("sortKey", sortKey);
     if (sortValue) params.set("sortValue", sortValue);
 
-    const response = await adminAxios.get(`/admin/review?${params.toString()}`);
+    const response = await api.get(`/admin/review?${params.toString()}`);
     return response.data;
   },
 
   detail: async (reviewId: string) => {
-    const response = await adminAxios.get(`/admin/review/detail/${reviewId}`);
+    const response = await api.get(`/admin/review/detail/${reviewId}`);
     return response.data;
   },
 
   reply: async (reviewId: string, content: string) => {
-    const response = await adminAxios.patch(`/admin/review/reply/${reviewId}`, {
+    const response = await api.patch(`/admin/review/reply/${reviewId}`, {
       content,
     });
     return response.data;
   },
 
   deleteReply: async (reviewId: string) => {
-    const response = await adminAxios.patch(
+    const response = await api.patch(
       `/admin/review/delete-reply/${reviewId}`,
     );
     return response.data;
   },
 
   toggleHidden: async (reviewId: string) => {
-    const response = await adminAxios.patch(
+    const response = await api.patch(
       `/admin/review/toggle-hidden/${reviewId}`,
     );
     return response.data;

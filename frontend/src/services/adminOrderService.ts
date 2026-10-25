@@ -1,4 +1,4 @@
-import adminAxios from "@/lib/adminAxios";
+import api from "@/lib/adminAxios";
 
 export const adminOrderService = {
   list: async (
@@ -21,12 +21,12 @@ export const adminOrderService = {
       ...(filters.startDate && { startDate: filters.startDate }),
       ...(filters.endDate && { endDate: filters.endDate }),
     });
-    const response = await adminAxios.get(`/admin/order?${params}`);
+    const response = await api.get(`/admin/order?${params}`);
     return response.data;
   },
 
   getDetail: async (orderId: string) => {
-    const response = await adminAxios.get(`/admin/order/detail/${orderId}`);
+    const response = await api.get(`/admin/order/detail/${orderId}`);
     return response.data;
   },
 
@@ -37,7 +37,7 @@ export const adminOrderService = {
       paymentStatus?: string;
     },
   ) => {
-    const response = await adminAxios.patch(
+    const response = await api.patch(
       `/admin/order/update/${orderId}`,
       data,
     );

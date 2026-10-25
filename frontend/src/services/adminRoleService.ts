@@ -1,20 +1,20 @@
-import adminAxios from "@/lib/adminAxios";
+import api from "@/lib/adminAxios";
 
 export const adminRoleService = {
   list: async (keyword: string, page: number, limit: number) => {
-    const response = await adminAxios.get(
+    const response = await api.get(
       `/admin/role?keyword=${keyword}&page=${page}&limit=${limit}`,
     );
     return response.data;
   },
 
   getDetail: async (roleId: string) => {
-    const response = await adminAxios.get(`/admin/role/detail/${roleId}`);
+    const response = await api.get(`/admin/role/detail/${roleId}`);
     return response.data;
   },
 
   create: async (data: { title: string; description?: string }) => {
-    const response = await adminAxios.post("/admin/role", data);
+    const response = await api.post("/admin/role", data);
     return response.data;
   },
 
@@ -22,7 +22,7 @@ export const adminRoleService = {
     roleId: string,
     data: { title?: string; description?: string },
   ) => {
-    const response = await adminAxios.patch(
+    const response = await api.patch(
       `/admin/role/update/${roleId}`,
       data,
     );
@@ -30,17 +30,17 @@ export const adminRoleService = {
   },
 
   deleteItem: async (roleId: string) => {
-    const response = await adminAxios.patch(`/admin/role/delete/${roleId}`);
+    const response = await api.patch(`/admin/role/delete/${roleId}`);
     return response.data;
   },
 
   getPermissions: async () => {
-    const response = await adminAxios.get("/admin/role/permissions");
+    const response = await api.get("/admin/role/permissions");
     return response.data;
   },
 
   updatePermissions: async (roleId: string, permissions: string[]) => {
-    const response = await adminAxios.patch(
+    const response = await api.patch(
       `/admin/role/${roleId}/permissions`,
       { permissions },
     );

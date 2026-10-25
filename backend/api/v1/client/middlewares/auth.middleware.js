@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "../../../../models/user.model.js";
 import logger from "../../../../config/logger.js";
+import Customer from "../../../../models/customer.model.js";
 
 // authorization - xác minh user là ai
 // - verify token
@@ -30,7 +31,9 @@ export const requireAuth = async (req, res, next) => {
     const user = await User.findOne({
       _id: decoded.userId,
       deleted: false,
-    }).select("-hashedPassword");
+    })
+      .select("-hashedPassword")
+      .lean();
 
     if (!user) {
       return res.status(404).json({
@@ -44,7 +47,20 @@ export const requireAuth = async (req, res, next) => {
       });
     }
 
+    const customer = await Customer.findOne({
+      userId: user._id,
+    })
+      .lean()
+      .select("address");
+
+    if (!customer) {
+      return res.status(404).json({
+        message: "Không tìm thấy thông tin khách hàng",
+      });
+    }
+
     req.user = user;
+    req.user.address = customer.address;
     next();
   } catch (error) {
     logger.logError("Lỗi khi xác minh client auth", error, {

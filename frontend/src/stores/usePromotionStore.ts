@@ -71,11 +71,19 @@ export const usePromotionStore = create<PromotionState>((set) => ({
 
       if (!matched) {
         set({ loading: false });
-        throw { response: { data: { message: "Mã khuyến mãi không tồn tại hoặc không áp dụng được" } } };
+        throw {
+          response: {
+            data: {
+              message: "Mã khuyến mãi không tồn tại hoặc không áp dụng được",
+            },
+          },
+        };
       }
 
       const orderPromotionId =
-        matched.type === "orderPromotion" ? matched.orderPromotionId : undefined;
+        matched.type === "orderPromotion"
+          ? matched.orderPromotionId
+          : undefined;
       const customerVoucherId =
         matched.type === "customerVoucher" ? matched.voucherId : undefined;
 
@@ -148,7 +156,11 @@ export const usePromotionStore = create<PromotionState>((set) => ({
     }
   },
 
-  calculateDiscount: async (orderValue, orderPromotionId, customerVoucherId) => {
+  calculateDiscount: async (
+    orderValue,
+    orderPromotionId,
+    customerVoucherId,
+  ) => {
     set({ loading: true });
     try {
       const response = await promotionService.calculate(
@@ -170,4 +182,3 @@ export const usePromotionStore = create<PromotionState>((set) => ({
     set({ appliedPromotion: null, discountResult: null });
   },
 }));
-

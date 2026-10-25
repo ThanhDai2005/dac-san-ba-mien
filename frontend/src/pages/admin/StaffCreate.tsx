@@ -3,12 +3,13 @@ import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, Save, Eye, EyeOff } from "lucide-react";
+import { Save, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { useAdminStaffStore } from "@/stores/useAdminStaffStore";
 import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
 import { useAdminRoleStore } from "@/stores/useAdminRoleStore";
 import AdminHeader from "@/components/admin/AdminHeader";
+import AdminPageHeading from "@/components/admin/AdminPageHeading";
 import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 import { hasPermission } from "@/lib/permissions";
 
@@ -93,18 +94,10 @@ const StaffCreate = () => {
       />
 
       <div className="p-6 md:p-8 max-w-[900px] mx-auto space-y-6">
-        {/* TITLE & BACK BUTTON */}
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate("/admin/staffs")}
-            className="flex items-center justify-center w-10 h-10 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <h1 className="text-[24px] font-bold text-gray-900 tracking-tight">
-            Thêm nhân viên mới
-          </h1>
-        </div>
+        <AdminPageHeading
+          title="Thêm nhân viên mới"
+          subtitle="Điền thông tin để tạo tài khoản nhân viên"
+        />
 
         {/* FORM CARD */}
         <div className="bg-white rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-gray-200 overflow-hidden">

@@ -3,12 +3,13 @@ import { useNavigate, useParams } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, Save, Eye, EyeOff } from "lucide-react";
+import { Save, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { useAdminStaffStore } from "@/stores/useAdminStaffStore";
 import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
 import { useAdminRoleStore } from "@/stores/useAdminRoleStore";
 import AdminHeader from "@/components/admin/AdminHeader";
+import AdminPageHeading from "@/components/admin/AdminPageHeading";
 import NoPermissionScreen from "@/components/admin/NoPermissionScreen";
 import { hasPermission } from "@/lib/permissions";
 
@@ -159,18 +160,10 @@ const StaffEdit = () => {
       />
 
       <div className="p-6 md:p-8 max-w-[900px] mx-auto space-y-6">
-        {/* TITLE & BACK BUTTON */}
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate("/admin/staffs")}
-            className="flex items-center justify-center w-10 h-10 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <h1 className="text-[24px] font-bold text-gray-900 tracking-tight">
-            {canEdit ? "Chỉnh sửa nhân viên" : "Xem chi tiết nhân viên"}
-          </h1>
-        </div>
+        <AdminPageHeading
+          title={canEdit ? "Chỉnh sửa nhân viên" : "Xem chi tiết nhân viên"}
+          subtitle="Cập nhật thông tin tài khoản nhân viên"
+        />
 
         {/* LOADING SKELETON */}
         {isLoadingDetail ? (

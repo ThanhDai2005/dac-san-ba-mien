@@ -416,19 +416,19 @@ const OrderDetail = () => {
                 <div>
                   <p className="text-sm text-gray-500">Tên khách hàng</p>
                   <p className="font-semibold text-gray-900 mt-1">
-                    {currentOrder.userId?.displayName || "N/A"}
+                    {currentOrder.customerId?.userId?.displayName || "N/A"}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Email</p>
                   <p className="font-semibold text-gray-900 mt-1">
-                    {currentOrder.userId?.email || "N/A"}
+                    {currentOrder.customerId?.userId?.email || "N/A"}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Số điện thoại</p>
                   <p className="font-semibold text-gray-900 mt-1">
-                    {currentOrder.userId?.phone || "N/A"}
+                    {currentOrder.customerId?.userId?.phone || "N/A"}
                   </p>
                 </div>
               </div>

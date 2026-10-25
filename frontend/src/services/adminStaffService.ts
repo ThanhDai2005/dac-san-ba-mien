@@ -1,4 +1,4 @@
-import adminAxios from "@/lib/adminAxios";
+import api from "@/lib/adminAxios";
 
 export const adminStaffService = {
   list: async (
@@ -8,14 +8,14 @@ export const adminStaffService = {
     page = 1,
     limit = 10,
   ) => {
-    const response = await adminAxios.get(
+    const response = await api.get(
       `/admin/staff?keyword=${keyword}&roleId=${roleId}&status=${status}&page=${page}&limit=${limit}`,
     );
     return response.data;
   },
 
   getDetail: async (staffId: string) => {
-    const response = await adminAxios.get(`/admin/staff/${staffId}`);
+    const response = await api.get(`/admin/staff/${staffId}`);
     return response.data;
   },
 
@@ -27,7 +27,7 @@ export const adminStaffService = {
     roleId: string;
     status?: string;
   }) => {
-    const response = await adminAxios.post("/admin/staff", data);
+    const response = await api.post("/admin/staff", data);
     return response.data;
   },
 
@@ -42,7 +42,7 @@ export const adminStaffService = {
       status?: string;
     },
   ) => {
-    const response = await adminAxios.patch(
+    const response = await api.patch(
       `/admin/staff/update/${staffId}`,
       data,
     );
@@ -50,7 +50,7 @@ export const adminStaffService = {
   },
 
   changeStatus: async (staffId: string, status: string) => {
-    const response = await adminAxios.patch(
+    const response = await api.patch(
       `/admin/staff/change-status/${staffId}`,
       {
         status,
@@ -60,7 +60,7 @@ export const adminStaffService = {
   },
 
   changeMulti: async (ids: string[], type: "active" | "inactive" | "delete-all") => {
-    const response = await adminAxios.patch("/admin/staff/change-multi", {
+    const response = await api.patch("/admin/staff/change-multi", {
       ids,
       type,
     });
@@ -68,7 +68,7 @@ export const adminStaffService = {
   },
 
   deleteItem: async (staffId: string) => {
-    const response = await adminAxios.patch(`/admin/staff/delete/${staffId}`);
+    const response = await api.patch(`/admin/staff/delete/${staffId}`);
     return response.data;
   },
 };

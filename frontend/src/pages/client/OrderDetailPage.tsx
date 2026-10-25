@@ -92,7 +92,7 @@ const OrderDetailPage = () => {
   const order = currentOrder;
   const config = statusConfig[order.orderStatus];
   const currentStep = config.step;
-  const subtotal = order.totalAmount - order.shippingFee;
+  const subtotal = order.totalAmount + order.discountAmount - order.shippingFee;
   const orderCode = order._id.toUpperCase();
   const orderDate = new Date(order.createdAt).toLocaleString("vi-VN");
 
@@ -224,7 +224,7 @@ const OrderDetailPage = () => {
               {order.shippingAddress.phone}
             </p>
             <p>
-              <span className="font-semibold text-gray-900 inline-block w-32">
+              <span className="font-semibold text-gray-900 inline-block w-38">
                 Địa chỉ giao hàng:
               </span>
               {order.shippingAddress.address}
@@ -324,6 +324,14 @@ const OrderDetailPage = () => {
                   {order.shippingFee.toLocaleString("vi-VN")}đ
                 </span>
               </div>
+              {order.discountAmount > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-green-600">Khuyến mãi</span>
+                  <span className="font-semibold text-green-600">
+                    - {order.discountAmount.toLocaleString("vi-VN")}đ
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between pt-3 mt-3 border-t border-gray-300">
                 <span className="font-bold text-gray-900 uppercase">
                   Tổng cộng
@@ -561,6 +569,14 @@ const OrderDetailPage = () => {
                     {order.shippingFee.toLocaleString("vi-VN")}đ
                   </span>
                 </div>
+                {order.discountAmount > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-green-600">Khuyến mãi</span>
+                    <span className="font-semibold text-green-600">
+                      - {order.discountAmount.toLocaleString("vi-VN")}đ
+                    </span>
+                  </div>
+                )}
                 <div className="border-t border-gray-100 pt-3 flex justify-between items-center">
                   <span className="text-gray-900 font-black">Tổng cộng</span>
                   <span className="text-2xl font-black text-[#b51c00]">

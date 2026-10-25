@@ -614,51 +614,6 @@ export interface AdminCustomerVoucherStore {
   issueVoucher: (promotionId: string, customerIds: string[]) => Promise<void>;
 }
 
-export interface AdminUserStore {
-  users: User[];
-  currentUser: User | null;
-  loading: boolean;
-  totalPages: number;
-
-  fetchUsers: (
-    keyword?: string,
-    roleId?: string,
-    status?: string,
-    page?: number,
-    limit?: number,
-  ) => Promise<void>;
-  getUserDetail: (userId: string) => Promise<User>;
-  createUser: (data: {
-    displayName: string;
-    phone: string;
-    password: string;
-    email: string;
-    roleId?: string;
-    status?: string;
-    address?: string;
-  }) => Promise<void>;
-  updateUser: (
-    userId: string,
-    data: {
-      displayName?: string;
-      phone?: string;
-      email?: string;
-      roleId?: string;
-      status?: string;
-      address?: string;
-    },
-  ) => Promise<void>;
-  changeStatus: (
-    userId: string,
-    status: "active" | "inactive",
-  ) => Promise<void>;
-  changeMulti: (
-    ids: string[],
-    type: "active" | "inactive" | "delete-all",
-  ) => Promise<void>;
-  deleteItem: (userId: string) => Promise<void>;
-}
-
 export interface AdminStaffStore {
   staffs: User[];
   currentStaff: User | null;

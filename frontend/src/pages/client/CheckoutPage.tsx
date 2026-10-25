@@ -55,7 +55,7 @@ const CheckoutPage = () => {
   const calculateSubtotal = () => {
     if (!cart?.items) return 0;
     return cart.items.reduce((sum, item) => {
-      return sum + item.productId.price * item.quantity;
+      return sum + item.price * item.quantity;
     }, 0);
   };
 
@@ -83,7 +83,8 @@ const CheckoutPage = () => {
           address: data.address,
         },
         paymentMethod: data.paymentMethod,
-        promotionId: appliedPromotion?.promotionId,
+        orderPromotionId: appliedPromotion?.orderPromotionId,
+        customerVoucherId: appliedPromotion?.customerVoucherId,
       };
 
       const order = await createOrder(orderData);
@@ -290,9 +291,7 @@ const CheckoutPage = () => {
                           SL: x{item.quantity}
                         </p>
                         <p className="text-sm font-bold text-[#b51c00]">
-                          {(
-                            item.productId.price * item.quantity
-                          ).toLocaleString("vi-VN")}
+                          {(item.price * item.quantity).toLocaleString("vi-VN")}
                           đ
                         </p>
                       </div>
