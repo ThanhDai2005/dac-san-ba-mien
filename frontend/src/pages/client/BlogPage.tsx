@@ -189,7 +189,7 @@ const BlogPage = () => {
                           person
                         </span>
                         <span>
-                          {featuredPost.authorId?.displayName || "Ban Biên Tập"}
+                          {featuredPost.authorId?.userId?.displayName || "Ban Biên Tập"}
                         </span>
                         <span>•</span>
                         <span>
@@ -236,7 +236,7 @@ const BlogPage = () => {
                               </span>
                             </div>
                             <span className="truncate max-w-[120px]">
-                              {post.authorId?.displayName}
+                              {post.authorId?.userId?.displayName || "Ban Biên Tập"}
                             </span>
                           </div>
                           <span className="text-gray-400">

@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAdminAuthStore } from "@/stores/useAdminAuthStore";
 import { hasPermission } from "@/lib/permissions";
+import { isSuperAdmin } from "@/lib/roleRoutes";
 
 const data = {
   navMain: [
@@ -33,7 +34,7 @@ const data = {
       title: "Quản Lý Món Ăn",
       url: "#",
       icon: Utensils,
-      permission: "categories_view",
+      permission: ["categories_view", "products_view"],
       items: [
         {
           title: "Danh mục sản phẩm",
@@ -51,7 +52,7 @@ const data = {
       title: "Quản Lý Phiếu Nhập",
       url: "#",
       icon: Warehouse,
-      permission: "suppliers_view",
+      permission: ["suppliers_view", "stock_receipts_view"],
       items: [
         {
           title: "Nhà cung cấp",
@@ -69,7 +70,7 @@ const data = {
       title: "Quản Lý Bài Viết",
       url: "#",
       icon: FileText,
-      permission: "blog_categories_view",
+      permission: ["blog_categories_view", "blogs_view"],
       items: [
         {
           title: "Danh mục bài viết",
@@ -87,7 +88,11 @@ const data = {
       title: "Quản Lý Khuyến Mãi",
       url: "#",
       icon: Tag,
-      permission: "order_promotions_view",
+      permission: [
+        "product_promotions_view",
+        "order_promotions_view",
+        "customer_vouchers_view",
+      ],
       items: [
         {
           title: "Khuyến mãi sản phẩm",
@@ -110,7 +115,7 @@ const data = {
       title: "Quản Lý Tài Khoản",
       url: "#",
       icon: Users,
-      permission: "customers_view",
+      permission: ["customers_view", "staffs_view"],
       items: [
         {
           title: "Khách hàng",
@@ -141,7 +146,7 @@ const data = {
       title: "Phân Quyền & Vai Trò",
       url: "#",
       icon: ShieldCheck,
-      permission: "roles_view",
+      permission: ["roles_permissions", "roles_view"],
       items: [
         {
           title: "Quản lý phân quyền",
@@ -155,12 +160,11 @@ const data = {
         },
       ],
     },
-
     {
       title: "Chăm sóc khách hàng",
       url: "#",
       icon: MessageSquare,
-      permission: "chats_view",
+      permission: ["chats_view", "reviews_view"],
       items: [
         {
           title: "Quản lý chat",
@@ -191,6 +195,8 @@ export const AppSidebar = ({
     }))
     .filter((group) => group.items.length > 0);
 
+  const showDashboard = isSuperAdmin(user?.roleId?.title);
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -210,27 +216,28 @@ export const AppSidebar = ({
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup className="pb-0">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                tooltip="Dashboard"
-                isActive={isDashboardActive}
-                className={`cursor-pointer transition-all duration-200 hover:bg-sidebar-accent
-                  ${
-                    isDashboardActive &&
+        {showDashboard && (
+          <SidebarGroup className="pb-0">
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  tooltip="Dashboard"
+                  isActive={isDashboardActive}
+                  className={`cursor-pointer transition-all duration-200 hover:bg-sidebar-accent
+                    ${isDashboardActive &&
                     "bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-sm"
-                  } `}
-              >
-                <Link to="/admin/dashboard" className="flex items-center gap-2">
-                  <Home className="shrink-0" />
-                  <span>Dashboard</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
+                    } `}
+                >
+                  <Link to="/admin/dashboard" className="flex items-center gap-2">
+                    <Home className="shrink-0" />
+                    <span>Dashboard</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
         <NavMain items={filteredNavMain} />
       </SidebarContent>
       <SidebarFooter>
