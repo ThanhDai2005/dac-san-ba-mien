@@ -190,6 +190,7 @@ export interface ReviewState {
   loading: boolean;
   totalPages: number;
   currentPage: number;
+  totalItems: number;
   createReview: (
     productId: string,
     orderId: string,
@@ -295,11 +296,60 @@ export interface AdminDashboardState {
       sold: number;
       revenue: number;
     }>;
+    revenueByMonth?: Array<{
+      month: string;
+      revenue: number;
+      cost: number;
+      profit: number;
+    }>;
+    revenueByQuarter?: Array<{
+      quarter: string;
+      revenue: number;
+      cost: number;
+      profit: number;
+    }>;
+    revenueByYear?: Array<{
+      year: string;
+      revenue: number;
+      cost: number;
+      profit: number;
+    }>;
+    revenueByStaff?: Array<{
+      staffId: string;
+      staffName: string;
+      years: Record<number, number>;
+    }>;
+    orderStatusPercentage?: {
+      pending: string;
+      processing: string;
+      shipped: string;
+      delivered: string;
+      cancelled: string;
+    };
+    revenueByProductQuarter?: Array<{
+      productId: string;
+      productName: string;
+      quarters: Record<string, number>;
+    }>;
+    revenueByCustomerYear?: Array<{
+      customerId: string;
+      customerName: string;
+      years: Record<number, number>;
+    }>;
+    revenueByCustomerQuarter?: Array<{
+      customerId: string;
+      customerName: string;
+      quarters: Record<string, number>;
+    }>;
   };
   loading: boolean;
 
-  fetchStats: (startDate?: string, endDate?: string) => Promise<void>;
-  fetchOrderStatusByMonth: (month?: string) => Promise<void>;
+  fetchStats: (
+    startDate?: string,
+    endDate?: string,
+    month?: string,
+    customerYear?: number,
+  ) => Promise<void>;
 }
 
 export interface AdminCategoryState {
