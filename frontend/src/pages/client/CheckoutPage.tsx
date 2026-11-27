@@ -15,7 +15,7 @@ const checkoutSchema = z.object({
     .string()
     .regex(/^(03|05|07|08|09)\d{8}$/, "Số điện thoại không hợp lệ"),
   address: z.string().min(10, "Địa chỉ phải có ít nhất 10 ký tự"),
-  paymentMethod: z.enum(["COD", "VNPAY", "MOMO", "STRIPE"]),
+  paymentMethod: z.enum(["COD", "VNPAY", "MOMO"]),
 });
 
 type CheckoutForm = z.infer<typeof checkoutSchema>;
@@ -25,7 +25,12 @@ const CheckoutPage = () => {
   const { cart, getCart, clearCart } = useCartStore();
   const { createOrder } = useOrderStore();
   const { user } = useAuthStore();
-  const { appliedPromotion, clearPromotion } = usePromotionStore();
+  const {
+    appliedPromotion,
+    clearPromotion,
+    getAvailablePromotions,
+    availablePromotions,
+  } = usePromotionStore();
   const [submitting, setSubmitting] = useState(false);
 
   const {
@@ -51,6 +56,44 @@ const CheckoutPage = () => {
       }
     }
   }, [user, setValue, getCart, navigate]);
+
+  // Fetch available promotions khi vào CheckoutPage
+  useEffect(() => {
+    if (appliedPromotion) {
+      getAvailablePromotions();
+    }
+  }, [appliedPromotion, getAvailablePromotions]);
+
+  // Validate appliedPromotion khi availablePromotions thay đổi
+  useEffect(() => {
+    if (!appliedPromotion || !availablePromotions) return;
+
+    const allAvailable = [
+      ...(availablePromotions.orderPromotions || []),
+      ...(availablePromotions.customerVouchers || []),
+    ];
+
+    let stillValid = false;
+
+    if (appliedPromotion.type === "orderPromotion") {
+      stillValid = allAvailable.some(
+        (p) =>
+          p.type === "orderPromotion" &&
+          p.orderPromotionId === appliedPromotion.orderPromotionId,
+      );
+    } else if (appliedPromotion.type === "customerVoucher") {
+      stillValid = allAvailable.some(
+        (p) =>
+          p.type === "customerVoucher" &&
+          p.voucherId === appliedPromotion.customerVoucherId,
+      );
+    }
+
+    if (!stillValid) {
+      clearPromotion();
+      toast.info("Mã khuyến mãi đã ngưng áp dụng hoặc không còn hợp lệ");
+    }
+  }, [availablePromotions, appliedPromotion, clearPromotion]);
 
   const calculateSubtotal = () => {
     if (!cart?.items) return 0;
@@ -109,7 +152,7 @@ const CheckoutPage = () => {
         return;
       }
 
-      // Handle other payment methods (COD, STRIPE)
+      // Handle other payment methods (COD)
       clearCart();
       clearPromotion();
       toast.success("Đặt hàng thành công!");

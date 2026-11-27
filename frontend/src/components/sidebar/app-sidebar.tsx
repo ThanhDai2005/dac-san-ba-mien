@@ -1,5 +1,6 @@
 import * as React from "react";
 import {
+  BarChart3,
   FileText,
   Home,
   MessageSquare,
@@ -178,6 +179,19 @@ const data = {
         },
       ],
     },
+    {
+      title: "Thống kê",
+      url: "#",
+      icon: BarChart3,
+      permission: ["statistics_view"],
+      items: [
+        {
+          title: "Thống kê",
+          url: "/admin/statistics",
+          permission: "statistics_view",
+        },
+      ],
+    },
   ],
 };
 
@@ -225,11 +239,15 @@ export const AppSidebar = ({
                   tooltip="Dashboard"
                   isActive={isDashboardActive}
                   className={`cursor-pointer transition-all duration-200 hover:bg-sidebar-accent
-                    ${isDashboardActive &&
-                    "bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-sm"
+                    ${
+                      isDashboardActive &&
+                      "bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-sm"
                     } `}
                 >
-                  <Link to="/admin/dashboard" className="flex items-center gap-2">
+                  <Link
+                    to="/admin/dashboard"
+                    className="flex items-center gap-2"
+                  >
                     <Home className="shrink-0" />
                     <span>Dashboard</span>
                   </Link>

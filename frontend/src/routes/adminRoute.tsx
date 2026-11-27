@@ -43,6 +43,7 @@ import RoleEdit from "@/pages/admin/RoleEdit";
 import RoleCreate from "@/pages/admin/RoleCreate";
 import ChatManagement from "@/pages/admin/ChatManagement";
 import ReviewManagement from "@/pages/admin/ReviewManagement";
+import StatisticPage from "@/pages/admin/StatisticPage";
 
 const adminRoute = {
   path: "/admin",
@@ -224,6 +225,10 @@ const adminRoute = {
             {
               path: "reviews",
               element: <ReviewManagement />,
+            },
+            {
+              path: "statistics",
+              element: <StatisticPage />,
             },
           ],
         },

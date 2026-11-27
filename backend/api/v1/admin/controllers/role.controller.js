@@ -390,6 +390,12 @@ export const getPermissions = async (req, res) => {
         value: "reviews_edit",
         label: "Phản hồi và xử lý đánh giá",
       },
+
+      {
+        group: "Thống kê",
+        value: "statistics_view",
+        label: "Xem thống kê hệ thống",
+      },
     ];
 
     res.status(200).json({

@@ -80,12 +80,12 @@ const clientRoute = {
           element: <PrivateRouter />,
           children: [
             {
-              path: "vouchers",
-              element: <VoucherPage />,
-            },
-            {
               path: "profile",
               element: <ProfilePage />,
+            },
+            {
+              path: "vouchers",
+              element: <VoucherPage />,
             },
             {
               path: "cart",

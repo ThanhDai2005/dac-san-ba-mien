@@ -1,3 +1,5 @@
+import type { Product } from "@/types/product";
+
 export interface Promotion {
   _id: string;
   title: string;
@@ -28,7 +30,7 @@ export interface OrderPromotion {
 export interface ProductPromotion {
   _id: string;
   promotionId: Promotion;
-  productIds: string[];
+  productIds: Pick<Product, "_id" | "name" | "images" | "price">[];
   createdAt: string;
   updatedAt: string;
 }

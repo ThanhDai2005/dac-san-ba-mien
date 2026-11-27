@@ -279,6 +279,18 @@ export interface AdminDashboardState {
       month: string;
       revenue: number;
     }>;
+    revenueByQuarter?: Array<{
+      quarter: string;
+      revenue: number;
+      cost: number;
+      profit: number;
+    }>;
+    revenueByYear?: Array<{
+      year: string;
+      revenue: number;
+      cost: number;
+      profit: number;
+    }>;
     recentOrders: Array<{
       _id: string;
       customerId?: {
@@ -296,51 +308,6 @@ export interface AdminDashboardState {
       sold: number;
       revenue: number;
     }>;
-    revenueByMonth?: Array<{
-      month: string;
-      revenue: number;
-      cost: number;
-      profit: number;
-    }>;
-    revenueByQuarter?: Array<{
-      quarter: string;
-      revenue: number;
-      cost: number;
-      profit: number;
-    }>;
-    revenueByYear?: Array<{
-      year: string;
-      revenue: number;
-      cost: number;
-      profit: number;
-    }>;
-    revenueByStaff?: Array<{
-      staffId: string;
-      staffName: string;
-      years: Record<number, number>;
-    }>;
-    orderStatusPercentage?: {
-      pending: string;
-      processing: string;
-      shipped: string;
-      delivered: string;
-      cancelled: string;
-    };
-    revenueByProductQuarter?: Array<{
-      productId: string;
-      productName: string;
-      quarters: Record<string, number>;
-    }>;
-    revenueByCustomerYear?: Array<{
-      customerId: string;
-      customerName: string;
-      years: Record<number, number>;
-    }>;
-    revenueByCustomerQuarter?: Array<{
-      customerId: string;
-      customerName: string;
-      quarters: Record<string, number>;
-    }>;
   };
   loading: boolean;
 
@@ -348,7 +315,6 @@ export interface AdminDashboardState {
     startDate?: string,
     endDate?: string,
     month?: string,
-    customerYear?: number,
   ) => Promise<void>;
 }
 
@@ -639,6 +605,7 @@ export interface AdminCustomerVoucherStore {
     totalIssued: number;
     totalUsed: number;
   } | null;
+  issuedCustomerIds: string[];
   loading: boolean;
   totalPages: number;
 
@@ -662,6 +629,7 @@ export interface AdminCustomerVoucherStore {
     customerIds: string[];
   }) => Promise<void>;
   issueVoucher: (promotionId: string, customerIds: string[]) => Promise<void>;
+  fetchIssuedCustomers: (promotionId: string) => Promise<void>;
 }
 
 export interface AdminStaffStore {
@@ -811,18 +779,21 @@ export interface AdminChatState {
   messages: Message[];
   conversationLoading: boolean;
   messageLoading: boolean;
+  sendingConversationId: string | null;
+  closingConversationId: string | null;
   isTyping: boolean;
   typingUser: "client" | "bot" | null;
 
   loadConversations: () => void;
   selectConversation: (conversationId: string) => void;
-  sendMessage: (conversationId: string, message: string) => void;
-  closeConversation: (conversationId: string) => void;
+  sendMessage: (conversationId: string, message: string) => Promise<boolean>;
+  closeConversation: (conversationId: string) => Promise<boolean>;
   addMessage: (conversationId: string, message: Message) => void;
   addNewConversation: (conversation: Conversation) => void;
   updateConversationStatus: (
     conversationId: string,
     status: "bot" | "waiting_human" | "human_active" | "closed",
+    assignedStaffId?: string | null,
   ) => void;
   updateConversationPreview: (
     conversationId: string,
@@ -834,6 +805,7 @@ export interface AdminChatState {
     } | null,
     status: "bot" | "waiting_human" | "human_active" | "closed",
     unreadByAdmin: number,
+    assignedStaffId?: string | null,
   ) => void;
   setTyping: (isTyping: boolean, user: "client" | "bot" | null) => void;
 }
@@ -941,4 +913,73 @@ export interface AdminReviewStore {
   deleteReply: (reviewId: string) => Promise<void>;
   toggleHidden: (reviewId: string) => Promise<void>;
   clearCurrentReview: () => void;
+}
+
+export interface AdminStatisticState {
+  productStats: {
+    mode: "month" | "quarter" | "year";
+    year: number;
+    periods: string[];
+    availableYears: number[];
+    products: Array<{
+      productId: string;
+      productName: string;
+      periods: Record<string, { quantity: number; revenue: number }>;
+      totalQuantity: number;
+      totalRevenue: number;
+    }>;
+  } | null;
+  productsLoading: boolean;
+  fetchProductStats: (
+    mode: "month" | "quarter" | "year",
+    year: number,
+  ) => Promise<void>;
+  stats: {
+    revenueByMonth?: Array<{
+      month: string;
+      revenue: number;
+      cost: number;
+      profit: number;
+    }>;
+    revenueByQuarter?: Array<{
+      quarter: string;
+      revenue: number;
+      cost: number;
+      profit: number;
+    }>;
+    revenueByYear?: Array<{
+      year: string;
+      revenue: number;
+      cost: number;
+      profit: number;
+    }>;
+    revenueByStaff?: Array<{
+      staffId: string;
+      staffName: string;
+      years: Record<number, number>;
+    }>;
+    revenueByProductQuarter?: Array<{
+      productId: string;
+      productName: string;
+      quarters: Record<string, number>;
+    }>;
+    revenueByCustomerYear?: Array<{
+      customerId: string;
+      customerName: string;
+      years: Record<number, number>;
+    }>;
+    revenueByCustomerQuarter?: Array<{
+      customerId: string;
+      customerName: string;
+      quarters: Record<string, number>;
+    }>;
+  };
+  loading: boolean;
+
+  fetchStats: (
+    startDate?: string,
+    endDate?: string,
+    month?: string,
+    customerYear?: number,
+  ) => Promise<void>;
 }

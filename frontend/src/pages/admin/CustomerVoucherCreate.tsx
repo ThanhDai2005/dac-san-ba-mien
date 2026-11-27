@@ -160,7 +160,7 @@ const CustomerVoucherCreate = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, title: e.target.value })
                   }
-                  placeholder="VD: Voucher sinh nhật tháng 10"
+                  placeholder="VD: Voucher tri ân khách hàng"
                   className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#b51c00]/20 focus:border-[#b51c00] bg-white transition-all"
                   required
                 />
@@ -181,7 +181,7 @@ const CustomerVoucherCreate = () => {
                         code: e.target.value.toUpperCase(),
                       })
                     }
-                    placeholder="VD: BIRTHDAY10"
+                    placeholder="VD: THANKYOU10"
                     className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#b51c00]/20 focus:border-[#b51c00] bg-white transition-all font-mono uppercase"
                     required
                   />

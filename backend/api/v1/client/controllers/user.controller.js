@@ -1,4 +1,5 @@
 import User from "../../../../models/user.model.js";
+import Customer from "../../../../models/customer.model.js";
 import Session from "../../../../models/session.model.js";
 import bcrypt from "bcrypt";
 import logger from "../../../../config/logger.js";
@@ -68,28 +69,47 @@ export const updateInfo = async (req, res) => {
     const existPhone = await User.findOne({
       _id: { $ne: userId },
       phone: phone,
+      deleted: false,
     });
 
     if (existPhone) {
-      return res.status(400).json({
+      return res.status(409).json({
         message: "Số điện thoại đã tồn tại",
       });
     }
 
     const user = await User.findOneAndUpdate(
-      { _id: userId },
+      { _id: userId, deleted: false },
       {
         displayName: displayName,
         email: email,
         phone: phone,
-        address: address,
       },
       { new: true },
     ).select("-hashedPassword");
 
+    // Update customer address
+    await Customer.updateOne(
+      { userId: userId },
+      {
+        address: address || "",
+      },
+    );
+
+    // Get updated customer data
+    const customer = await Customer.findOne({ userId: userId }).select(
+      "address",
+    );
+
+    // Merge user and customer data
+    const userData = {
+      ...user.toObject(),
+      address: customer?.address || "",
+    };
+
     res.json({
       message: "Cập nhật user thành công",
-      user: user,
+      user: userData,
     });
   } catch (error) {
     logger.logError("Lỗi xảy ra khi updateInfo", error, {
